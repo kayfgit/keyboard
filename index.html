@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPA Chord Keyboard</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0a0a0f;
+    color: #e0e0e0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Status bar */
+  #status-bar {
+    padding: 6px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #08080d;
+    border-bottom: 1px solid #1a1a25;
+    font-size: 11px;
+  }
+
+  .status-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
+  .status-dot.online { background: #4ade80; }
+  .status-dot.offline { background: #555; }
+
+  #server-status { color: #555; }
+  #mode-label { color: #555; }
+
+  /* English output area */
+  #output-area {
+    flex: 1;
+    padding: 16px 24px 8px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  #output-area h2 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #666;
+    margin-bottom: 8px;
+  }
+
+  #english-output {
+    flex: 1;
+    background: #111118;
+    border: 1px solid #222;
+    border-radius: 8px;
+    padding: 16px;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-size: 22px;
+    line-height: 1.6;
+    color: #e0e0e0;
+    overflow-y: auto;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    min-height: 100px;
+  }
+
+  #english-output .cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1.1em;
+    background: #7c6fef;
+    vertical-align: text-bottom;
+    animation: blink 1s step-end infinite;
+  }
+
+  .corrected-flash {
+    animation: correctPulse 0.6s ease;
+  }
+
+  @keyframes correctPulse {
+    0%, 100% { border-color: #222; }
+    50% { border-color: #4ade80; }
+  }
+
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+
+  /* IPA preview strip */
+  #ipa-strip {
+    padding: 8px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 40px;
+  }
+
+  #ipa-strip .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #555;
+    min-width: 30px;
+  }
+
+  #ipa-display {
+    font-size: 20px;
+    color: #9b7bf7;
+    letter-spacing: 1px;
+    min-height: 1.2em;
+  }
+
+  /* Chord preview area */
+  #chord-preview {
+    padding: 10px 24px;
+    background: #0e0e14;
+    border-top: 1px solid #1a1a25;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    min-height: 56px;
+  }
+
+  #chord-preview .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #555;
+    min-width: 60px;
+  }
+
+  #chord-preview .preview-content {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    font-size: 18px;
+  }
+
+  .preview-consonant {
+    color: #6ea8fe;
+    font-size: 24px;
+    min-width: 36px;
+    text-align: center;
+  }
+
+  .preview-vowel {
+    color: #f59e6e;
+    font-size: 24px;
+    min-width: 36px;
+    text-align: center;
+  }
+
+  .preview-bits {
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 12px;
+    color: #444;
+  }
+
+  .preview-bits .on { color: #7c6fef; }
+
+  .preview-feature {
+    font-size: 11px;
+    color: #555;
+    max-width: 200px;
+  }
+
+  /* Keyboard area */
+  #keyboard-area {
+    padding: 16px 24px 22px;
+    background: #08080d;
+    border-top: 1px solid #1a1a25;
+  }
+
+  .hands-container {
+    display: flex;
+    justify-content: center;
+    gap: 48px;
+  }
+
+  .hand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .hand-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #444;
+    margin-bottom: 4px;
+  }
+
+  .keys-row {
+    display: flex;
+    gap: 6px;
+  }
+
+  .key {
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #222;
+    background: #141420;
+    transition: all 0.08s ease;
+    user-select: none;
+  }
+
+  .key .key-letter {
+    font-size: 16px;
+    font-weight: 600;
+    color: #555;
+  }
+
+  .key .key-finger {
+    font-size: 9px;
+    color: #333;
+    margin-top: 2px;
+  }
+
+  .key .key-feature {
+    font-size: 8px;
+    color: #333;
+    margin-top: 1px;
+  }
+
+  .key.left.pressed {
+    background: #1a2a4a;
+    border-color: #6ea8fe;
+    box-shadow: 0 0 12px rgba(110, 168, 254, 0.3);
+  }
+  .key.left.pressed .key-letter { color: #6ea8fe; }
+  .key.left.pressed .key-finger { color: #4a7ab8; }
+
+  .key.right.pressed {
+    background: #3a2215;
+    border-color: #f59e6e;
+    box-shadow: 0 0 12px rgba(245, 158, 110, 0.3);
+  }
+  .key.right.pressed .key-letter { color: #f59e6e; }
+  .key.right.pressed .key-finger { color: #b87a4a; }
+
+  .key.fired {
+    transition: none;
+    background: #2a2a40 !important;
+    border-color: #7c6fef !important;
+    box-shadow: 0 0 20px rgba(124, 111, 239, 0.5) !important;
+  }
+
+  /* Help text */
+  #help {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 11px;
+    color: #333;
+  }
+
+  #help kbd {
+    background: #1a1a25;
+    border: 1px solid #282835;
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-family: inherit;
+    font-size: 10px;
+    color: #555;
+  }
+
+  .invalid-flash {
+    animation: invalidPulse 0.3s ease;
+  }
+
+  @keyframes invalidPulse {
+    0%, 100% { border-color: #222; }
+    50% { border-color: #aa3333; }
+  }
+</style>
+</head>
+<body>
+
+<div id="status-bar">
+  <span id="server-status"><span class="status-dot offline"></span>Server: checking...</span>
+  <span id="lang-toggle" onclick="toggleLanguage()" style="cursor:pointer;color:#7c6fef;font-size:12px;padding:2px 8px;border:1px solid #2a2a3a;border-radius:4px;">AI:EN</span>
+  <span id="mode-label">Mode: phonemic only</span>
+</div>
+
+<div id="output-area">
+  <h2>Output</h2>
+  <div id="english-output"><span class="cursor"></span></div>
+</div>
+
+<div id="ipa-strip">
+  <span class="label">Input</span>
+  <span id="ipa-display"></span>
+</div>
+
+<div id="chord-preview">
+  <span class="label">Chord</span>
+  <div class="preview-content">
+    <div>
+      <div class="preview-bits" id="left-bits">
+        <span>0</span><span>0</span><span>0</span><span>0</span><span>0</span>
+      </div>
+      <div class="preview-consonant" id="preview-consonant">&nbsp;</div>
+    </div>
+    <div style="color:#333; font-size:20px;">+</div>
+    <div>
+      <div class="preview-bits" id="right-bits">
+        <span>0</span><span>0</span><span>0</span><span>0</span><span>0</span>
+      </div>
+      <div class="preview-vowel" id="preview-vowel">&nbsp;</div>
+    </div>
+    <div class="preview-feature" id="preview-features"></div>
+  </div>
+</div>
+
+<div id="keyboard-area">
+  <div class="hands-container">
+    <div class="hand">
+      <div class="hand-label">Left Hand (Consonant)</div>
+      <div class="keys-row">
+        <div class="key left" id="key-a">
+          <span class="key-letter">A</span>
+          <span class="key-finger">pinky</span>
+          <span class="key-feature">manner</span>
+        </div>
+        <div class="key left" id="key-s">
+          <span class="key-letter">S</span>
+          <span class="key-finger">ring</span>
+          <span class="key-feature">manner</span>
+        </div>
+        <div class="key left" id="key-d">
+          <span class="key-letter">D</span>
+          <span class="key-finger">middle</span>
+          <span class="key-feature">place</span>
+        </div>
+        <div class="key left" id="key-f">
+          <span class="key-letter">F</span>
+          <span class="key-finger">index</span>
+          <span class="key-feature">place</span>
+        </div>
+        <div class="key left" id="key-c">
+          <span class="key-letter">C</span>
+          <span class="key-finger">thumb</span>
+          <span class="key-feature">voice</span>
+        </div>
+      </div>
+    </div>
+    <div class="hand">
+      <div class="hand-label">Right Hand (Vowel)</div>
+      <div class="keys-row">
+        <div class="key right" id="key-m">
+          <span class="key-letter">M</span>
+          <span class="key-finger">thumb</span>
+          <span class="key-feature">mod (M)</span>
+        </div>
+        <div class="key right" id="key-j">
+          <span class="key-letter">J</span>
+          <span class="key-finger">index</span>
+          <span class="key-feature">height</span>
+        </div>
+        <div class="key right" id="key-k">
+          <span class="key-letter">K</span>
+          <span class="key-finger">middle</span>
+          <span class="key-feature">height</span>
+        </div>
+        <div class="key right" id="key-l">
+          <span class="key-letter">L</span>
+          <span class="key-finger">ring</span>
+          <span class="key-feature">back</span>
+        </div>
+        <div class="key right" id="key-semicolon">
+          <span class="key-letter">;</span>
+          <span class="key-finger">pinky</span>
+          <span class="key-feature">back</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="help">
+    Hold keys to chord, release all to fire.
+    <kbd>Space</kbd> send to AI &nbsp;
+    <kbd>C+M</kbd> backspace &nbsp;
+    <kbd>All 10</kbd> enter &nbsp;
+    <a href="cheatsheet.html" style="color:#7c6fef;text-decoration:none;">Cheat Sheet &rarr;</a>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// CONFIG
+// ============================================================
+const API_BASE = 'http://localhost:8000';
+let serverOnline = false;
+
+// ============================================================
+// MAPPING DATA
+// ============================================================
+
+// Universal consonant map (same for all languages)
+const CONSONANTS = {
+  0:  null,   // no consonant
+  1:  'f',    2:  'p',    3:  'st',   4:  't',
+  5:  's',    6:  'θ',    7:  'ð',    8:  'r',
+  9:  'ʃ',    10: 'nd',   11: 'tr',   12: 'k',
+  13: 'h',    14: 'pr',   15: 'str',  16: 'b',
+  17: 'v',    18: 'm',    19: 'w',    20: 'd',
+  21: 'z',    22: 'n',    23: 'dʒ',   24: 'l',
+  25: 'ʒ',    26: 'nt',   27: 'tʃ',   28: 'g',
+  29: 'sp',   30: 'ŋ',    31: 'j',
+};
+
+// Universal vowel map: 6 base + 5 modified + 20 VC chunks
+const VOWELS = {
+  0:  null,   // no vowel
+  // Base vowels (no M thumb)
+  1:  'i',    // ; — high front
+  2:  'o',    // L — mid back
+  3:  'u',    // L+; — high back
+  4:  'e',    // K — mid front
+  5:  'ə',    // K+; — schwa
+  6:  'at',   // K+L — VC chunk
+  7:  'in',   // K+L+; — VC chunk
+  8:  'a',    // J — low
+  9:  'an',   // J+; — VC chunk
+  10: 'on',   // J+L — VC chunk
+  11: 'it',   // J+L+; — VC chunk
+  12: 'er',   // J+K — VC chunk
+  13: 'or',   // J+K+; — VC chunk
+  14: 'al',   // J+K+L — VC chunk
+  15: 'ing',  // J+K+L+; — suffix chunk
+  // M-codes: modified vowels + chunks
+  16: 'ot',   // M — VC chunk
+  17: 'ī',    // M+; — modified i (M+i)
+  18: 'ō',    // M+L — modified o (M+o)
+  19: 'ū',    // M+L+; — modified u (M+u)
+  20: 'ē',    // M+K — modified e (M+e)
+  21: 'et',   // M+K+; — VC chunk
+  22: 'ut',   // M+K+L — VC chunk
+  23: 'en',   // M+K+L+; — VC chunk
+  24: 'ā',    // M+J — modified a (M+a)
+  25: 'un',   // M+J+; — VC chunk
+  26: 'ad',   // M+J+L — VC chunk
+  27: 'is',   // M+J+L+; — VC chunk
+  28: 'il',   // M+J+K — VC chunk
+  29: 'aw',   // M+J+K+; — diphthong (ɔː)
+  30: 'oi',   // M+J+K+L — diphthong (ɔɪ)
+  31: 'ow',   // M+J+K+L+; — diphthong (aʊ)
+};
+
+// AI output language (layout is universal, this only affects AI decoding)
+const AI_LANGUAGES = { en: 'English', pt: 'Português' };
+let currentLang = 'en';
+
+const PLACES = ['Labial', 'Alveolar', 'Postalveolar', 'Velar'];
+const MANNERS = ['Stop', 'Fricative', 'Nasal', 'Approximant'];
+const HEIGHTS = ['Close', 'Near-close', 'Open-mid', 'Open'];
+const BACKNESSES = ['Front', 'Central', 'Back', 'Back+round'];
+
+const LEFT_KEYS = { 'c': 4, 'f': 3, 'd': 2, 's': 1, 'a': 0 };
+const RIGHT_KEYS = { 'm': 4, 'j': 3, 'k': 2, 'l': 1, ';': 0 };
+
+// ============================================================
+// CHORD ENGINE
+// ============================================================
+
+const heldKeys = new Set();
+const chordBuffer = new Set();
+let chordActive = false;
+
+function isChordKey(key) { return key in LEFT_KEYS || key in RIGHT_KEYS; }
+
+function getLeftCode() {
+  let code = 0;
+  for (const key of chordBuffer) {
+    if (key in LEFT_KEYS) code |= (1 << LEFT_KEYS[key]);
+  }
+  return code;
+}
+
+function getRightCode() {
+  let code = 0;
+  for (const key of chordBuffer) {
+    if (key in RIGHT_KEYS) code |= (1 << RIGHT_KEYS[key]);
+  }
+  return code;
+}
+
+function hasLeftHand() {
+  for (const key of chordBuffer) { if (key in LEFT_KEYS) return true; }
+  return false;
+}
+
+function hasRightHand() {
+  for (const key of chordBuffer) { if (key in RIGHT_KEYS) return true; }
+  return false;
+}
+
+function codeToBits(code) {
+  return [(code>>4)&1, (code>>3)&1, (code>>2)&1, (code>>1)&1, code&1];
+}
+
+function getConsonantFeatures(code) {
+  const placeVal = ((code >> 3) & 1) * 2 + ((code >> 2) & 1);
+  const mannerVal = ((code >> 1) & 1) * 2 + (code & 1);
+  const voiced = (code >> 4) & 1;
+  return `${voiced ? 'Voiced' : 'Voiceless'} ${PLACES[placeVal]} ${MANNERS[mannerVal]}`;
+}
+
+function getVowelFeatures(code) {
+  const heightVal = ((code >> 3) & 1) * 2 + ((code >> 2) & 1);
+  const backVal = ((code >> 1) & 1) * 2 + (code & 1);
+  const mod = (code >> 4) & 1;
+  return `${HEIGHTS[heightVal]} ${BACKNESSES[backVal]}${mod ? ' (mod)' : ''}`;
+}
+
+// ============================================================
+// APPLICATION STATE
+// ============================================================
+
+// Completed lines of English text
+let completedLines = [];
+// IPA phonemes for the current line being typed
+let ipaBuffer = [];
+// Whether we're waiting for the AI to respond
+let converting = false;
+
+// DOM elements
+const englishOutput = document.getElementById('english-output');
+const ipaDisplay = document.getElementById('ipa-display');
+const previewConsonant = document.getElementById('preview-consonant');
+const previewVowel = document.getElementById('preview-vowel');
+const leftBitsEl = document.getElementById('left-bits');
+const rightBitsEl = document.getElementById('right-bits');
+const previewFeatures = document.getElementById('preview-features');
+
+function escapeHtml(text) {
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ============================================================
+// DISPLAY UPDATES
+// ============================================================
+
+function updateDisplay() {
+  let html = '';
+
+  if (completedLines.length > 0) {
+    html += completedLines.map(l => escapeHtml(l)).join('\n');
+  }
+
+  if (ipaBuffer.length > 0) {
+    if (completedLines.length > 0 && completedLines[completedLines.length - 1] !== '') {
+      html += ' ';
+    }
+    html += '<span style="color:#9b7bf7;opacity:0.7">' +
+      escapeHtml(ipaBuffer.join('')) + '</span>';
+  }
+
+  html += '<span class="cursor"></span>';
+
+  englishOutput.innerHTML = html;
+  englishOutput.scrollTop = englishOutput.scrollHeight;
+
+  // Update IPA strip
+  ipaDisplay.textContent = ipaBuffer.join('');
+}
+
+function updateKeyVisuals() {
+  for (const key of Object.keys(LEFT_KEYS)) {
+    const el = document.getElementById('key-' + key);
+    if (el) el.classList.toggle('pressed', heldKeys.has(key));
+  }
+  for (const key of Object.keys(RIGHT_KEYS)) {
+    const el = document.getElementById('key-' + (key === ';' ? 'semicolon' : key));
+    if (el) el.classList.toggle('pressed', heldKeys.has(key));
+  }
+}
+
+function updatePreview() {
+  if (!chordActive) {
+    previewConsonant.innerHTML = '&nbsp;';
+    previewVowel.innerHTML = '&nbsp;';
+    leftBitsEl.querySelectorAll('span').forEach((s) => { s.textContent = '0'; s.className = ''; });
+    rightBitsEl.querySelectorAll('span').forEach((s) => { s.textContent = '0'; s.className = ''; });
+    previewFeatures.textContent = '';
+    return;
+  }
+
+  const leftCode = getLeftCode();
+  const rightCode = getRightCode();
+  const lb = codeToBits(leftCode);
+  const rb = codeToBits(rightCode);
+
+  leftBitsEl.querySelectorAll('span').forEach((s, i) => { s.textContent = lb[i]; s.className = lb[i] ? 'on' : ''; });
+  rightBitsEl.querySelectorAll('span').forEach((s, i) => { s.textContent = rb[i]; s.className = rb[i] ? 'on' : ''; });
+
+  // Control chord preview
+  if (hasLeftHand() && hasRightHand() && leftCode === 16 && rightCode === 16) {
+    previewConsonant.textContent = '\u232B';
+    previewVowel.textContent = '';
+    previewFeatures.textContent = 'BACKSPACE (both thumbs)';
+    return;
+  }
+  if (leftCode === 31 && rightCode === 31) {
+    previewConsonant.textContent = '\u21B5';
+    previewVowel.textContent = '';
+    previewFeatures.textContent = 'ENTER (all keys)';
+    return;
+  }
+
+  const consonant = hasLeftHand() ? (CONSONANTS[leftCode] || '?') : '';
+  const vowel = hasRightHand() ? (VOWELS[rightCode] || '?') : '';
+
+  previewConsonant.textContent = consonant || (hasLeftHand() ? '—' : '');
+  previewVowel.textContent = vowel || (hasRightHand() ? '—' : '');
+
+  const parts = [];
+  if (hasLeftHand() && leftCode !== 0) parts.push(getConsonantFeatures(leftCode));
+  if (hasRightHand() && rightCode !== 0) parts.push(getVowelFeatures(rightCode));
+  previewFeatures.textContent = parts.join(' + ');
+}
+
+function flashFired() {
+  document.querySelectorAll('.key').forEach(k => {
+    if (k.classList.contains('pressed')) {
+      k.classList.add('fired');
+      setTimeout(() => k.classList.remove('fired'), 150);
+    }
+  });
+}
+
+function flashInvalid() {
+  englishOutput.classList.add('invalid-flash');
+  setTimeout(() => englishOutput.classList.remove('invalid-flash'), 300);
+}
+
+function flashConverted() {
+  englishOutput.classList.add('corrected-flash');
+  setTimeout(() => englishOutput.classList.remove('corrected-flash'), 600);
+}
+
+// ============================================================
+// SERVER COMMUNICATION
+// ============================================================
+
+function updateModeLabel() {
+  const langName = AI_LANGUAGES[currentLang];
+  if (serverOnline) {
+    document.getElementById('mode-label').textContent = `Mode: ${langName} (AI)`;
+  } else {
+    document.getElementById('mode-label').textContent = 'Mode: phonemic only';
+  }
+}
+
+function toggleLanguage() {
+  const langs = Object.keys(AI_LANGUAGES);
+  const idx = langs.indexOf(currentLang);
+  currentLang = langs[(idx + 1) % langs.length];
+  document.getElementById('lang-toggle').textContent = 'AI:' + currentLang.toUpperCase();
+  // Layout stays universal — only AI output language changes
+  updateModeLabel();
+}
+
+async function checkServer() {
+  try {
+    const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(2000) });
+    if (res.ok) {
+      serverOnline = true;
+      document.getElementById('server-status').innerHTML =
+        '<span class="status-dot online"></span>Server: connected';
+    }
+  } catch {
+    serverOnline = false;
+    document.getElementById('server-status').innerHTML =
+      '<span class="status-dot offline"></span>Server: offline';
+  }
+  updateModeLabel();
+}
+
+async function convertIpa(ipaText) {
+  if (!serverOnline) return null;
+  try {
+    const res = await fetch(`${API_BASE}/convert`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ipa: ipaText, lang: currentLang }),
+      signal: AbortSignal.timeout(15000),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return data.text;
+    }
+  } catch {
+    checkServer();
+  }
+  return null;
+}
+
+// ============================================================
+// EVENT HANDLERS
+// ============================================================
+
+function normalizeKey(e) {
+  if (e.key === ';') return ';';
+  return e.key.toLowerCase();
+}
+
+document.addEventListener('keydown', (e) => {
+  // Space = send IPA to AI
+  if (e.key === ' ') {
+    e.preventDefault();
+    handleSpace();
+    return;
+  }
+
+  // Backspace = delete last phoneme
+  if (e.key === 'Backspace') {
+    e.preventDefault();
+    handleBackspace();
+    return;
+  }
+
+  // Enter = new line
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    handleEnter();
+    return;
+  }
+
+  const key = normalizeKey(e);
+  if (!isChordKey(key)) return;
+  e.preventDefault();
+  if (converting) return; // Don't accept input while converting
+  if (heldKeys.has(key)) return;
+
+  if (!chordActive) {
+    chordActive = true;
+    chordBuffer.clear();
+  }
+
+  heldKeys.add(key);
+  chordBuffer.add(key);
+  updateKeyVisuals();
+  updatePreview();
+});
+
+document.addEventListener('keyup', (e) => {
+  const key = normalizeKey(e);
+  if (!isChordKey(key)) return;
+  e.preventDefault();
+
+  heldKeys.delete(key);
+  updateKeyVisuals();
+
+  if (chordActive && heldKeys.size === 0) {
+    fireChord();
+    chordActive = false;
+    chordBuffer.clear();
+    setTimeout(() => { if (!chordActive) updatePreview(); }, 200);
+  }
+});
+
+function fireChord() {
+  const leftCode = getLeftCode();
+  const rightCode = getRightCode();
+  const leftUsed = hasLeftHand();
+  const rightUsed = hasRightHand();
+
+  // Control chords — intercept before phoneme lookup
+  if (leftCode === 16 && rightCode === 16) {  // Both thumbs (C+M) → Backspace
+    flashFired();
+    handleBackspace();
+    return;
+  }
+  if (leftCode === 31 && rightCode === 31) {  // All 10 keys → Enter
+    flashFired();
+    handleEnter();
+    return;
+  }
+
+  let ipaResult = '';
+  let valid = true;
+
+  if (leftUsed && leftCode !== 0) {
+    const c = CONSONANTS[leftCode];
+    if (c) ipaResult += c;
+    else valid = false;
+  }
+
+  if (rightUsed && rightCode !== 0) {
+    const v = VOWELS[rightCode];
+    if (v) ipaResult += v;
+    else valid = false;
+  }
+
+  if (ipaResult && valid) {
+    flashFired();
+    ipaBuffer.push(ipaResult);
+    updateDisplay();
+  } else if (!valid) {
+    flashInvalid();
+  }
+}
+
+function appendText(text) {
+  const last = completedLines.length - 1;
+  if (last >= 0 && completedLines[last] !== '') {
+    completedLines[last] += ' ' + text;
+  } else if (last >= 0) {
+    completedLines[last] = text;
+  } else {
+    completedLines.push(text);
+  }
+}
+
+async function handleSpace() {
+  if (ipaBuffer.length === 0) return;
+  if (converting) return;
+
+  const ipaText = ipaBuffer.join('');
+
+  if (serverOnline) {
+    converting = true;
+    updateDisplay();
+
+    const result = await convertIpa(ipaText);
+
+    converting = false;
+    if (result) {
+      appendText(result);
+      flashConverted();
+    } else {
+      appendText(ipaText);
+    }
+  } else {
+    appendText(ipaText);
+  }
+
+  ipaBuffer = [];
+  updateDisplay();
+}
+
+function handleEnter() {
+  // If there's pending IPA, treat Enter as just a newline in the output
+  // Don't send to AI — that's what Space does
+  if (ipaBuffer.length > 0) return; // Ignore Enter while typing IPA
+
+  // Add a blank line
+  completedLines.push('');
+  updateDisplay();
+}
+
+function handleBackspace() {
+  if (converting) return;
+
+  if (ipaBuffer.length > 0) {
+    ipaBuffer.pop();
+    updateDisplay();
+  } else if (completedLines.length > 0) {
+    completedLines.pop();
+    updateDisplay();
+  }
+}
+
+// Handle window blur
+window.addEventListener('blur', () => {
+  heldKeys.clear();
+  if (chordActive) { chordActive = false; chordBuffer.clear(); }
+  updateKeyVisuals();
+  updatePreview();
+});
+
+// ============================================================
+// INIT
+// ============================================================
+checkServer();
+setInterval(checkServer, 10000);
+updateDisplay();
+</script>
+</body>
+</html>
