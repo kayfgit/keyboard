@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Semantic Mode Cheat Sheet</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0a0a0f;
+    color: #e0e0e0;
+    padding: 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  h1 { font-size: 20px; margin-bottom: 4px; color: #4ade80; }
+  .subtitle { font-size: 12px; color: #555; margin-bottom: 24px; }
+  h2 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #666;
+    margin: 28px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #1a1a25;
+  }
+
+  .hands {
+    display: flex;
+    gap: 32px;
+    justify-content: center;
+    margin: 16px 0 24px;
+  }
+  .hand { text-align: center; }
+  .hand-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    color: #4ade80;
+  }
+  .fingers { display: flex; gap: 4px; }
+  .key {
+    width: 48px;
+    height: 48px;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+    background: #112220;
+    border: 1px solid #1a3a35;
+    color: #4ade80;
+  }
+  .key .label {
+    font-size: 8px;
+    color: #2a5a4a;
+    margin-top: 2px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 6px;
+  }
+  .item {
+    background: #111118;
+    border: 1px solid #1a1a25;
+    border-radius: 6px;
+    padding: 8px 10px;
+    text-align: center;
+  }
+  .item .sym {
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Consolas', monospace;
+    line-height: 1.3;
+  }
+  .item .keys {
+    font-family: 'Consolas', monospace;
+    font-size: 9px;
+    color: #555;
+    margin-top: 3px;
+  }
+
+  .action .sym { color: #6ea8fe; }
+  .target .sym { color: #c084fc; }
+  .modifier .sym { color: #fbbf24; }
+  .logic .sym { color: #2dd4bf; }
+  .meta .sym { color: #f87171; }
+  .shortcut .sym { color: #4ade80; }
+
+  .section-label {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 600;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .section-label.action { background: #1a2a3a; color: #6ea8fe; }
+  .section-label.target { background: #2a1a2a; color: #c084fc; }
+  .section-label.modifier { background: #2a2a1a; color: #fbbf24; }
+  .section-label.logic { background: #1a2a2a; color: #2dd4bf; }
+  .section-label.meta { background: #2a1a1a; color: #f87171; }
+
+  .examples {
+    background: #111118;
+    border: 1px solid #1a1a25;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-top: 8px;
+  }
+  .ex-row {
+    display: flex;
+    gap: 16px;
+    padding: 6px 0;
+    border-bottom: 1px solid #1a1a25;
+    font-size: 13px;
+    align-items: center;
+  }
+  .ex-row:last-child { border-bottom: none; }
+  .ex-tokens {
+    display: flex;
+    gap: 4px;
+    min-width: 280px;
+  }
+  .ex-token {
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-family: 'Consolas', monospace;
+    font-weight: 600;
+  }
+  .ex-token.action { background: #1a2a3a; color: #6ea8fe; }
+  .ex-token.target { background: #2a1a2a; color: #c084fc; }
+  .ex-token.modifier { background: #2a2a1a; color: #fbbf24; }
+  .ex-token.logic { background: #1a2a2a; color: #2dd4bf; }
+  .ex-token.meta { background: #2a1a1a; color: #f87171; }
+  .ex-arrow { color: #444; }
+  .ex-text { color: #888; flex: 1; }
+
+  .note {
+    background: #0d0d12;
+    border-left: 3px solid #4ade80;
+    padding: 10px 14px;
+    margin-top: 20px;
+    font-size: 12px;
+    color: #666;
+  }
+  .note strong { color: #888; }
+  kbd {
+    background: #1a1a25;
+    border: 1px solid #282835;
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-family: inherit;
+    font-size: 11px;
+    color: #888;
+  }
+
+  .category-legend {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin: 16px 0;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+  }
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+  }
+  .legend-dot.action { background: #6ea8fe; }
+  .legend-dot.target { background: #c084fc; }
+  .legend-dot.modifier { background: #fbbf24; }
+  .legend-dot.logic { background: #2dd4bf; }
+  .legend-dot.meta { background: #f87171; }
+</style>
+</head>
+<body>
+
+<h1>Semantic Mode Cheat Sheet</h1>
+<p class="subtitle">Left hand = category (A/S/D/F/C), Right hand = select (J/K/L/;, M extends). Space = expand to text.</p>
+
+<!-- HAND LAYOUT -->
+<div class="hands">
+  <div class="hand">
+    <div class="hand-label">Left (Category)</div>
+    <div class="fingers">
+      <div class="key"><span>A</span><span class="label">ACTION</span></div>
+      <div class="key"><span>S</span><span class="label">TARGET</span></div>
+      <div class="key"><span>D</span><span class="label">MODIFY</span></div>
+      <div class="key"><span>F</span><span class="label">LOGIC</span></div>
+      <div class="key"><span>C</span><span class="label">META</span></div>
+    </div>
+  </div>
+  <div class="hand">
+    <div class="hand-label">Right (Select)</div>
+    <div class="fingers">
+      <div class="key"><span>M</span><span class="label">extend</span></div>
+      <div class="key"><span>J</span><span class="label">1</span></div>
+      <div class="key"><span>K</span><span class="label">2</span></div>
+      <div class="key"><span>L</span><span class="label">3</span></div>
+      <div class="key"><span>;</span><span class="label">4</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="category-legend">
+  <div class="legend-item"><div class="legend-dot action"></div> Action (A)</div>
+  <div class="legend-item"><div class="legend-dot target"></div> Target (S)</div>
+  <div class="legend-item"><div class="legend-dot modifier"></div> Modifier (D)</div>
+  <div class="legend-item"><div class="legend-dot logic"></div> Logic (F)</div>
+  <div class="legend-item"><div class="legend-dot meta"></div> Meta (C)</div>
+</div>
+
+<!-- ACTIONS -->
+<h2>Actions <span class="section-label action">A + right</span></h2>
+<div class="grid">
+  <div class="item action"><div class="sym">CREATE</div><div class="keys">A+J</div></div>
+  <div class="item action"><div class="sym">DELETE</div><div class="keys">A+K</div></div>
+  <div class="item action"><div class="sym">MODIFY</div><div class="keys">A+L</div></div>
+  <div class="item action"><div class="sym">FIX</div><div class="keys">A+;</div></div>
+  <div class="item action"><div class="sym">FIND</div><div class="keys">A+J+K</div></div>
+  <div class="item action"><div class="sym">SHOW</div><div class="keys">A+J+L</div></div>
+  <div class="item action"><div class="sym">TEST</div><div class="keys">A+J+;</div></div>
+  <div class="item action"><div class="sym">RUN</div><div class="keys">A+K+L</div></div>
+  <div class="item action"><div class="sym">EXPLAIN</div><div class="keys">A+K+;</div></div>
+  <div class="item action"><div class="sym">REFACTOR</div><div class="keys">A+L+;</div></div>
+  <div class="item action"><div class="sym">OPTIMIZE</div><div class="keys">A+J+K+L</div></div>
+  <div class="item action"><div class="sym">DEBUG</div><div class="keys">A+J+K+;</div></div>
+  <div class="item action"><div class="sym">DEPLOY</div><div class="keys">A+J+L+;</div></div>
+  <div class="item action"><div class="sym">IMPORT</div><div class="keys">A+K+L+;</div></div>
+  <div class="item action"><div class="sym">EXPORT</div><div class="keys">A+J+K+L+;</div></div>
+</div>
+
+<h2>Actions Extended <span class="section-label action">A+M + right</span></h2>
+<div class="grid">
+  <div class="item action"><div class="sym">ADD</div><div class="keys">A+M+J</div></div>
+  <div class="item action"><div class="sym">REMOVE</div><div class="keys">A+M+K</div></div>
+  <div class="item action"><div class="sym">RENAME</div><div class="keys">A+M+L</div></div>
+  <div class="item action"><div class="sym">MOVE</div><div class="keys">A+M+;</div></div>
+  <div class="item action"><div class="sym">COPY</div><div class="keys">A+M+J+K</div></div>
+  <div class="item action"><div class="sym">UPDATE</div><div class="keys">A+M+J+L</div></div>
+  <div class="item action"><div class="sym">CHECK</div><div class="keys">A+M+J+;</div></div>
+  <div class="item action"><div class="sym">BUILD</div><div class="keys">A+M+K+L</div></div>
+  <div class="item action"><div class="sym">INSTALL</div><div class="keys">A+M+K+;</div></div>
+  <div class="item action"><div class="sym">CONFIGURE</div><div class="keys">A+M+L+;</div></div>
+  <div class="item action"><div class="sym">GENERATE</div><div class="keys">A+M+J+K+L</div></div>
+  <div class="item action"><div class="sym">VALIDATE</div><div class="keys">A+M+J+K+;</div></div>
+  <div class="item action"><div class="sym">CLEAN</div><div class="keys">A+M+J+L+;</div></div>
+  <div class="item action"><div class="sym">REVERT</div><div class="keys">A+M+K+L+;</div></div>
+</div>
+
+<!-- TARGETS -->
+<h2>Targets <span class="section-label target">S + right</span></h2>
+<div class="grid">
+  <div class="item target"><div class="sym">FILE</div><div class="keys">S+J</div></div>
+  <div class="item target"><div class="sym">FUNCTION</div><div class="keys">S+K</div></div>
+  <div class="item target"><div class="sym">CLASS</div><div class="keys">S+L</div></div>
+  <div class="item target"><div class="sym">VARIABLE</div><div class="keys">S+;</div></div>
+  <div class="item target"><div class="sym">COMPONENT</div><div class="keys">S+J+K</div></div>
+  <div class="item target"><div class="sym">API</div><div class="keys">S+J+L</div></div>
+  <div class="item target"><div class="sym">DATABASE</div><div class="keys">S+J+;</div></div>
+  <div class="item target"><div class="sym">TEST</div><div class="keys">S+K+L</div></div>
+  <div class="item target"><div class="sym">ERROR</div><div class="keys">S+K+;</div></div>
+  <div class="item target"><div class="sym">BUG</div><div class="keys">S+L+;</div></div>
+  <div class="item target"><div class="sym">CODE</div><div class="keys">S+J+K+L</div></div>
+  <div class="item target"><div class="sym">TYPE</div><div class="keys">S+J+K+;</div></div>
+  <div class="item target"><div class="sym">MODULE</div><div class="keys">S+J+L+;</div></div>
+  <div class="item target"><div class="sym">ROUTE</div><div class="keys">S+K+L+;</div></div>
+  <div class="item target"><div class="sym">CONFIG</div><div class="keys">S+J+K+L+;</div></div>
+</div>
+
+<h2>Targets Extended <span class="section-label target">S+M + right</span></h2>
+<div class="grid">
+  <div class="item target"><div class="sym">INTERFACE</div><div class="keys">S+M+J</div></div>
+  <div class="item target"><div class="sym">METHOD</div><div class="keys">S+M+K</div></div>
+  <div class="item target"><div class="sym">PROPERTY</div><div class="keys">S+M+L</div></div>
+  <div class="item target"><div class="sym">PARAMETER</div><div class="keys">S+M+;</div></div>
+  <div class="item target"><div class="sym">DEPENDENCY</div><div class="keys">S+M+J+K</div></div>
+  <div class="item target"><div class="sym">ENDPOINT</div><div class="keys">S+M+J+L</div></div>
+  <div class="item target"><div class="sym">QUERY</div><div class="keys">S+M+J+;</div></div>
+  <div class="item target"><div class="sym">SCHEMA</div><div class="keys">S+M+K+L</div></div>
+  <div class="item target"><div class="sym">COMMENT</div><div class="keys">S+M+K+;</div></div>
+  <div class="item target"><div class="sym">LOG</div><div class="keys">S+M+L+;</div></div>
+  <div class="item target"><div class="sym">RESPONSE</div><div class="keys">S+M+J+K+L</div></div>
+  <div class="item target"><div class="sym">REQUEST</div><div class="keys">S+M+J+K+;</div></div>
+  <div class="item target"><div class="sym">STATE</div><div class="keys">S+M+J+L+;</div></div>
+  <div class="item target"><div class="sym">EVENT</div><div class="keys">S+M+K+L+;</div></div>
+</div>
+
+<!-- MODIFIERS -->
+<h2>Modifiers <span class="section-label modifier">D + right</span></h2>
+<div class="grid">
+  <div class="item modifier"><div class="sym">THIS</div><div class="keys">D+J</div></div>
+  <div class="item modifier"><div class="sym">THAT</div><div class="keys">D+K</div></div>
+  <div class="item modifier"><div class="sym">ALL</div><div class="keys">D+L</div></div>
+  <div class="item modifier"><div class="sym">LAST</div><div class="keys">D+;</div></div>
+  <div class="item modifier"><div class="sym">NEXT</div><div class="keys">D+J+K</div></div>
+  <div class="item modifier"><div class="sym">NEW</div><div class="keys">D+J+L</div></div>
+  <div class="item modifier"><div class="sym">CURRENT</div><div class="keys">D+J+;</div></div>
+  <div class="item modifier"><div class="sym">SAME</div><div class="keys">D+K+L</div></div>
+  <div class="item modifier"><div class="sym">OTHER</div><div class="keys">D+K+;</div></div>
+  <div class="item modifier"><div class="sym">EVERY</div><div class="keys">D+L+;</div></div>
+  <div class="item modifier"><div class="sym">FIRST</div><div class="keys">D+J+K+L</div></div>
+  <div class="item modifier"><div class="sym">EACH</div><div class="keys">D+J+K+;</div></div>
+  <div class="item modifier"><div class="sym">ONLY</div><div class="keys">D+J+L+;</div></div>
+  <div class="item modifier"><div class="sym">MAIN</div><div class="keys">D+K+L+;</div></div>
+  <div class="item modifier"><div class="sym">ENTIRE</div><div class="keys">D+J+K+L+;</div></div>
+</div>
+
+<h2>Modifiers Extended <span class="section-label modifier">D+M + right</span></h2>
+<div class="grid">
+  <div class="item modifier"><div class="sym">ASYNC</div><div class="keys">D+M+J</div></div>
+  <div class="item modifier"><div class="sym">RECURSIVE</div><div class="keys">D+M+K</div></div>
+  <div class="item modifier"><div class="sym">PUBLIC</div><div class="keys">D+M+L</div></div>
+  <div class="item modifier"><div class="sym">PRIVATE</div><div class="keys">D+M+;</div></div>
+  <div class="item modifier"><div class="sym">STATIC</div><div class="keys">D+M+J+K</div></div>
+  <div class="item modifier"><div class="sym">GLOBAL</div><div class="keys">D+M+J+L</div></div>
+  <div class="item modifier"><div class="sym">LOCAL</div><div class="keys">D+M+J+;</div></div>
+  <div class="item modifier"><div class="sym">OPTIONAL</div><div class="keys">D+M+K+L</div></div>
+  <div class="item modifier"><div class="sym">REQUIRED</div><div class="keys">D+M+K+;</div></div>
+  <div class="item modifier"><div class="sym">DEPRECATED</div><div class="keys">D+M+L+;</div></div>
+  <div class="item modifier"><div class="sym">TEMPORARY</div><div class="keys">D+M+J+K+L</div></div>
+  <div class="item modifier"><div class="sym">PERMANENT</div><div class="keys">D+M+J+K+;</div></div>
+</div>
+
+<!-- LOGIC -->
+<h2>Logic <span class="section-label logic">F + right</span></h2>
+<div class="grid">
+  <div class="item logic"><div class="sym">AND</div><div class="keys">F+J</div></div>
+  <div class="item logic"><div class="sym">OR</div><div class="keys">F+K</div></div>
+  <div class="item logic"><div class="sym">NOT</div><div class="keys">F+L</div></div>
+  <div class="item logic"><div class="sym">IF</div><div class="keys">F+;</div></div>
+  <div class="item logic"><div class="sym">THEN</div><div class="keys">F+J+K</div></div>
+  <div class="item logic"><div class="sym">WHEN</div><div class="keys">F+J+L</div></div>
+  <div class="item logic"><div class="sym">WHERE</div><div class="keys">F+J+;</div></div>
+  <div class="item logic"><div class="sym">WITH</div><div class="keys">F+K+L</div></div>
+  <div class="item logic"><div class="sym">WITHOUT</div><div class="keys">F+K+;</div></div>
+  <div class="item logic"><div class="sym">FROM</div><div class="keys">F+L+;</div></div>
+  <div class="item logic"><div class="sym">TO</div><div class="keys">F+J+K+L</div></div>
+  <div class="item logic"><div class="sym">INTO</div><div class="keys">F+J+K+;</div></div>
+  <div class="item logic"><div class="sym">LIKE</div><div class="keys">F+J+L+;</div></div>
+  <div class="item logic"><div class="sym">AS</div><div class="keys">F+K+L+;</div></div>
+  <div class="item logic"><div class="sym">BEFORE</div><div class="keys">F+J+K+L+;</div></div>
+</div>
+
+<h2>Logic Extended <span class="section-label logic">F+M + right</span></h2>
+<div class="grid">
+  <div class="item logic"><div class="sym">AFTER</div><div class="keys">F+M+J</div></div>
+  <div class="item logic"><div class="sym">WHILE</div><div class="keys">F+M+K</div></div>
+  <div class="item logic"><div class="sym">UNTIL</div><div class="keys">F+M+L</div></div>
+  <div class="item logic"><div class="sym">UNLESS</div><div class="keys">F+M+;</div></div>
+  <div class="item logic"><div class="sym">BECAUSE</div><div class="keys">F+M+J+K</div></div>
+  <div class="item logic"><div class="sym">SO</div><div class="keys">F+M+J+L</div></div>
+  <div class="item logic"><div class="sym">ALSO</div><div class="keys">F+M+J+;</div></div>
+  <div class="item logic"><div class="sym">INSTEAD</div><div class="keys">F+M+K+L</div></div>
+  <div class="item logic"><div class="sym">USING</div><div class="keys">F+M+K+;</div></div>
+  <div class="item logic"><div class="sym">BASED_ON</div><div class="keys">F+M+L+;</div></div>
+</div>
+
+<!-- META -->
+<h2>Meta <span class="section-label meta">C + right</span></h2>
+<div class="grid">
+  <div class="item meta"><div class="sym">UNDO</div><div class="keys">C+J</div></div>
+  <div class="item meta"><div class="sym">REDO</div><div class="keys">C+K</div></div>
+  <div class="item meta"><div class="sym">DONE</div><div class="keys">C+L</div></div>
+  <div class="item meta"><div class="sym">CANCEL</div><div class="keys">C+;</div></div>
+  <div class="item meta"><div class="sym">HELP</div><div class="keys">C+J+K</div></div>
+  <div class="item meta"><div class="sym">AGAIN</div><div class="keys">C+J+L</div></div>
+  <div class="item meta"><div class="sym">YES</div><div class="keys">C+J+;</div></div>
+  <div class="item meta"><div class="sym">NO</div><div class="keys">C+K+L</div></div>
+  <div class="item meta"><div class="sym">MAYBE</div><div class="keys">C+K+;</div></div>
+  <div class="item meta"><div class="sym">WAIT</div><div class="keys">C+L+;</div></div>
+  <div class="item meta"><div class="sym">CONFIRM</div><div class="keys">C+J+K+L</div></div>
+  <div class="item meta"><div class="sym">SKIP</div><div class="keys">C+J+K+;</div></div>
+  <div class="item meta"><div class="sym">MORE</div><div class="keys">C+J+L+;</div></div>
+  <div class="item meta"><div class="sym">LESS</div><div class="keys">C+K+L+;</div></div>
+  <div class="item meta"><div class="sym">PERFECT</div><div class="keys">C+J+K+L+;</div></div>
+</div>
+
+<h2>Meta Extended <span class="section-label meta">C+M + right</span></h2>
+<div class="grid">
+  <div class="item meta"><div class="sym">FASTER</div><div class="keys">C+M+J</div></div>
+  <div class="item meta"><div class="sym">SIMPLER</div><div class="keys">C+M+K</div></div>
+  <div class="item meta"><div class="sym">SAFER</div><div class="keys">C+M+L</div></div>
+  <div class="item meta"><div class="sym">BETTER</div><div class="keys">C+M+;</div></div>
+  <div class="item meta"><div class="sym">CONTINUE</div><div class="keys">C+M+J+K</div></div>
+  <div class="item meta"><div class="sym">STOP</div><div class="keys">C+M+J+L</div></div>
+  <div class="item meta"><div class="sym">RETRY</div><div class="keys">C+M+J+;</div></div>
+  <div class="item meta"><div class="sym">EXAMPLE</div><div class="keys">C+M+K+L</div></div>
+  <div class="item meta"><div class="sym">WHY</div><div class="keys">C+M+K+;</div></div>
+  <div class="item meta"><div class="sym">HOW</div><div class="keys">C+M+L+;</div></div>
+</div>
+
+<!-- SHORTCUTS -->
+<h2>Shortcuts (combo left keys)</h2>
+<div class="grid">
+  <div class="item shortcut"><div class="sym">CREATE_FILE</div><div class="keys">A+S+J</div></div>
+  <div class="item shortcut"><div class="sym">CREATE_FUNCTION</div><div class="keys">A+S+K</div></div>
+  <div class="item shortcut"><div class="sym">DELETE_FILE</div><div class="keys">A+S+L</div></div>
+  <div class="item shortcut"><div class="sym">FIX_BUG</div><div class="keys">A+S+;</div></div>
+  <div class="item shortcut"><div class="sym">ADD_TEST</div><div class="keys">A+S+J+K</div></div>
+  <div class="item shortcut"><div class="sym">FIX_ERROR</div><div class="keys">A+S+J+L</div></div>
+  <div class="item shortcut"><div class="sym">REFACTOR_CODE</div><div class="keys">A+S+K+L</div></div>
+  <div class="item shortcut"><div class="sym">THIS_FILE</div><div class="keys">D+S+J</div></div>
+  <div class="item shortcut"><div class="sym">THIS_FUNCTION</div><div class="keys">D+S+K</div></div>
+  <div class="item shortcut"><div class="sym">ALL_FILES</div><div class="keys">D+S+L</div></div>
+  <div class="item shortcut"><div class="sym">ALL_TESTS</div><div class="keys">D+S+;</div></div>
+</div>
+
+<!-- EXAMPLES -->
+<h2>Examples</h2>
+<div class="examples">
+  <div class="ex-row">
+    <div class="ex-tokens">
+      <span class="ex-token action">CREATE</span>
+      <span class="ex-token target">FUNCTION</span>
+      <span class="ex-token modifier">ASYNC</span>
+    </div>
+    <span class="ex-arrow">&rarr;</span>
+    <span class="ex-text">Create an async function.</span>
+  </div>
+  <div class="ex-row">
+    <div class="ex-tokens">
+      <span class="ex-token action">FIX</span>
+      <span class="ex-token target">BUG</span>
+      <span class="ex-token modifier">THIS</span>
+      <span class="ex-token target">FUNCTION</span>
+    </div>
+    <span class="ex-arrow">&rarr;</span>
+    <span class="ex-text">Fix the bug in this function.</span>
+  </div>
+  <div class="ex-row">
+    <div class="ex-tokens">
+      <span class="ex-token action">REFACTOR</span>
+      <span class="ex-token modifier">THIS</span>
+      <span class="ex-token target">CODE</span>
+      <span class="ex-token meta">SIMPLER</span>
+    </div>
+    <span class="ex-arrow">&rarr;</span>
+    <span class="ex-text">Refactor this code to be simpler.</span>
+  </div>
+  <div class="ex-row">
+    <div class="ex-tokens">
+      <span class="ex-token action">CREATE</span>
+      <span class="ex-token target">TEST</span>
+      <span class="ex-token modifier">ALL</span>
+      <span class="ex-token target">API</span>
+    </div>
+    <span class="ex-arrow">&rarr;</span>
+    <span class="ex-text">Create tests for all API endpoints.</span>
+  </div>
+  <div class="ex-row">
+    <div class="ex-tokens">
+      <span class="ex-token action">EXPLAIN</span>
+      <span class="ex-token modifier">THIS</span>
+      <span class="ex-token target">FUNCTION</span>
+      <span class="ex-token meta">HOW</span>
+    </div>
+    <span class="ex-arrow">&rarr;</span>
+    <span class="ex-text">Explain how this function works.</span>
+  </div>
+  <div class="ex-row">
+    <div class="ex-tokens">
+      <span class="ex-token action">GENERATE</span>
+      <span class="ex-token target">TYPE</span>
+      <span class="ex-token logic">FROM</span>
+      <span class="ex-token target">SCHEMA</span>
+    </div>
+    <span class="ex-arrow">&rarr;</span>
+    <span class="ex-text">Generate types from the schema.</span>
+  </div>
+  <div class="ex-row">
+    <div class="ex-tokens">
+      <span class="ex-token action">ADD</span>
+      <span class="ex-token target">ERROR</span>
+      <span class="ex-token logic">WITH</span>
+      <span class="ex-token target">LOG</span>
+    </div>
+    <span class="ex-arrow">&rarr;</span>
+    <span class="ex-text">Add error handling with logging.</span>
+  </div>
+</div>
+
+<div class="note">
+  <strong>Controls:</strong> <kbd>Space</kbd> expand to text &nbsp; <kbd>C+M</kbd> backspace &nbsp; <kbd>Backspace</kbd> delete last token<br>
+  <strong>Tip:</strong> Build intent with tokens, press Space to let AI expand into natural language.
+</div>
+
+</body>
+</html>

@@ -3,1089 +3,266 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Universal Chord Keyboard — Cheat Sheet</title>
+<title>Chord Keyboard Cheat Sheet</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
   body {
     font-family: 'Segoe UI', system-ui, sans-serif;
     background: #0a0a0f;
     color: #e0e0e0;
-    padding: 32px;
-    max-width: 1100px;
+    padding: 24px;
+    max-width: 900px;
     margin: 0 auto;
   }
-
-  h1 {
-    font-size: 22px;
-    font-weight: 600;
-    margin-bottom: 4px;
-  }
-
-  .subtitle {
-    font-size: 13px;
-    color: #555;
-    margin-bottom: 32px;
-  }
-
+  h1 { font-size: 20px; margin-bottom: 4px; }
+  .subtitle { font-size: 12px; color: #555; margin-bottom: 24px; }
   h2 {
-    font-size: 15px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    color: #555;
-    margin-bottom: 16px;
-    margin-top: 36px;
-    border-bottom: 1px solid #1a1a25;
-    padding-bottom: 8px;
-  }
-
-  h3 {
     font-size: 13px;
-    color: #777;
-    margin-bottom: 10px;
-    margin-top: 20px;
-  }
-
-  /* Hand diagram */
-  .hand-diagram {
-    display: flex;
-    gap: 48px;
-    justify-content: center;
-    margin: 20px 0 28px;
-  }
-
-  .hand-side {
-    text-align: center;
-  }
-
-  .hand-side .hand-title {
-    font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 2px;
-    margin-bottom: 10px;
-  }
-
-  .hand-title.left { color: #6ea8fe; }
-  .hand-title.right { color: #f59e6e; }
-
-  .fingers {
-    display: flex;
-    gap: 4px;
-    justify-content: center;
-  }
-
-  .finger-col {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 72px;
-    gap: 4px;
-  }
-
-  .finger-key {
-    width: 44px;
-    height: 44px;
-    border-radius: 7px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    font-size: 16px;
-  }
-
-  .finger-key.left {
-    background: #112240;
-    border: 1px solid #1a3a6a;
-    color: #6ea8fe;
-  }
-
-  .finger-key.right {
-    background: #2a1810;
-    border: 1px solid #4a2a18;
-    color: #f59e6e;
-  }
-
-  .finger-name {
-    font-size: 10px;
-    color: #444;
-  }
-
-  .finger-feature {
-    font-size: 10px;
     color: #666;
-    font-style: italic;
+    margin: 28px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #1a1a25;
   }
-
-  /* Tables */
-  .grid-container {
-    overflow-x: auto;
-  }
-
-  table {
-    border-collapse: collapse;
-    width: 100%;
-    font-size: 13px;
-  }
-
-  th {
-    text-align: left;
-    padding: 8px 10px;
-    font-weight: 600;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-
-  td {
-    padding: 6px 10px;
-    border: 1px solid #1a1a25;
-    vertical-align: top;
-  }
-
-  .consonant-table th {
-    color: #6ea8fe;
-    border-bottom: 1px solid #1a3a6a;
-  }
-
-  .vowel-table th {
-    color: #f59e6e;
-    border-bottom: 1px solid #4a2a18;
-  }
-
-  .chunk-table th {
-    color: #9b7bf7;
-    border-bottom: 1px solid #3a2a6a;
-  }
-
-  .cell-ipa {
-    font-size: 18px;
-    font-weight: 600;
-  }
-
-  .cell-ipa.left-color { color: #6ea8fe; }
-  .cell-ipa.right-color { color: #f59e6e; }
-  .cell-ipa.cluster-color { color: #9b7bf7; }
-  .cell-ipa.mod-color { color: #e89b3e; }
-
-  .cell-keys {
-    font-family: 'Consolas', 'Courier New', monospace;
-    font-size: 11px;
-    color: #555;
-    margin-top: 2px;
-  }
-
-  .cell-example {
-    font-size: 11px;
-    color: #444;
-    font-style: italic;
-  }
-
-  .cell-empty {
-    color: #222;
-    font-style: italic;
-    font-size: 11px;
-  }
-
-  /* Quick reference */
-  .quick-ref {
+  .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 8px;
-    margin-top: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 6px;
   }
-
-  .qr-item {
+  .item {
     background: #111118;
     border: 1px solid #1a1a25;
     border-radius: 6px;
-    padding: 8px 10px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .qr-ipa {
-    font-size: 18px;
-    font-weight: 600;
-    min-width: 32px;
+    padding: 8px 6px;
     text-align: center;
   }
-
-  .qr-detail {
-    font-size: 11px;
-    color: #666;
+  .item .sym {
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.2;
   }
-
-  .qr-detail .qr-keys {
+  .item .keys {
     font-family: 'Consolas', monospace;
+    font-size: 10px;
     color: #555;
+    margin-top: 2px;
   }
+  .left .sym { color: #6ea8fe; }
+  .right .sym { color: #f59e6e; }
+  .chunk .sym { color: #9b7bf7; }
+  .mod .sym { color: #e89b3e; }
+  .ctrl .sym { color: #4ade80; }
 
-  /* Examples */
-  .example-box {
+  .hands {
+    display: flex;
+    gap: 32px;
+    justify-content: center;
+    margin: 16px 0;
+  }
+  .hand { text-align: center; }
+  .hand-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .hand-label.left { color: #6ea8fe; }
+  .hand-label.right { color: #f59e6e; }
+  .fingers { display: flex; gap: 4px; }
+  .key {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .key.left { background: #112240; border: 1px solid #1a3a6a; color: #6ea8fe; }
+  .key.right { background: #2a1810; border: 1px solid #4a2a18; color: #f59e6e; }
+
+  .examples {
     background: #111118;
     border: 1px solid #1a1a25;
     border-radius: 8px;
-    padding: 14px 18px;
-    margin-top: 10px;
+    padding: 12px 16px;
+    margin-top: 8px;
+  }
+  .ex-row {
+    display: flex;
+    gap: 12px;
+    padding: 4px 0;
+    border-bottom: 1px solid #1a1a25;
     font-size: 13px;
   }
-
-  .example-box .ex-label {
-    font-size: 11px;
-    color: #555;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 4px;
-  }
-
-  .example-box .ex-phonemic {
-    color: #9b7bf7;
-    font-size: 16px;
-    letter-spacing: 0.5px;
-  }
-
-  .example-box .ex-english {
-    color: #e0e0e0;
-    font-size: 16px;
-    margin-top: 4px;
-  }
-
-  .example-box .ex-chords {
-    color: #444;
-    font-size: 12px;
-    margin-top: 6px;
-    font-family: 'Consolas', monospace;
-  }
-
-  .tag {
-    display: inline-block;
-    padding: 1px 6px;
-    border-radius: 3px;
-    font-size: 10px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .tag-base { background: #1a2a4a; color: #6ea8fe; }
-  .tag-chunk { background: #2a1a4a; color: #9b7bf7; }
-  .tag-mod { background: #3a2a10; color: #e89b3e; }
-  .tag-control { background: #1a3a2a; color: #4ade80; }
+  .ex-row:last-child { border-bottom: none; }
+  .ex-ipa { color: #9b7bf7; min-width: 140px; font-family: monospace; }
+  .ex-text { color: #888; }
 
   .note {
-    background: #111118;
+    background: #0d0d12;
     border-left: 3px solid #7c6fef;
     padding: 10px 14px;
-    margin-top: 16px;
+    margin-top: 20px;
     font-size: 12px;
+    color: #666;
+  }
+  .note strong { color: #888; }
+  kbd {
+    background: #1a1a25;
+    border: 1px solid #282835;
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-family: inherit;
+    font-size: 11px;
     color: #888;
   }
-
-  a { color: #7c6fef; text-decoration: none; }
-  a:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
 
-<h1>Universal Chord Keyboard</h1>
-<p class="subtitle">One layout for all languages. 6 vowels + 5 modifiers + 20 chunks. AI decodes to text.</p>
+<h1>Chord Keyboard Cheat Sheet</h1>
+<p class="subtitle">Left hand = consonant, Right hand = vowel. Release all keys to fire chord. Space = send to AI.</p>
 
-<!-- ============================================================ -->
 <!-- HAND LAYOUT -->
-<!-- ============================================================ -->
-
-<h2>Hand Layout</h2>
-
-<div class="hand-diagram">
-  <div class="hand-side">
-    <div class="hand-title left">Left Hand (Consonant)</div>
+<div class="hands">
+  <div class="hand">
+    <div class="hand-label left">Left (Consonant)</div>
     <div class="fingers">
-      <div class="finger-col">
-        <div class="finger-key left">A</div>
-        <div class="finger-name">pinky</div>
-        <div class="finger-feature">manner</div>
-      </div>
-      <div class="finger-col">
-        <div class="finger-key left">S</div>
-        <div class="finger-name">ring</div>
-        <div class="finger-feature">manner</div>
-      </div>
-      <div class="finger-col">
-        <div class="finger-key left">D</div>
-        <div class="finger-name">middle</div>
-        <div class="finger-feature">place</div>
-      </div>
-      <div class="finger-col">
-        <div class="finger-key left">F</div>
-        <div class="finger-name">index</div>
-        <div class="finger-feature">place</div>
-      </div>
-      <div class="finger-col">
-        <div class="finger-key left">C</div>
-        <div class="finger-name">thumb</div>
-        <div class="finger-feature">voice</div>
-      </div>
+      <div class="key left">A</div>
+      <div class="key left">S</div>
+      <div class="key left">D</div>
+      <div class="key left">F</div>
+      <div class="key left">C</div>
     </div>
   </div>
-
-  <div class="hand-side">
-    <div class="hand-title right">Right Hand (Vowel)</div>
+  <div class="hand">
+    <div class="hand-label right">Right (Vowel)</div>
     <div class="fingers">
-      <div class="finger-col">
-        <div class="finger-key right">M</div>
-        <div class="finger-name">thumb</div>
-        <div class="finger-feature">mod</div>
-      </div>
-      <div class="finger-col">
-        <div class="finger-key right">J</div>
-        <div class="finger-name">index</div>
-        <div class="finger-feature">height</div>
-      </div>
-      <div class="finger-col">
-        <div class="finger-key right">K</div>
-        <div class="finger-name">middle</div>
-        <div class="finger-feature">height</div>
-      </div>
-      <div class="finger-col">
-        <div class="finger-key right">L</div>
-        <div class="finger-name">ring</div>
-        <div class="finger-feature">back</div>
-      </div>
-      <div class="finger-col">
-        <div class="finger-key right">;</div>
-        <div class="finger-name">pinky</div>
-        <div class="finger-feature">back</div>
-      </div>
+      <div class="key right">M</div>
+      <div class="key right">J</div>
+      <div class="key right">K</div>
+      <div class="key right">L</div>
+      <div class="key right">;</div>
     </div>
   </div>
 </div>
 
-<div class="note">
-  <strong>How it works:</strong> Hold keys together, release all to fire a chord.
-  Left hand = consonant, right hand = vowel. One chord = one syllable.
-  <kbd>Space</kbd> sends to AI for text conversion.
-  <kbd>C+M</kbd> (both thumbs) = backspace.
-  <kbd>All 10</kbd> = enter.
-</div>
-
-<!-- ============================================================ -->
-<!-- BASE VOWELS -->
-<!-- ============================================================ -->
-
-<h2>Base Vowels <span class="tag tag-base">6 sounds</span></h2>
-
-<h3>Right hand only (no M thumb)</h3>
-
-<div class="grid-container">
-<table class="vowel-table">
-  <tr>
-    <th>Symbol</th>
-    <th>Keys</th>
-    <th>Sound</th>
-    <th>English examples</th>
-    <th># keys</th>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa right-color">i</span></td>
-    <td class="cell-keys">;</td>
-    <td>high front</td>
-    <td class="cell-example">see, sit, easy</td>
-    <td>1</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa right-color">e</span></td>
-    <td class="cell-keys">K</td>
-    <td>mid front</td>
-    <td class="cell-example">bed, set, any</td>
-    <td>1</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa right-color">a</span></td>
-    <td class="cell-keys">J</td>
-    <td>low</td>
-    <td class="cell-example">cat, hat, father</td>
-    <td>1</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa right-color">o</span></td>
-    <td class="cell-keys">L</td>
-    <td>mid back</td>
-    <td class="cell-example">not, hot, dog</td>
-    <td>1</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa right-color">u</span></td>
-    <td class="cell-keys">L+;</td>
-    <td>high back</td>
-    <td class="cell-example">put, blue, food</td>
-    <td>2</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa right-color">ə</span></td>
-    <td class="cell-keys">K+;</td>
-    <td>schwa</td>
-    <td class="cell-example">the, about, sofa</td>
-    <td>2</td>
-  </tr>
-</table>
-</div>
-
-<div class="note">
-  <strong>Lossy encoding:</strong> Each vowel covers multiple English sounds. "i" covers both /iː/ (see) and /ɪ/ (sit). "a" covers /æ/ (cat) and /ɑ/ (father). The AI uses context to determine the right word.
-</div>
-
-<!-- ============================================================ -->
-<!-- MODIFIED VOWELS -->
-<!-- ============================================================ -->
-
-<h2>Modified Vowels <span class="tag tag-mod">M + base vowel</span></h2>
-
-<h3>M thumb + same keys as base vowel = long/diphthong version</h3>
-
-<div class="grid-container">
-<table class="vowel-table">
-  <tr>
-    <th>Symbol</th>
-    <th>Keys</th>
-    <th>Pattern</th>
-    <th>AI interprets as</th>
-    <th># keys</th>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa mod-color">ī</span></td>
-    <td class="cell-keys">M+;</td>
-    <td>M + i</td>
-    <td class="cell-example">iː (see, meet) or aɪ (eye, write)</td>
-    <td>2</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa mod-color">ē</span></td>
-    <td class="cell-keys">M+K</td>
-    <td>M + e</td>
-    <td class="cell-example">eɪ (day, make, say)</td>
-    <td>2</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa mod-color">ā</span></td>
-    <td class="cell-keys">M+J</td>
-    <td>M + a</td>
-    <td class="cell-example">ɑː (father, car, palm)</td>
-    <td>2</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa mod-color">ō</span></td>
-    <td class="cell-keys">M+L</td>
-    <td>M + o</td>
-    <td class="cell-example">oʊ (go, home) or ɔː (thought, or)</td>
-    <td>2</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa mod-color">ū</span></td>
-    <td class="cell-keys">M+L+;</td>
-    <td>M + u</td>
-    <td class="cell-example">uː (blue, food, true)</td>
-    <td>3</td>
-  </tr>
-</table>
-</div>
-
-<div class="note">
-  <strong>Learning tip:</strong> The modifier pattern is simple — press M (thumb) + the same keys as the base vowel. M+; = modified i, M+K = modified e, etc.
-</div>
-
-<!-- ============================================================ -->
-<!-- VC CHUNKS -->
-<!-- ============================================================ -->
-
-<h2>VC Chunks <span class="tag tag-chunk">20 shortcuts</span></h2>
-
-<h3>Vowel + coda consonant in one right-hand chord — saves 1 chord per use</h3>
-
-<div class="grid-container">
-<table class="vowel-table">
-  <tr>
-    <th>Chunk</th>
-    <th>Keys</th>
-    <th>Example words</th>
-    <th># keys</th>
-    <th>Chord example</th>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa cluster-color">at</span></td>
-    <td class="cell-keys">K+L</td>
-    <td class="cell-example">cat, bat, hat, that</td>
-    <td>2</td>
-    <td class="cell-example">k+at = "cat" (1 chord!)</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa cluster-color">in</span></td>
-    <td class="cell-keys">K+L+;</td>
-    <td class="cell-example">sin, bin, win, thin</td>
-    <td>3</td>
-    <td class="cell-example">w+in = "win" (1 chord!)</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa cluster-color">an</span></td>
-    <td class="cell-keys">J+;</td>
-    <td class="cell-example">can, man, ran, than</td>
-    <td>2</td>
-    <td class="cell-example">k+an = "can" (1 chord!)</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa cluster-color">on</span></td>
-    <td class="cell-keys">J+L</td>
-    <td class="cell-example">con, don, upon</td>
-    <td>2</td>
-    <td class="cell-example">d+on = "done" (1 chord!)</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa cluster-color">it</span></td>
-    <td class="cell-keys">J+L+;</td>
-    <td class="cell-example">sit, bit, hit, fit</td>
-    <td>3</td>
-    <td class="cell-example">s+it = "sit" (1 chord!)</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa cluster-color">er</span></td>
-    <td class="cell-keys">J+K</td>
-    <td class="cell-example">her, per, better</td>
-    <td>2</td>
-    <td class="cell-example">h+er = "her" (1 chord!)</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa cluster-color">or</span></td>
-    <td class="cell-keys">J+K+;</td>
-    <td class="cell-example">for, nor, more</td>
-    <td>3</td>
-    <td class="cell-example">f+or = "for" (1 chord!)</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa cluster-color">al</span></td>
-    <td class="cell-keys">J+K+L</td>
-    <td class="cell-example">shall, pal, call</td>
-    <td>3</td>
-    <td class="cell-example">—+al = "all" (1 chord!)</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa cluster-color">ing</span></td>
-    <td class="cell-keys">J+K+L+;</td>
-    <td class="cell-example">going, running, thing</td>
-    <td>4</td>
-    <td class="cell-example">g+ō+ing = "going" (2 chords)</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa cluster-color">ot</span></td>
-    <td class="cell-keys">M</td>
-    <td class="cell-example">not, hot, got, lot</td>
-    <td>1</td>
-    <td class="cell-example">n+ot = "not" (1 chord!)</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa cluster-color">et</span></td>
-    <td class="cell-keys">M+K+;</td>
-    <td class="cell-example">set, bet, let, get</td>
-    <td>3</td>
-    <td class="cell-example">g+et = "get" (1 chord!)</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa cluster-color">ut</span></td>
-    <td class="cell-keys">M+K+L</td>
-    <td class="cell-example">but, cut, hut, shut</td>
-    <td>3</td>
-    <td class="cell-example">b+ut = "but" (1 chord!)</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa cluster-color">en</span></td>
-    <td class="cell-keys">M+K+L+;</td>
-    <td class="cell-example">pen, ten, hen, then</td>
-    <td>4</td>
-    <td class="cell-example">t+en = "ten" (1 chord!)</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa cluster-color">un</span></td>
-    <td class="cell-keys">M+J+;</td>
-    <td class="cell-example">sun, fun, run, gun</td>
-    <td>3</td>
-    <td class="cell-example">s+un = "sun" (1 chord!)</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa cluster-color">ad</span></td>
-    <td class="cell-keys">M+J+L</td>
-    <td class="cell-example">bad, had, sad, mad</td>
-    <td>3</td>
-    <td class="cell-example">b+ad = "bad" (1 chord!)</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa cluster-color">is</span></td>
-    <td class="cell-keys">M+J+L+;</td>
-    <td class="cell-example">is, his, this</td>
-    <td>4</td>
-    <td class="cell-example">ð+is = "this" (1 chord!)</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa cluster-color">il</span></td>
-    <td class="cell-keys">M+J+K</td>
-    <td class="cell-example">fill, still, will</td>
-    <td>3</td>
-    <td class="cell-example">w+il = "will" (1 chord!)</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa cluster-color">aw</span></td>
-    <td class="cell-keys">M+J+K+;</td>
-    <td class="cell-example">saw, law, draw</td>
-    <td>4</td>
-    <td class="cell-example">s+aw = "saw" (1 chord!)</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa cluster-color">oi</span></td>
-    <td class="cell-keys">M+J+K+L</td>
-    <td class="cell-example">boy, toy, enjoy</td>
-    <td>4</td>
-    <td class="cell-example">b+oi = "boy" (1 chord!)</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa cluster-color">ow</span></td>
-    <td class="cell-keys">M+J+K+L+;</td>
-    <td class="cell-example">how, now, cow</td>
-    <td>5</td>
-    <td class="cell-example">h+ow = "how" (1 chord!)</td>
-  </tr>
-</table>
-</div>
-
-<!-- ============================================================ -->
 <!-- CONSONANTS -->
-<!-- ============================================================ -->
-
-<h2>Consonants — Base Phonemes <span class="tag tag-base">19 sounds</span></h2>
-
-<h3>Featural grid: Voice (C thumb) &times; Place (F+D) &times; Manner (S+A)</h3>
-
-<div class="grid-container">
-<table class="consonant-table">
-  <tr>
-    <th></th>
-    <th colspan="2">Stop</th>
-    <th colspan="2">Fricative</th>
-    <th colspan="2">Nasal</th>
-    <th colspan="2">Approximant</th>
-  </tr>
-  <tr>
-    <th></th>
-    <th>VL</th><th>V</th>
-    <th>VL</th><th>V</th>
-    <th>VL</th><th>V</th>
-    <th>VL</th><th>V</th>
-  </tr>
-  <tr>
-    <td><strong>Labial</strong></td>
-    <td>
-      <span class="cell-ipa left-color">p</span>
-      <div class="cell-keys">S</div>
-      <div class="cell-example">pan</div>
-    </td>
-    <td>
-      <span class="cell-ipa left-color">b</span>
-      <div class="cell-keys">C</div>
-      <div class="cell-example">bat</div>
-    </td>
-    <td>
-      <span class="cell-ipa left-color">f</span>
-      <div class="cell-keys">A</div>
-      <div class="cell-example">fan</div>
-    </td>
-    <td>
-      <span class="cell-ipa left-color">v</span>
-      <div class="cell-keys">C+A</div>
-      <div class="cell-example">van</div>
-    </td>
-    <td class="cell-empty">—</td>
-    <td>
-      <span class="cell-ipa left-color">m</span>
-      <div class="cell-keys">C+S</div>
-      <div class="cell-example">man</div>
-    </td>
-    <td class="cell-empty">—</td>
-    <td>
-      <span class="cell-ipa left-color">w</span>
-      <div class="cell-keys">C+S+A</div>
-      <div class="cell-example">wet</div>
-    </td>
-  </tr>
-  <tr>
-    <td><strong>Alveolar</strong></td>
-    <td>
-      <span class="cell-ipa left-color">t</span>
-      <div class="cell-keys">D</div>
-      <div class="cell-example">tap</div>
-    </td>
-    <td>
-      <span class="cell-ipa left-color">d</span>
-      <div class="cell-keys">C+D</div>
-      <div class="cell-example">day</div>
-    </td>
-    <td>
-      <span class="cell-ipa left-color">s</span>
-      <div class="cell-keys">D+A</div>
-      <div class="cell-example">sun</div>
-    </td>
-    <td>
-      <span class="cell-ipa left-color">z</span>
-      <div class="cell-keys">C+D+A</div>
-      <div class="cell-example">zoo</div>
-    </td>
-    <td>
-      <span class="cell-ipa cluster-color">θ</span>
-      <div class="cell-keys">D+S</div>
-      <div class="cell-example">think</div>
-    </td>
-    <td>
-      <span class="cell-ipa left-color">n</span>
-      <div class="cell-keys">C+D+S</div>
-      <div class="cell-example">net</div>
-    </td>
-    <td>
-      <span class="cell-ipa cluster-color">ð</span>
-      <div class="cell-keys">D+S+A</div>
-      <div class="cell-example">the</div>
-    </td>
-    <td>
-      <span class="cell-ipa left-color">l</span>
-      <div class="cell-keys">C+F</div>
-      <div class="cell-example">let</div>
-    </td>
-  </tr>
-  <tr>
-    <td><strong>Post-alveolar</strong></td>
-    <td>
-      <span class="cell-ipa cluster-color">tʃ</span>
-      <div class="cell-keys">C+F+S+A</div>
-      <div class="cell-example">church</div>
-    </td>
-    <td>
-      <span class="cell-ipa cluster-color">dʒ</span>
-      <div class="cell-keys">C+D+S+A</div>
-      <div class="cell-example">judge</div>
-    </td>
-    <td>
-      <span class="cell-ipa left-color">ʃ</span>
-      <div class="cell-keys">F+A</div>
-      <div class="cell-example">she</div>
-    </td>
-    <td>
-      <span class="cell-ipa left-color">ʒ</span>
-      <div class="cell-keys">C+F+A</div>
-      <div class="cell-example">vision</div>
-    </td>
-    <td class="cell-empty">—</td>
-    <td class="cell-empty">—</td>
-    <td class="cell-empty">—</td>
-    <td>
-      <span class="cell-ipa left-color">r</span>
-      <div class="cell-keys">F</div>
-      <div class="cell-example">run</div>
-    </td>
-  </tr>
-  <tr>
-    <td><strong>Velar</strong></td>
-    <td>
-      <span class="cell-ipa left-color">k</span>
-      <div class="cell-keys">F+D</div>
-      <div class="cell-example">key</div>
-    </td>
-    <td>
-      <span class="cell-ipa left-color">g</span>
-      <div class="cell-keys">C+F+D</div>
-      <div class="cell-example">go</div>
-    </td>
-    <td>
-      <span class="cell-ipa left-color">h</span>
-      <div class="cell-keys">F+D+A</div>
-      <div class="cell-example">hat</div>
-    </td>
-    <td class="cell-empty">—</td>
-    <td class="cell-empty">—</td>
-    <td>
-      <span class="cell-ipa left-color">ŋ</span>
-      <div class="cell-keys">C+F+D+S</div>
-      <div class="cell-example">sing</div>
-    </td>
-    <td class="cell-empty">—</td>
-    <td>
-      <span class="cell-ipa left-color">j</span>
-      <div class="cell-keys">C+F+D+S+A</div>
-      <div class="cell-example">yes</div>
-    </td>
-  </tr>
-</table>
+<h2>Consonants (Left Hand)</h2>
+<div class="grid">
+  <div class="item left"><div class="sym">f</div><div class="keys">A</div></div>
+  <div class="item left"><div class="sym">p</div><div class="keys">S</div></div>
+  <div class="item left"><div class="sym">t</div><div class="keys">D</div></div>
+  <div class="item left"><div class="sym">r</div><div class="keys">F</div></div>
+  <div class="item left"><div class="sym">b</div><div class="keys">C</div></div>
+  <div class="item left"><div class="sym">s</div><div class="keys">D+A</div></div>
+  <div class="item left"><div class="sym">v</div><div class="keys">C+A</div></div>
+  <div class="item left"><div class="sym">d</div><div class="keys">C+D</div></div>
+  <div class="item left"><div class="sym">m</div><div class="keys">C+S</div></div>
+  <div class="item left"><div class="sym">ʃ</div><div class="keys">F+A</div></div>
+  <div class="item left"><div class="sym">k</div><div class="keys">F+D</div></div>
+  <div class="item left"><div class="sym">l</div><div class="keys">C+F</div></div>
+  <div class="item left"><div class="sym">n</div><div class="keys">C+D+S</div></div>
+  <div class="item left"><div class="sym">h</div><div class="keys">F+D+A</div></div>
+  <div class="item left"><div class="sym">g</div><div class="keys">C+F+D</div></div>
+  <div class="item left"><div class="sym">z</div><div class="keys">C+D+A</div></div>
+  <div class="item left"><div class="sym">w</div><div class="keys">C+S+A</div></div>
+  <div class="item left"><div class="sym">ʒ</div><div class="keys">C+F+A</div></div>
+  <div class="item left"><div class="sym">ŋ</div><div class="keys">C+F+D+S</div></div>
 </div>
 
-<!-- ============================================================ -->
 <!-- CONSONANT CLUSTERS -->
-<!-- ============================================================ -->
-
-<h2>Consonant Clusters <span class="tag tag-chunk">7 shortcuts</span></h2>
-
-<div class="grid-container">
-<table class="consonant-table">
-  <tr>
-    <th>Cluster</th>
-    <th>Keys</th>
-    <th>Example</th>
-    <th># keys</th>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa cluster-color">st</span></td>
-    <td class="cell-keys">S+A</td>
-    <td class="cell-example">stop, star, fast</td>
-    <td>2</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa cluster-color">nd</span></td>
-    <td class="cell-keys">F+S</td>
-    <td class="cell-example">and, hand, find</td>
-    <td>2</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa cluster-color">tr</span></td>
-    <td class="cell-keys">F+S+A</td>
-    <td class="cell-example">tree, try, true</td>
-    <td>3</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa cluster-color">pr</span></td>
-    <td class="cell-keys">F+D+S</td>
-    <td class="cell-example">pro, pre, prize</td>
-    <td>3</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa cluster-color">str</span></td>
-    <td class="cell-keys">F+D+S+A</td>
-    <td class="cell-example">string, street</td>
-    <td>4</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa cluster-color">nt</span></td>
-    <td class="cell-keys">C+F+S</td>
-    <td class="cell-example">want, went, hunt</td>
-    <td>3</td>
-  </tr>
-  <tr>
-    <td><span class="cell-ipa cluster-color">sp</span></td>
-    <td class="cell-keys">C+F+D+A</td>
-    <td class="cell-example">spin, spot, spy</td>
-    <td>4</td>
-  </tr>
-</table>
+<h2>Consonant Clusters</h2>
+<div class="grid">
+  <div class="item chunk"><div class="sym">st</div><div class="keys">S+A</div></div>
+  <div class="item chunk"><div class="sym">nd</div><div class="keys">F+S</div></div>
+  <div class="item chunk"><div class="sym">θ</div><div class="keys">D+S</div></div>
+  <div class="item chunk"><div class="sym">ð</div><div class="keys">D+S+A</div></div>
+  <div class="item chunk"><div class="sym">tr</div><div class="keys">F+S+A</div></div>
+  <div class="item chunk"><div class="sym">pr</div><div class="keys">F+D+S</div></div>
+  <div class="item chunk"><div class="sym">str</div><div class="keys">F+D+S+A</div></div>
+  <div class="item chunk"><div class="sym">nt</div><div class="keys">C+F+S</div></div>
+  <div class="item chunk"><div class="sym">sp</div><div class="keys">C+F+D+A</div></div>
+  <div class="item chunk"><div class="sym">tʃ</div><div class="keys">C+F+S+A</div></div>
+  <div class="item chunk"><div class="sym">dʒ</div><div class="keys">C+D+S+A</div></div>
+  <div class="item chunk"><div class="sym">j</div><div class="keys">all 5</div></div>
 </div>
 
-<!-- ============================================================ -->
-<!-- CONTROL CHORDS -->
-<!-- ============================================================ -->
-
-<h2>Control Chords <span class="tag tag-control">2 controls</span></h2>
-
-<div class="grid-container">
-<table>
-  <tr>
-    <th style="color:#4ade80;">Action</th>
-    <th style="color:#4ade80;">Chord</th>
-    <th style="color:#4ade80;">Keys</th>
-  </tr>
-  <tr>
-    <td><strong>Backspace</strong></td>
-    <td>Both thumbs</td>
-    <td class="cell-keys">C + M</td>
-  </tr>
-  <tr>
-    <td><strong>Enter</strong></td>
-    <td>All 10 keys</td>
-    <td class="cell-keys">A+S+D+F+C + M+J+K+L+;</td>
-  </tr>
-</table>
+<!-- BASE VOWELS -->
+<h2>Vowels (Right Hand)</h2>
+<div class="grid">
+  <div class="item right"><div class="sym">a</div><div class="keys">J</div></div>
+  <div class="item right"><div class="sym">e</div><div class="keys">K</div></div>
+  <div class="item right"><div class="sym">i</div><div class="keys">;</div></div>
+  <div class="item right"><div class="sym">o</div><div class="keys">L</div></div>
+  <div class="item right"><div class="sym">u</div><div class="keys">L+;</div></div>
+  <div class="item right"><div class="sym">ə</div><div class="keys">K+;</div></div>
 </div>
 
-<!-- ============================================================ -->
-<!-- QUICK REFERENCE -->
-<!-- ============================================================ -->
-
-<h2>Quick Reference — by Key Count</h2>
-
-<h3>1 key (most ergonomic)</h3>
-<div class="quick-ref">
-  <div class="qr-item">
-    <span class="qr-ipa left-color">f</span>
-    <div class="qr-detail"><span class="qr-keys">A</span></div>
-  </div>
-  <div class="qr-item">
-    <span class="qr-ipa left-color">p</span>
-    <div class="qr-detail"><span class="qr-keys">S</span></div>
-  </div>
-  <div class="qr-item">
-    <span class="qr-ipa left-color">t</span>
-    <div class="qr-detail"><span class="qr-keys">D</span></div>
-  </div>
-  <div class="qr-item">
-    <span class="qr-ipa left-color">r</span>
-    <div class="qr-detail"><span class="qr-keys">F</span></div>
-  </div>
-  <div class="qr-item">
-    <span class="qr-ipa left-color">b</span>
-    <div class="qr-detail"><span class="qr-keys">C</span></div>
-  </div>
-  <div class="qr-item">
-    <span class="qr-ipa right-color">i</span>
-    <div class="qr-detail"><span class="qr-keys">;</span></div>
-  </div>
-  <div class="qr-item">
-    <span class="qr-ipa right-color">e</span>
-    <div class="qr-detail"><span class="qr-keys">K</span></div>
-  </div>
-  <div class="qr-item">
-    <span class="qr-ipa right-color">a</span>
-    <div class="qr-detail"><span class="qr-keys">J</span></div>
-  </div>
-  <div class="qr-item">
-    <span class="qr-ipa right-color">o</span>
-    <div class="qr-detail"><span class="qr-keys">L</span></div>
-  </div>
-  <div class="qr-item">
-    <span class="qr-ipa cluster-color">ot</span>
-    <div class="qr-detail"><span class="qr-keys">M</span></div>
-  </div>
+<!-- MODIFIED VOWELS -->
+<h2>Modified Vowels (M + base)</h2>
+<div class="grid">
+  <div class="item mod"><div class="sym">ā</div><div class="keys">M+J</div></div>
+  <div class="item mod"><div class="sym">ē</div><div class="keys">M+K</div></div>
+  <div class="item mod"><div class="sym">ī</div><div class="keys">M+;</div></div>
+  <div class="item mod"><div class="sym">ō</div><div class="keys">M+L</div></div>
+  <div class="item mod"><div class="sym">ū</div><div class="keys">M+L+;</div></div>
 </div>
 
-<h3>2 keys</h3>
-<div class="quick-ref">
-  <div class="qr-item">
-    <span class="qr-ipa left-color">s</span>
-    <div class="qr-detail"><span class="qr-keys">D+A</span></div>
-  </div>
-  <div class="qr-item">
-    <span class="qr-ipa left-color">v</span>
-    <div class="qr-detail"><span class="qr-keys">C+A</span></div>
-  </div>
-  <div class="qr-item">
-    <span class="qr-ipa left-color">d</span>
-    <div class="qr-detail"><span class="qr-keys">C+D</span></div>
-  </div>
-  <div class="qr-item">
-    <span class="qr-ipa left-color">m</span>
-    <div class="qr-detail"><span class="qr-keys">C+S</span></div>
-  </div>
-  <div class="qr-item">
-    <span class="qr-ipa left-color">ʃ</span>
-    <div class="qr-detail"><span class="qr-keys">F+A</span></div>
-  </div>
-  <div class="qr-item">
-    <span class="qr-ipa left-color">k</span>
-    <div class="qr-detail"><span class="qr-keys">F+D</span></div>
-  </div>
-  <div class="qr-item">
-    <span class="qr-ipa left-color">l</span>
-    <div class="qr-detail"><span class="qr-keys">C+F</span></div>
-  </div>
-  <div class="qr-item">
-    <span class="qr-ipa cluster-color">θ</span>
-    <div class="qr-detail"><span class="qr-keys">D+S</span></div>
-  </div>
-  <div class="qr-item">
-    <span class="qr-ipa cluster-color">st</span>
-    <div class="qr-detail"><span class="qr-keys">S+A</span></div>
-  </div>
-  <div class="qr-item">
-    <span class="qr-ipa cluster-color">nd</span>
-    <div class="qr-detail"><span class="qr-keys">F+S</span></div>
-  </div>
-  <div class="qr-item">
-    <span class="qr-ipa right-color">u</span>
-    <div class="qr-detail"><span class="qr-keys">L+;</span></div>
-  </div>
-  <div class="qr-item">
-    <span class="qr-ipa right-color">ə</span>
-    <div class="qr-detail"><span class="qr-keys">K+;</span></div>
-  </div>
-  <div class="qr-item">
-    <span class="qr-ipa cluster-color">at</span>
-    <div class="qr-detail"><span class="qr-keys">K+L</span></div>
-  </div>
-  <div class="qr-item">
-    <span class="qr-ipa cluster-color">an</span>
-    <div class="qr-detail"><span class="qr-keys">J+;</span></div>
-  </div>
-  <div class="qr-item">
-    <span class="qr-ipa cluster-color">on</span>
-    <div class="qr-detail"><span class="qr-keys">J+L</span></div>
-  </div>
-  <div class="qr-item">
-    <span class="qr-ipa cluster-color">er</span>
-    <div class="qr-detail"><span class="qr-keys">J+K</span></div>
-  </div>
-  <div class="qr-item">
-    <span class="qr-ipa mod-color">ī</span>
-    <div class="qr-detail"><span class="qr-keys">M+;</span></div>
-  </div>
-  <div class="qr-item">
-    <span class="qr-ipa mod-color">ē</span>
-    <div class="qr-detail"><span class="qr-keys">M+K</span></div>
-  </div>
-  <div class="qr-item">
-    <span class="qr-ipa mod-color">ā</span>
-    <div class="qr-detail"><span class="qr-keys">M+J</span></div>
-  </div>
-  <div class="qr-item">
-    <span class="qr-ipa mod-color">ō</span>
-    <div class="qr-detail"><span class="qr-keys">M+L</span></div>
-  </div>
+<!-- VC CHUNKS -->
+<h2>VC Chunks (vowel+coda shortcuts)</h2>
+<div class="grid">
+  <div class="item chunk"><div class="sym">ot</div><div class="keys">M</div></div>
+  <div class="item chunk"><div class="sym">at</div><div class="keys">K+L</div></div>
+  <div class="item chunk"><div class="sym">an</div><div class="keys">J+;</div></div>
+  <div class="item chunk"><div class="sym">on</div><div class="keys">J+L</div></div>
+  <div class="item chunk"><div class="sym">in</div><div class="keys">K+L+;</div></div>
+  <div class="item chunk"><div class="sym">it</div><div class="keys">J+L+;</div></div>
+  <div class="item chunk"><div class="sym">er</div><div class="keys">J+K</div></div>
+  <div class="item chunk"><div class="sym">or</div><div class="keys">J+K+;</div></div>
+  <div class="item chunk"><div class="sym">al</div><div class="keys">J+K+L</div></div>
+  <div class="item chunk"><div class="sym">ing</div><div class="keys">J+K+L+;</div></div>
+  <div class="item chunk"><div class="sym">et</div><div class="keys">M+K+;</div></div>
+  <div class="item chunk"><div class="sym">ut</div><div class="keys">M+K+L</div></div>
+  <div class="item chunk"><div class="sym">en</div><div class="keys">M+K+L+;</div></div>
+  <div class="item chunk"><div class="sym">un</div><div class="keys">M+J+;</div></div>
+  <div class="item chunk"><div class="sym">ad</div><div class="keys">M+J+L</div></div>
+  <div class="item chunk"><div class="sym">is</div><div class="keys">M+J+L+;</div></div>
+  <div class="item chunk"><div class="sym">il</div><div class="keys">M+J+K</div></div>
+  <div class="item chunk"><div class="sym">aw</div><div class="keys">M+J+K+;</div></div>
+  <div class="item chunk"><div class="sym">oi</div><div class="keys">M+J+K+L</div></div>
+  <div class="item chunk"><div class="sym">ow</div><div class="keys">all 5</div></div>
 </div>
 
-<!-- ============================================================ -->
+<!-- CONTROL -->
+<h2>Controls</h2>
+<div class="grid">
+  <div class="item ctrl"><div class="sym">⌫</div><div class="keys">C+M</div></div>
+  <div class="item ctrl"><div class="sym">↵</div><div class="keys">all 10</div></div>
+</div>
+
 <!-- EXAMPLES -->
-<!-- ============================================================ -->
-
-<h2>Example Words</h2>
-
-<div class="example-box">
-  <div class="ex-label">1 chord each</div>
-  <div class="ex-phonemic">ð+ə → "the" &nbsp;|&nbsp; k+at → "cat" &nbsp;|&nbsp; n+ot → "not" &nbsp;|&nbsp; b+ut → "but" &nbsp;|&nbsp; g+et → "get"</div>
-  <div class="ex-chords">1 chord = consonant(left) + VC chunk(right)</div>
+<h2>Examples</h2>
+<div class="examples">
+  <div class="ex-row"><span class="ex-ipa">k+at</span><span class="ex-text">→ cat</span></div>
+  <div class="ex-row"><span class="ex-ipa">ð+ə</span><span class="ex-text">→ the</span></div>
+  <div class="ex-row"><span class="ex-ipa">n+ot</span><span class="ex-text">→ not</span></div>
+  <div class="ex-row"><span class="ex-ipa">g+et</span><span class="ex-text">→ get</span></div>
+  <div class="ex-row"><span class="ex-ipa">h+er</span><span class="ex-text">→ her</span></div>
+  <div class="ex-row"><span class="ex-ipa">f+or</span><span class="ex-text">→ for</span></div>
+  <div class="ex-row"><span class="ex-ipa">w+il</span><span class="ex-text">→ will</span></div>
+  <div class="ex-row"><span class="ex-ipa">g+ō+ing</span><span class="ex-text">→ going (2 chords)</span></div>
+  <div class="ex-row"><span class="ex-ipa">ð+is+is+ð+ə+b+est+w+ē</span><span class="ex-text">→ This is the best way.</span></div>
+  <div class="ex-row"><span class="ex-ipa">ī+h+ae+v+a+k+at</span><span class="ex-text">→ I have a cat.</span></div>
 </div>
 
-<div class="example-box" style="margin-top:8px;">
-  <div class="ex-label">Modified vowels</div>
-  <div class="ex-phonemic">d+ē → "day" &nbsp;|&nbsp; g+ō → "go" &nbsp;|&nbsp; s+ī → "see/sigh" &nbsp;|&nbsp; b+ū → "blue"</div>
-  <div class="ex-chords">M thumb + base vowel keys = long/diphthong version</div>
+<div class="note">
+  <strong>Desktop app:</strong> <kbd>Alt+Q</kbd> toggle on/off · <kbd>C+M</kbd> backspace (deletes word) · <kbd>Space</kbd> convert to text<br>
+  <strong>Raw mode:</strong> Right-click tray → Raw mode (no punctuation)
 </div>
-
-<div class="example-box" style="margin-top:8px;">
-  <div class="ex-label">Full sentence</div>
-  <div class="ex-phonemic">ðəkatsatonðəmat</div>
-  <div class="ex-english">"The cat sat on the mat." — 6 chords</div>
-  <div class="ex-chords">ð+ə | k+at | s+at | —+on | ð+ə | m+at</div>
-</div>
-
-<div class="example-box" style="margin-top:8px;">
-  <div class="ex-label">Full sentence</div>
-  <div class="ex-phonemic">plizrītðəansər</div>
-  <div class="ex-english">"Please write the answer." — AI resolves the lossy encoding</div>
-  <div class="ex-chords">p+i | l+ī | z | r+ī | t | ð+ə | —+an | s+ər</div>
-</div>
-
-<div class="example-box" style="margin-top:8px;">
-  <div class="ex-label">Chunk savings</div>
-  <div class="ex-phonemic">f+or = "for" (was 2 chords) &nbsp;|&nbsp; h+er = "her" (was 2) &nbsp;|&nbsp; w+il = "will" (was 2)</div>
-  <div class="ex-chords">New VC chunks: er, or, ing, en, un, al — save 1 chord each</div>
-</div>
-
-<div class="note" style="margin-top:24px;">
-  <strong>Universal design:</strong> This layout works for all languages. The AI output language is toggled separately (AI:EN / AI:PT / etc.). The keyboard layout never changes.
-  Portuguese users type the same keys — "r" becomes /ɾ/ or /h/ contextually, "n+j" = nh, "l+j" = lh.
-</div>
-
-<p style="text-align:center; margin-top:32px; font-size:12px; color:#333;">
-  <a href="index.html">&larr; Back to keyboard</a>
-</p>
 
 </body>
 </html>

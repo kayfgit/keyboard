@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Semantic Chord Keyboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-deep: #05080a;
+    --bg-panel: #0a0e12;
+    --bg-surface: #0f1419;
+    --border: #1a2332;
+    --border-glow: #2a3a4a;
+
+    --text-dim: #3a4a5a;
+    --text-mid: #6a7a8a;
+    --text-bright: #c5d5e5;
+
+    --action: #00d4ff;
+    --action-glow: rgba(0, 212, 255, 0.4);
+    --target: #bf5fff;
+    --target-glow: rgba(191, 95, 255, 0.4);
+    --modifier: #ffb800;
+    --modifier-glow: rgba(255, 184, 0, 0.4);
+    --logic: #00ffa3;
+    --logic-glow: rgba(0, 255, 163, 0.4);
+    --meta: #ff5f87;
+    --meta-glow: rgba(255, 95, 135, 0.4);
+
+    --accent: #00ffa3;
+    --accent-glow: rgba(0, 255, 163, 0.3);
+  }
+
+  body {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--bg-deep);
+    color: var(--text-bright);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Scanline overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.1) 2px,
+      rgba(0, 0, 0, 0.1) 4px
+    );
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* Status bar */
+  #status-bar {
+    padding: 8px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    letter-spacing: 0.5px;
+  }
+
+  .status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-dim);
+    box-shadow: 0 0 6px transparent;
+    transition: all 0.3s ease;
+  }
+
+  .status-dot.online {
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent-glow);
+  }
+
+  #mode-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-shadow: 0 0 10px var(--accent-glow);
+  }
+
+  /* Output area */
+  #output-area {
+    flex: 1;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    max-height: 30vh;
+  }
+
+  .section-label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+
+  #text-output {
+    flex: 1;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text-bright);
+    overflow-y: auto;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+  }
+
+  #text-output .cursor {
+    display: inline-block;
+    width: 8px;
+    height: 1.2em;
+    background: var(--accent);
+    vertical-align: text-bottom;
+    animation: cursorBlink 1s step-end infinite;
+    box-shadow: 0 0 8px var(--accent-glow);
+  }
+
+  @keyframes cursorBlink {
+    50% { opacity: 0; }
+  }
+
+  .expanding #text-output {
+    border-color: var(--accent);
+    box-shadow: 0 0 20px var(--accent-glow), inset 0 0 30px rgba(0, 255, 163, 0.05);
+  }
+
+  /* Intent buffer */
+  #intent-buffer {
+    padding: 12px 20px;
+    background: var(--bg-panel);
+    border-top: 1px solid var(--border);
+    min-height: 52px;
+  }
+
+  #intent-display {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    min-height: 28px;
+  }
+
+  .intent-token {
+    padding: 4px 12px;
+    border-radius: 2px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border: 1px solid;
+    transition: all 0.15s ease;
+  }
+
+  .intent-token.action {
+    color: var(--action);
+    border-color: var(--action);
+    background: rgba(0, 212, 255, 0.1);
+    box-shadow: 0 0 10px var(--action-glow);
+  }
+  .intent-token.target {
+    color: var(--target);
+    border-color: var(--target);
+    background: rgba(191, 95, 255, 0.1);
+    box-shadow: 0 0 10px var(--target-glow);
+  }
+  .intent-token.modifier {
+    color: var(--modifier);
+    border-color: var(--modifier);
+    background: rgba(255, 184, 0, 0.1);
+    box-shadow: 0 0 10px var(--modifier-glow);
+  }
+  .intent-token.logic {
+    color: var(--logic);
+    border-color: var(--logic);
+    background: rgba(0, 255, 163, 0.1);
+    box-shadow: 0 0 10px var(--logic-glow);
+  }
+  .intent-token.meta {
+    color: var(--meta);
+    border-color: var(--meta);
+    background: rgba(255, 95, 135, 0.1);
+    box-shadow: 0 0 10px var(--meta-glow);
+  }
+
+  .intent-placeholder {
+    color: var(--text-dim);
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+
+  /* Chord preview - current selection */
+  #chord-preview {
+    padding: 16px 20px;
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    min-height: 60px;
+  }
+
+  #preview-result {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    min-width: 200px;
+    text-align: center;
+    transition: all 0.15s ease;
+  }
+
+  #preview-result.action { color: var(--action); text-shadow: 0 0 15px var(--action-glow); }
+  #preview-result.target { color: var(--target); text-shadow: 0 0 15px var(--target-glow); }
+  #preview-result.modifier { color: var(--modifier); text-shadow: 0 0 15px var(--modifier-glow); }
+  #preview-result.logic { color: var(--logic); text-shadow: 0 0 15px var(--logic-glow); }
+  #preview-result.meta { color: var(--meta); text-shadow: 0 0 15px var(--meta-glow); }
+  #preview-result.control { color: var(--accent); text-shadow: 0 0 15px var(--accent-glow); }
+  #preview-result.empty { color: var(--text-dim); text-shadow: none; }
+
+  /* Keyboard area */
+  #keyboard-area {
+    padding: 20px;
+    background: var(--bg-panel);
+    border-top: 1px solid var(--border);
+  }
+
+  .keyboard-container {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .hand {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .hand-header {
+    text-align: center;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hand-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    color: var(--text-mid);
+    text-transform: uppercase;
+  }
+
+  .keys-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  /* Key styling */
+  .key {
+    width: 72px;
+    height: 80px;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    transition: all 0.12s ease;
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .key::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-glow), transparent);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .key .key-letter {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-dim);
+    transition: all 0.12s ease;
+  }
+
+  .key .key-label {
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    text-transform: uppercase;
+    transition: all 0.12s ease;
+    max-width: 64px;
+    text-align: center;
+    line-height: 1.2;
+    min-height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Left hand key states */
+  .key.left.available {
+    border-color: var(--border-glow);
+  }
+  .key.left.available::before { opacity: 1; }
+
+  .key.left.pressed {
+    transform: translateY(2px);
+  }
+
+  .key.left.pressed.action {
+    background: rgba(0, 212, 255, 0.15);
+    border-color: var(--action);
+    box-shadow: 0 0 20px var(--action-glow), inset 0 0 20px rgba(0, 212, 255, 0.1);
+  }
+  .key.left.pressed.action .key-letter { color: var(--action); }
+  .key.left.pressed.action .key-label { color: var(--action); }
+
+  .key.left.pressed.target {
+    background: rgba(191, 95, 255, 0.15);
+    border-color: var(--target);
+    box-shadow: 0 0 20px var(--target-glow), inset 0 0 20px rgba(191, 95, 255, 0.1);
+  }
+  .key.left.pressed.target .key-letter { color: var(--target); }
+  .key.left.pressed.target .key-label { color: var(--target); }
+
+  .key.left.pressed.modifier {
+    background: rgba(255, 184, 0, 0.15);
+    border-color: var(--modifier);
+    box-shadow: 0 0 20px var(--modifier-glow), inset 0 0 20px rgba(255, 184, 0, 0.1);
+  }
+  .key.left.pressed.modifier .key-letter { color: var(--modifier); }
+  .key.left.pressed.modifier .key-label { color: var(--modifier); }
+
+  .key.left.pressed.logic {
+    background: rgba(0, 255, 163, 0.15);
+    border-color: var(--logic);
+    box-shadow: 0 0 20px var(--logic-glow), inset 0 0 20px rgba(0, 255, 163, 0.1);
+  }
+  .key.left.pressed.logic .key-letter { color: var(--logic); }
+  .key.left.pressed.logic .key-label { color: var(--logic); }
+
+  .key.left.pressed.meta {
+    background: rgba(255, 95, 135, 0.15);
+    border-color: var(--meta);
+    box-shadow: 0 0 20px var(--meta-glow), inset 0 0 20px rgba(255, 95, 135, 0.1);
+  }
+  .key.left.pressed.meta .key-letter { color: var(--meta); }
+  .key.left.pressed.meta .key-label { color: var(--meta); }
+
+  /* Right hand - shows available options */
+  .key.right {
+    height: 80px;
+  }
+
+  .key.right .key-label {
+    font-size: 9px;
+    min-height: 24px;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: all 0.15s ease;
+  }
+
+  .key.right.has-option .key-label {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .key.right.has-option {
+    border-color: var(--border-glow);
+  }
+  .key.right.has-option::before { opacity: 1; }
+
+  .key.right.has-option.action .key-label { color: var(--action); }
+  .key.right.has-option.target .key-label { color: var(--target); }
+  .key.right.has-option.modifier .key-label { color: var(--modifier); }
+  .key.right.has-option.logic .key-label { color: var(--logic); }
+  .key.right.has-option.meta .key-label { color: var(--meta); }
+
+  .key.right.pressed {
+    transform: translateY(2px);
+  }
+
+  .key.right.pressed.action {
+    background: rgba(0, 212, 255, 0.2);
+    border-color: var(--action);
+    box-shadow: 0 0 25px var(--action-glow);
+  }
+  .key.right.pressed.action .key-letter { color: var(--action); }
+
+  .key.right.pressed.target {
+    background: rgba(191, 95, 255, 0.2);
+    border-color: var(--target);
+    box-shadow: 0 0 25px var(--target-glow);
+  }
+  .key.right.pressed.target .key-letter { color: var(--target); }
+
+  .key.right.pressed.modifier {
+    background: rgba(255, 184, 0, 0.2);
+    border-color: var(--modifier);
+    box-shadow: 0 0 25px var(--modifier-glow);
+  }
+  .key.right.pressed.modifier .key-letter { color: var(--modifier); }
+
+  .key.right.pressed.logic {
+    background: rgba(0, 255, 163, 0.2);
+    border-color: var(--logic);
+    box-shadow: 0 0 25px var(--logic-glow);
+  }
+  .key.right.pressed.logic .key-letter { color: var(--logic); }
+
+  .key.right.pressed.meta {
+    background: rgba(255, 95, 135, 0.2);
+    border-color: var(--meta);
+    box-shadow: 0 0 25px var(--meta-glow);
+  }
+  .key.right.pressed.meta .key-letter { color: var(--meta); }
+
+  .key.right.pressed.control {
+    background: rgba(0, 255, 163, 0.2);
+    border-color: var(--accent);
+    box-shadow: 0 0 25px var(--accent-glow);
+  }
+  .key.right.pressed.control .key-letter { color: var(--accent); }
+  .key.right.pressed.control .key-label { color: var(--accent); }
+
+  /* Fired animation */
+  .key.fired {
+    animation: keyFire 0.2s ease;
+  }
+
+  @keyframes keyFire {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+  }
+
+  /* Help bar */
+  #help-bar {
+    padding: 10px 20px;
+    background: var(--bg-deep);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+
+  #help-bar kbd {
+    display: inline-block;
+    padding: 2px 6px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--text-mid);
+    margin: 0 2px;
+  }
+
+  #help-bar a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  /* Options panel - shows all available options for current state */
+  #options-panel {
+    padding: 12px 20px;
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border);
+    display: none;
+  }
+
+  #options-panel.visible {
+    display: block;
+  }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 6px;
+    max-height: 120px;
+    overflow-y: auto;
+  }
+
+  .option-item {
+    padding: 6px 10px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-size: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .option-item .chord {
+    color: var(--text-dim);
+    font-size: 9px;
+  }
+
+  .option-item .symbol {
+    font-weight: 600;
+  }
+
+  .option-item.action .symbol { color: var(--action); }
+  .option-item.target .symbol { color: var(--target); }
+  .option-item.modifier .symbol { color: var(--modifier); }
+  .option-item.logic .symbol { color: var(--logic); }
+  .option-item.meta .symbol { color: var(--meta); }
+
+  /* Invalid flash */
+  .invalid-flash {
+    animation: invalidShake 0.3s ease;
+  }
+
+  @keyframes invalidShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--bg-surface);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--border-glow);
+  }
+</style>
+</head>
+<body>
+
+<div id="status-bar">
+  <div class="status-indicator">
+    <span class="status-dot" id="status-dot"></span>
+    <span id="server-status">Checking server...</span>
+  </div>
+  <span id="mode-label">SEMANTIC MODE</span>
+  <span style="color: var(--text-dim);">Intent Interface v2.0</span>
+</div>
+
+<div id="output-area">
+  <div class="section-label">Output</div>
+  <div id="text-output"><span class="cursor"></span></div>
+</div>
+
+<div id="intent-buffer">
+  <div id="intent-display">
+    <span class="intent-placeholder">Hold category key to see options...</span>
+  </div>
+</div>
+
+<div id="chord-preview">
+  <div id="preview-result" class="empty">READY</div>
+</div>
+
+<div id="options-panel">
+  <div class="options-grid" id="options-grid"></div>
+</div>
+
+<div id="keyboard-area">
+  <div class="keyboard-container">
+    <div class="hand" id="left-hand">
+      <div class="hand-header">
+        <div class="hand-title">Category Select</div>
+      </div>
+      <div class="keys-row">
+        <div class="key left" id="key-a" data-key="a" data-category="action">
+          <span class="key-letter">A</span>
+          <span class="key-label">ACTION</span>
+        </div>
+        <div class="key left" id="key-s" data-key="s" data-category="target">
+          <span class="key-letter">S</span>
+          <span class="key-label">TARGET</span>
+        </div>
+        <div class="key left" id="key-d" data-key="d" data-category="modifier">
+          <span class="key-letter">D</span>
+          <span class="key-label">MODIFIER</span>
+        </div>
+        <div class="key left" id="key-f" data-key="f" data-category="logic">
+          <span class="key-letter">F</span>
+          <span class="key-label">LOGIC</span>
+        </div>
+        <div class="key left" id="key-c" data-key="c" data-category="meta">
+          <span class="key-letter">C</span>
+          <span class="key-label">META</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hand" id="right-hand">
+      <div class="hand-header">
+        <div class="hand-title">Command Select</div>
+      </div>
+      <div class="keys-row">
+        <div class="key right" id="key-m" data-key="m">
+          <span class="key-letter">M</span>
+          <span class="key-label">EXTEND</span>
+        </div>
+        <div class="key right" id="key-j" data-key="j">
+          <span class="key-letter">J</span>
+          <span class="key-label"></span>
+        </div>
+        <div class="key right" id="key-k" data-key="k">
+          <span class="key-letter">K</span>
+          <span class="key-label"></span>
+        </div>
+        <div class="key right" id="key-l" data-key="l">
+          <span class="key-letter">L</span>
+          <span class="key-label"></span>
+        </div>
+        <div class="key right" id="key-semicolon" data-key=";">
+          <span class="key-letter">;</span>
+          <span class="key-label"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="help-bar">
+  <span><kbd>Space</kbd> Expand to text</span>
+  <span><kbd>C</kbd>+<kbd>M</kbd> Backspace</span>
+  <span><kbd>Backspace</kbd> Delete token</span>
+  <a href="semantic-cheatsheet.html">Full Reference</a>
+</div>
+
+<script>
+// ============================================================
+// SEMANTIC VOCABULARY
+// ============================================================
+
+const SEMANTICS = {
+  // ACTIONS (A + right hand)
+  'A+J':     { symbol: 'CREATE', category: 'action' },
+  'A+K':     { symbol: 'DELETE', category: 'action' },
+  'A+L':     { symbol: 'MODIFY', category: 'action' },
+  'A+;':     { symbol: 'FIX', category: 'action' },
+  'A+J+K':   { symbol: 'FIND', category: 'action' },
+  'A+J+L':   { symbol: 'SHOW', category: 'action' },
+  'A+J+;':   { symbol: 'TEST', category: 'action' },
+  'A+K+L':   { symbol: 'RUN', category: 'action' },
+  'A+K+;':   { symbol: 'EXPLAIN', category: 'action' },
+  'A+L+;':   { symbol: 'REFACTOR', category: 'action' },
+  'A+J+K+L': { symbol: 'OPTIMIZE', category: 'action' },
+  'A+J+K+;': { symbol: 'DEBUG', category: 'action' },
+  'A+J+L+;': { symbol: 'DEPLOY', category: 'action' },
+  'A+K+L+;': { symbol: 'IMPORT', category: 'action' },
+  'A+J+K+L+;': { symbol: 'EXPORT', category: 'action' },
+  'A+M+J':   { symbol: 'ADD', category: 'action' },
+  'A+M+K':   { symbol: 'REMOVE', category: 'action' },
+  'A+M+L':   { symbol: 'RENAME', category: 'action' },
+  'A+M+;':   { symbol: 'MOVE', category: 'action' },
+  'A+M+J+K': { symbol: 'COPY', category: 'action' },
+  'A+M+J+L': { symbol: 'UPDATE', category: 'action' },
+  'A+M+J+;': { symbol: 'CHECK', category: 'action' },
+  'A+M+K+L': { symbol: 'BUILD', category: 'action' },
+  'A+M+K+;': { symbol: 'INSTALL', category: 'action' },
+  'A+M+L+;': { symbol: 'CONFIGURE', category: 'action' },
+  'A+M+J+K+L': { symbol: 'GENERATE', category: 'action' },
+  'A+M+J+K+;': { symbol: 'VALIDATE', category: 'action' },
+  'A+M+J+L+;': { symbol: 'CLEAN', category: 'action' },
+  'A+M+K+L+;': { symbol: 'REVERT', category: 'action' },
+
+  // TARGETS (S + right hand)
+  'S+J':     { symbol: 'FILE', category: 'target' },
+  'S+K':     { symbol: 'FUNCTION', category: 'target' },
+  'S+L':     { symbol: 'CLASS', category: 'target' },
+  'S+;':     { symbol: 'VARIABLE', category: 'target' },
+  'S+J+K':   { symbol: 'COMPONENT', category: 'target' },
+  'S+J+L':   { symbol: 'API', category: 'target' },
+  'S+J+;':   { symbol: 'DATABASE', category: 'target' },
+  'S+K+L':   { symbol: 'TEST', category: 'target' },
+  'S+K+;':   { symbol: 'ERROR', category: 'target' },
+  'S+L+;':   { symbol: 'BUG', category: 'target' },
+  'S+J+K+L': { symbol: 'CODE', category: 'target' },
+  'S+J+K+;': { symbol: 'TYPE', category: 'target' },
+  'S+J+L+;': { symbol: 'MODULE', category: 'target' },
+  'S+K+L+;': { symbol: 'ROUTE', category: 'target' },
+  'S+J+K+L+;': { symbol: 'CONFIG', category: 'target' },
+  'S+M+J':   { symbol: 'INTERFACE', category: 'target' },
+  'S+M+K':   { symbol: 'METHOD', category: 'target' },
+  'S+M+L':   { symbol: 'PROPERTY', category: 'target' },
+  'S+M+;':   { symbol: 'PARAMETER', category: 'target' },
+  'S+M+J+K': { symbol: 'DEPENDENCY', category: 'target' },
+  'S+M+J+L': { symbol: 'ENDPOINT', category: 'target' },
+  'S+M+J+;': { symbol: 'QUERY', category: 'target' },
+  'S+M+K+L': { symbol: 'SCHEMA', category: 'target' },
+  'S+M+K+;': { symbol: 'COMMENT', category: 'target' },
+  'S+M+L+;': { symbol: 'LOG', category: 'target' },
+  'S+M+J+K+L': { symbol: 'RESPONSE', category: 'target' },
+  'S+M+J+K+;': { symbol: 'REQUEST', category: 'target' },
+  'S+M+J+L+;': { symbol: 'STATE', category: 'target' },
+  'S+M+K+L+;': { symbol: 'EVENT', category: 'target' },
+
+  // MODIFIERS (D + right hand)
+  'D+J':     { symbol: 'THIS', category: 'modifier' },
+  'D+K':     { symbol: 'THAT', category: 'modifier' },
+  'D+L':     { symbol: 'ALL', category: 'modifier' },
+  'D+;':     { symbol: 'LAST', category: 'modifier' },
+  'D+J+K':   { symbol: 'NEXT', category: 'modifier' },
+  'D+J+L':   { symbol: 'NEW', category: 'modifier' },
+  'D+J+;':   { symbol: 'CURRENT', category: 'modifier' },
+  'D+K+L':   { symbol: 'SAME', category: 'modifier' },
+  'D+K+;':   { symbol: 'OTHER', category: 'modifier' },
+  'D+L+;':   { symbol: 'EVERY', category: 'modifier' },
+  'D+J+K+L': { symbol: 'FIRST', category: 'modifier' },
+  'D+J+K+;': { symbol: 'EACH', category: 'modifier' },
+  'D+J+L+;': { symbol: 'ONLY', category: 'modifier' },
+  'D+K+L+;': { symbol: 'MAIN', category: 'modifier' },
+  'D+J+K+L+;': { symbol: 'ENTIRE', category: 'modifier' },
+  'D+M+J':   { symbol: 'ASYNC', category: 'modifier' },
+  'D+M+K':   { symbol: 'RECURSIVE', category: 'modifier' },
+  'D+M+L':   { symbol: 'PUBLIC', category: 'modifier' },
+  'D+M+;':   { symbol: 'PRIVATE', category: 'modifier' },
+  'D+M+J+K': { symbol: 'STATIC', category: 'modifier' },
+  'D+M+J+L': { symbol: 'GLOBAL', category: 'modifier' },
+  'D+M+J+;': { symbol: 'LOCAL', category: 'modifier' },
+  'D+M+K+L': { symbol: 'OPTIONAL', category: 'modifier' },
+  'D+M+K+;': { symbol: 'REQUIRED', category: 'modifier' },
+  'D+M+L+;': { symbol: 'DEPRECATED', category: 'modifier' },
+  'D+M+J+K+L': { symbol: 'TEMPORARY', category: 'modifier' },
+  'D+M+J+K+;': { symbol: 'PERMANENT', category: 'modifier' },
+
+  // LOGIC (F + right hand)
+  'F+J':     { symbol: 'AND', category: 'logic' },
+  'F+K':     { symbol: 'OR', category: 'logic' },
+  'F+L':     { symbol: 'NOT', category: 'logic' },
+  'F+;':     { symbol: 'IF', category: 'logic' },
+  'F+J+K':   { symbol: 'THEN', category: 'logic' },
+  'F+J+L':   { symbol: 'WHEN', category: 'logic' },
+  'F+J+;':   { symbol: 'WHERE', category: 'logic' },
+  'F+K+L':   { symbol: 'WITH', category: 'logic' },
+  'F+K+;':   { symbol: 'WITHOUT', category: 'logic' },
+  'F+L+;':   { symbol: 'FROM', category: 'logic' },
+  'F+J+K+L': { symbol: 'TO', category: 'logic' },
+  'F+J+K+;': { symbol: 'INTO', category: 'logic' },
+  'F+J+L+;': { symbol: 'LIKE', category: 'logic' },
+  'F+K+L+;': { symbol: 'AS', category: 'logic' },
+  'F+J+K+L+;': { symbol: 'BEFORE', category: 'logic' },
+  'F+M+J':   { symbol: 'AFTER', category: 'logic' },
+  'F+M+K':   { symbol: 'WHILE', category: 'logic' },
+  'F+M+L':   { symbol: 'UNTIL', category: 'logic' },
+  'F+M+;':   { symbol: 'UNLESS', category: 'logic' },
+  'F+M+J+K': { symbol: 'BECAUSE', category: 'logic' },
+  'F+M+J+L': { symbol: 'SO', category: 'logic' },
+  'F+M+J+;': { symbol: 'ALSO', category: 'logic' },
+  'F+M+K+L': { symbol: 'INSTEAD', category: 'logic' },
+  'F+M+K+;': { symbol: 'USING', category: 'logic' },
+  'F+M+L+;': { symbol: 'BASED_ON', category: 'logic' },
+
+  // META (C + right hand)
+  'C+J':     { symbol: 'UNDO', category: 'meta' },
+  'C+K':     { symbol: 'REDO', category: 'meta' },
+  'C+L':     { symbol: 'DONE', category: 'meta' },
+  'C+;':     { symbol: 'CANCEL', category: 'meta' },
+  'C+J+K':   { symbol: 'HELP', category: 'meta' },
+  'C+J+L':   { symbol: 'AGAIN', category: 'meta' },
+  'C+J+;':   { symbol: 'YES', category: 'meta' },
+  'C+K+L':   { symbol: 'NO', category: 'meta' },
+  'C+K+;':   { symbol: 'MAYBE', category: 'meta' },
+  'C+L+;':   { symbol: 'WAIT', category: 'meta' },
+  'C+J+K+L': { symbol: 'CONFIRM', category: 'meta' },
+  'C+J+K+;': { symbol: 'SKIP', category: 'meta' },
+  'C+J+L+;': { symbol: 'MORE', category: 'meta' },
+  'C+K+L+;': { symbol: 'LESS', category: 'meta' },
+  'C+J+K+L+;': { symbol: 'PERFECT', category: 'meta' },
+  'C+M+J':   { symbol: 'FASTER', category: 'meta' },
+  'C+M+K':   { symbol: 'SIMPLER', category: 'meta' },
+  'C+M+L':   { symbol: 'SAFER', category: 'meta' },
+  'C+M+;':   { symbol: 'BETTER', category: 'meta' },
+  'C+M+J+K': { symbol: 'CONTINUE', category: 'meta' },
+  'C+M+J+L': { symbol: 'STOP', category: 'meta' },
+  'C+M+J+;': { symbol: 'RETRY', category: 'meta' },
+  'C+M+K+L': { symbol: 'EXAMPLE', category: 'meta' },
+  'C+M+K+;': { symbol: 'WHY', category: 'meta' },
+  'C+M+L+;': { symbol: 'HOW', category: 'meta' },
+
+  // Shortcuts
+  'A+S+J':     { symbol: 'CREATE_FILE', category: 'action' },
+  'A+S+K':     { symbol: 'CREATE_FUNCTION', category: 'action' },
+  'A+S+L':     { symbol: 'DELETE_FILE', category: 'action' },
+  'A+S+;':     { symbol: 'FIX_BUG', category: 'action' },
+  'A+S+J+K':   { symbol: 'ADD_TEST', category: 'action' },
+  'A+S+J+L':   { symbol: 'FIX_ERROR', category: 'action' },
+  'A+S+K+L':   { symbol: 'REFACTOR_CODE', category: 'action' },
+  'D+S+J':     { symbol: 'THIS_FILE', category: 'target' },
+  'D+S+K':     { symbol: 'THIS_FUNCTION', category: 'target' },
+  'D+S+L':     { symbol: 'ALL_FILES', category: 'target' },
+  'D+S+;':     { symbol: 'ALL_TESTS', category: 'target' },
+};
+
+// Normalize chord key for consistent lookup
+const LEFT_KEY_ORDER = ['A', 'S', 'D', 'F', 'C'];
+const RIGHT_KEY_ORDER = ['M', 'J', 'K', 'L', ';'];
+
+function sortByOrder(keys, order) {
+  return keys.slice().sort((a, b) => order.indexOf(a) - order.indexOf(b));
+}
+
+function normalizeChordKey(leftKeys, rightKeys) {
+  const sortedLeft = sortByOrder(leftKeys, LEFT_KEY_ORDER);
+  const sortedRight = sortByOrder(rightKeys, RIGHT_KEY_ORDER);
+  return sortedLeft.join('+') + '+' + sortedRight.join('+');
+}
+
+// Build normalized lookup table at startup
+const SEMANTICS_LOOKUP = {};
+for (const [chord, data] of Object.entries(SEMANTICS)) {
+  const parts = chord.split('+');
+  const leftParts = parts.filter(p => LEFT_KEY_ORDER.includes(p));
+  const rightParts = parts.filter(p => RIGHT_KEY_ORDER.includes(p));
+  const normalized = normalizeChordKey(leftParts, rightParts);
+  SEMANTICS_LOOKUP[normalized] = data;
+}
+
+// Map for getting options for each left key combination
+function getOptionsForLeftKeys(leftKeys) {
+  const options = {};
+  const leftPrefix = sortByOrder(leftKeys, LEFT_KEY_ORDER).join('+');
+
+  for (const [chord, data] of Object.entries(SEMANTICS)) {
+    const parts = chord.split('+');
+    const chordLeft = sortByOrder(parts.filter(p => LEFT_KEY_ORDER.includes(p)), LEFT_KEY_ORDER).join('+');
+    const chordRight = parts.filter(p => RIGHT_KEY_ORDER.includes(p));
+
+    if (chordLeft === leftPrefix) {
+      const rightKey = sortByOrder(chordRight, RIGHT_KEY_ORDER).join('+');
+      options[rightKey] = data;
+    }
+  }
+
+  return options;
+}
+
+// ============================================================
+// CONFIG & STATE
+// ============================================================
+const API_BASE = 'http://localhost:8000';
+let serverOnline = false;
+
+const LEFT_KEYS = { 'c': 4, 'f': 3, 'd': 2, 's': 1, 'a': 0 };
+const RIGHT_KEYS = { 'm': 4, 'j': 3, 'k': 2, 'l': 1, ';': 0 };
+const LEFT_KEY_CATEGORIES = { 'a': 'action', 's': 'target', 'd': 'modifier', 'f': 'logic', 'c': 'meta' };
+
+const heldKeys = new Set();
+const chordBuffer = new Set();
+let chordActive = false;
+let completedLines = [];
+let semanticBuffer = [];
+let expanding = false;
+
+// DOM elements
+const textOutput = document.getElementById('text-output');
+const intentDisplay = document.getElementById('intent-display');
+const previewResult = document.getElementById('preview-result');
+const optionsPanel = document.getElementById('options-panel');
+const optionsGrid = document.getElementById('options-grid');
+
+// ============================================================
+// CHORD ENGINE
+// ============================================================
+
+function isChordKey(key) { return key in LEFT_KEYS || key in RIGHT_KEYS; }
+
+function getLeftCode() {
+  let code = 0;
+  for (const key of chordBuffer) {
+    if (key in LEFT_KEYS) code |= (1 << LEFT_KEYS[key]);
+  }
+  return code;
+}
+
+function getRightCode() {
+  let code = 0;
+  for (const key of chordBuffer) {
+    if (key in RIGHT_KEYS) code |= (1 << RIGHT_KEYS[key]);
+  }
+  return code;
+}
+
+function codeToKeys(code, isLeft) {
+  const keys = [];
+  const keyMap = isLeft ? ['A', 'S', 'D', 'F', 'C'] : [';', 'L', 'K', 'J', 'M'];
+  for (let i = 0; i < 5; i++) {
+    if (code & (1 << i)) keys.push(keyMap[i]);
+  }
+  return keys;
+}
+
+function getChordKey(leftCode, rightCode) {
+  const leftKeys = codeToKeys(leftCode, true);
+  const rightKeys = codeToKeys(rightCode, false);
+  if (leftKeys.length === 0 || rightKeys.length === 0) return null;
+  return normalizeChordKey(leftKeys, rightKeys);
+}
+
+function lookupSemantic(chordKey) {
+  return SEMANTICS_LOOKUP[chordKey];
+}
+
+function getHeldLeftKeys() {
+  const keys = [];
+  for (const key of chordBuffer) {
+    if (key in LEFT_KEYS) keys.push(key.toUpperCase());
+  }
+  return sortByOrder(keys, LEFT_KEY_ORDER);
+}
+
+function getHeldRightKeys() {
+  const keys = [];
+  for (const key of chordBuffer) {
+    if (key in RIGHT_KEYS) keys.push(key === ';' ? ';' : key.toUpperCase());
+  }
+  return sortByOrder(keys, RIGHT_KEY_ORDER);
+}
+
+function getCurrentCategory() {
+  for (const key of chordBuffer) {
+    if (key in LEFT_KEY_CATEGORIES) {
+      return LEFT_KEY_CATEGORIES[key];
+    }
+  }
+  return null;
+}
+
+// ============================================================
+// DISPLAY UPDATES
+// ============================================================
+
+function escapeHtml(text) {
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function updateDisplay() {
+  let html = '';
+  if (completedLines.length > 0) {
+    html += completedLines.map(l => escapeHtml(l)).join('\n');
+  }
+  html += '<span class="cursor"></span>';
+  textOutput.innerHTML = html;
+  textOutput.scrollTop = textOutput.scrollHeight;
+
+  // Update intent buffer
+  if (semanticBuffer.length > 0) {
+    intentDisplay.innerHTML = semanticBuffer.map(token =>
+      `<span class="intent-token ${token.category}">${token.symbol}</span>`
+    ).join('');
+  } else {
+    intentDisplay.innerHTML = '<span class="intent-placeholder">Hold category key to see options...</span>';
+  }
+}
+
+function updateKeyVisuals() {
+  const leftHeld = getHeldLeftKeys();
+  const rightHeld = getHeldRightKeys();
+  const category = getCurrentCategory();
+
+  // Update left hand keys
+  document.querySelectorAll('.key.left').forEach(keyEl => {
+    const key = keyEl.dataset.key;
+    const isPressed = heldKeys.has(key);
+    const keyCategory = keyEl.dataset.category;
+
+    keyEl.classList.remove('pressed', 'action', 'target', 'modifier', 'logic', 'meta');
+
+    if (isPressed) {
+      keyEl.classList.add('pressed', keyCategory);
+    }
+  });
+
+  // Update right hand keys with available options
+  const options = leftHeld.length > 0 ? getOptionsForLeftKeys(leftHeld) : {};
+
+  document.querySelectorAll('.key.right').forEach(keyEl => {
+    const key = keyEl.dataset.key;
+    const keyUpper = key === ';' ? ';' : key.toUpperCase();
+    const isPressed = heldKeys.has(key);
+    const labelEl = keyEl.querySelector('.key-label');
+
+    keyEl.classList.remove('pressed', 'has-option', 'action', 'target', 'modifier', 'logic', 'meta', 'control');
+
+    // Check for backspace control chord
+    if (leftHeld.includes('C') && leftHeld.length === 1 && key === 'm') {
+      keyEl.classList.add('has-option', 'control');
+      labelEl.textContent = 'BACKSPACE';
+      if (isPressed) {
+        keyEl.classList.add('pressed', 'control');
+      }
+      return;
+    }
+
+    // Find what this key would produce
+    const currentRight = [...rightHeld];
+    if (!currentRight.includes(keyUpper)) {
+      currentRight.push(keyUpper);
+    }
+    const rightKey = sortByOrder(currentRight, RIGHT_KEY_ORDER).join('+');
+
+    if (options[rightKey]) {
+      const opt = options[rightKey];
+      keyEl.classList.add('has-option', opt.category);
+      labelEl.textContent = opt.symbol;
+
+      if (isPressed) {
+        keyEl.classList.add('pressed', opt.category);
+      }
+    } else if (key === 'm' && leftHeld.length > 0) {
+      // M key always shows "EXTEND" when a category is selected
+      keyEl.classList.add('has-option');
+      labelEl.textContent = '+MORE';
+      labelEl.style.color = 'var(--text-mid)';
+
+      if (isPressed) {
+        keyEl.classList.add('pressed');
+        keyEl.style.borderColor = 'var(--border-glow)';
+      }
+    } else {
+      labelEl.textContent = '';
+      if (isPressed) {
+        keyEl.classList.add('pressed');
+      }
+    }
+  });
+}
+
+function updatePreview() {
+  const leftCode = getLeftCode();
+  const rightCode = getRightCode();
+
+  previewResult.classList.remove('action', 'target', 'modifier', 'logic', 'meta', 'control', 'empty');
+
+  if (!chordActive || (leftCode === 0 && rightCode === 0)) {
+    previewResult.textContent = 'READY';
+    previewResult.classList.add('empty');
+    return;
+  }
+
+  // Check for control chord (backspace)
+  if (leftCode === 16 && rightCode === 16) {
+    previewResult.textContent = '⌫ BACKSPACE';
+    previewResult.classList.add('control');
+    return;
+  }
+
+  const chordKey = getChordKey(leftCode, rightCode);
+  const sem = chordKey ? lookupSemantic(chordKey) : null;
+  if (sem) {
+    previewResult.textContent = sem.symbol;
+    previewResult.classList.add(sem.category);
+  } else if (leftCode > 0) {
+    const category = getCurrentCategory();
+    previewResult.textContent = category ? category.toUpperCase() + '...' : 'SELECT...';
+    previewResult.classList.add(category || 'empty');
+  } else {
+    previewResult.textContent = 'READY';
+    previewResult.classList.add('empty');
+  }
+}
+
+function flashFired() {
+  document.querySelectorAll('.key.pressed').forEach(k => {
+    k.classList.add('fired');
+    setTimeout(() => k.classList.remove('fired'), 200);
+  });
+}
+
+function flashInvalid() {
+  textOutput.classList.add('invalid-flash');
+  setTimeout(() => textOutput.classList.remove('invalid-flash'), 300);
+}
+
+// ============================================================
+// SERVER COMMUNICATION
+// ============================================================
+
+async function checkServer() {
+  try {
+    const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(2000) });
+    if (res.ok) {
+      serverOnline = true;
+      document.getElementById('status-dot').classList.add('online');
+      document.getElementById('server-status').textContent = 'Connected';
+    }
+  } catch {
+    serverOnline = false;
+    document.getElementById('status-dot').classList.remove('online');
+    document.getElementById('server-status').textContent = 'Offline';
+  }
+}
+
+async function expandSemantic(tokens) {
+  if (!serverOnline) return tokens.map(t => t.symbol).join(' ');
+  try {
+    const res = await fetch(`${API_BASE}/expand`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tokens: tokens.map(t => t.symbol) }),
+      signal: AbortSignal.timeout(15000),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return data.text;
+    }
+  } catch {
+    checkServer();
+  }
+  return tokens.map(t => t.symbol).join(' ');
+}
+
+// ============================================================
+// EVENT HANDLERS
+// ============================================================
+
+function normalizeKey(e) {
+  if (e.key === ';') return ';';
+  return e.key.toLowerCase();
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === ' ') {
+    e.preventDefault();
+    handleSpace();
+    return;
+  }
+
+  if (e.key === 'Backspace') {
+    e.preventDefault();
+    handleBackspace();
+    return;
+  }
+
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    handleEnter();
+    return;
+  }
+
+  const key = normalizeKey(e);
+  if (!isChordKey(key)) return;
+  e.preventDefault();
+  if (expanding) return;
+  if (heldKeys.has(key)) return;
+
+  if (!chordActive) {
+    chordActive = true;
+    chordBuffer.clear();
+  }
+
+  heldKeys.add(key);
+  chordBuffer.add(key);
+  updateKeyVisuals();
+  updatePreview();
+});
+
+document.addEventListener('keyup', (e) => {
+  const key = normalizeKey(e);
+  if (!isChordKey(key)) return;
+  e.preventDefault();
+
+  heldKeys.delete(key);
+  updateKeyVisuals();
+
+  if (chordActive && heldKeys.size === 0) {
+    fireChord();
+    chordActive = false;
+    chordBuffer.clear();
+    setTimeout(() => {
+      if (!chordActive) {
+        updateKeyVisuals();
+        updatePreview();
+      }
+    }, 100);
+  }
+});
+
+function fireChord() {
+  const leftCode = getLeftCode();
+  const rightCode = getRightCode();
+
+  // Control: both thumbs = backspace
+  if (leftCode === 16 && rightCode === 16) {
+    flashFired();
+    handleBackspace();
+    return;
+  }
+
+  const chordKey = getChordKey(leftCode, rightCode);
+  const sem = chordKey ? lookupSemantic(chordKey) : null;
+  if (sem) {
+    flashFired();
+    semanticBuffer.push(sem);
+    updateDisplay();
+  } else if (leftCode > 0 || rightCode > 0) {
+    flashInvalid();
+  }
+}
+
+async function handleSpace() {
+  if (semanticBuffer.length === 0) return;
+  if (expanding) return;
+
+  expanding = true;
+  document.body.classList.add('expanding');
+  updateDisplay();
+
+  const result = await expandSemantic(semanticBuffer);
+
+  expanding = false;
+  document.body.classList.remove('expanding');
+
+  if (completedLines.length > 0 && completedLines[completedLines.length - 1] !== '') {
+    completedLines[completedLines.length - 1] += ' ' + result;
+  } else if (completedLines.length > 0) {
+    completedLines[completedLines.length - 1] = result;
+  } else {
+    completedLines.push(result);
+  }
+
+  semanticBuffer = [];
+  updateDisplay();
+}
+
+function handleEnter() {
+  if (semanticBuffer.length > 0) return;
+  completedLines.push('');
+  updateDisplay();
+}
+
+function handleBackspace() {
+  if (expanding) return;
+  if (semanticBuffer.length > 0) {
+    semanticBuffer.pop();
+    updateDisplay();
+  } else if (completedLines.length > 0) {
+    completedLines.pop();
+    updateDisplay();
+  }
+}
+
+window.addEventListener('blur', () => {
+  heldKeys.clear();
+  chordBuffer.clear();
+  chordActive = false;
+  updateKeyVisuals();
+  updatePreview();
+});
+
+// ============================================================
+// INIT
+// ============================================================
+checkServer();
+setInterval(checkServer, 10000);
+updateDisplay();
+updateKeyVisuals();
+updatePreview();
+</script>
+</body>
+</html>

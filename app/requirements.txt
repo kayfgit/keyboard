@@ -1,0 +1,5 @@
+pynput>=1.7.6
+pystray>=0.19.5
+groq>=0.4.0
+Pillow>=10.0.0
+python-dotenv>=1.0.0
