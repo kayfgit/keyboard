@@ -241,6 +241,64 @@ Extended meta (C+M + right):
 | D+S+L | ALL_FILES | ALL + FILE |
 | D+S+; | ALL_TESTS | ALL + TEST |
 
+### Symbols (A+F combo)
+
+| Chord | Symbol |
+|-------|--------|
+| A+F+J | 1 |
+| A+F+K | 2 |
+| A+F+L | 3 |
+| A+F+; | 4 |
+| A+F+J+K | 5 |
+| A+F+J+L | 6 |
+| A+F+J+; | 7 |
+| A+F+K+L | 8 |
+| A+F+K+; | 9 |
+| A+F+L+; | 0 |
+| A+F+J+K+L | . |
+| A+F+J+K+; | , |
+| A+F+J+L+; | ? |
+| A+F+K+L+; | ! |
+| A+F+J+K+L+; | : |
+
+Extended symbols (A+F+M + right):
+| Chord | Symbol |
+|-------|--------|
+| A+F+M+J | - |
+| A+F+M+K | _ |
+| A+F+M+L | / |
+| A+F+M+; | @ |
+| A+F+M+J+K | # |
+| A+F+M+J+L | $ |
+| A+F+M+J+; | % |
+| A+F+M+K+L | & |
+| A+F+M+K+; | * |
+| A+F+M+L+; | + |
+| A+F+M+J+K+L | = |
+| A+F+M+J+K+; | ( |
+| A+F+M+J+L+; | ) |
+| A+F+M+K+L+; | " |
+
+### Style Modifiers (D+C combo) — for reprompt
+
+Use these to restyle the last AI output. Add style modifiers then press REPROMPT.
+
+| Chord | Symbol | Effect |
+|-------|--------|--------|
+| D+C+J | FORMAL | Professional, formal tone |
+| D+C+K | CASUAL | Relaxed, conversational |
+| D+C+L | POLITE | Add softeners, please/thanks |
+| D+C+; | DIRECT | Blunt, to the point |
+| D+C+J+K | TECHNICAL | Precise terminology |
+| D+C+J+L | FRIENDLY | Warm, approachable |
+| D+C+J+; | PROFESSIONAL | Business-appropriate |
+| D+C+K+L | BRIEF | Condense to essentials |
+| D+C+K+; | DETAILED | Add more explanation |
+| D+C+L+; | AS_QUESTION | Rephrase as question |
+| D+C+J+K+L | AS_COMMAND | Rephrase as command |
+| D+C+J+K+; | AS_REQUEST | Rephrase as polite request |
+| D+C+M+J | REPROMPT | Trigger restyling |
+
 ---
 
 ## Example Sequences

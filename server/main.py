@@ -28,6 +28,8 @@ class ConvertResponse(BaseModel):
 
 class ExpandRequest(BaseModel):
     tokens: list[str]  # e.g. ["CREATE", "FUNCTION", "ASYNC"]
+    styles: list[str] | None = None  # e.g. ["POLITE", "FORMAL"] for reprompt
+    original_text: str | None = None  # Original text to restyle
 
 
 class ExpandResponse(BaseModel):
@@ -44,7 +46,7 @@ async def convert(req: ConvertRequest):
 @app.post("/expand", response_model=ExpandResponse)
 async def expand(req: ExpandRequest):
     """Expand semantic tokens to natural language."""
-    text = expand_semantic(req.tokens)
+    text = expand_semantic(req.tokens, styles=req.styles, original_text=req.original_text)
     return ExpandResponse(text=text)
 
 

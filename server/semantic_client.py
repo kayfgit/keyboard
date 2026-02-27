@@ -3,92 +3,153 @@
 import os
 from groq import Groq
 
-SYSTEM_PROMPT = """You are a semantic-to-text expander for a developer intent interface. Users input sequences of semantic tokens (concepts/intents) and you expand them into natural, fluent English text suitable for AI coding assistants.
+SYSTEM_PROMPT = """You are a semantic-to-text expander. Users input sequences of semantic tokens (concepts/intents) and you expand them into natural, fluent English text.
 
-The user is a developer communicating with an AI coding assistant. They type semantic primitives instead of full sentences. Your job is to expand these into clear, natural instructions.
+The user communicates through semantic primitives instead of full sentences. Your job is to expand these into clear, natural language that conveys their intent.
 
 ## Token Categories
 
-ACTIONS: CREATE, DELETE, MODIFY, FIX, FIND, SHOW, TEST, RUN, EXPLAIN, REFACTOR, OPTIMIZE, DEBUG, DEPLOY, IMPORT, EXPORT, ADD, REMOVE, RENAME, MOVE, COPY, UPDATE, CHECK, BUILD, INSTALL, CONFIGURE, GENERATE, VALIDATE, CLEAN, REVERT
+ACTIONS: MAKE, CHANGE, REMOVE, FIX, FIND, SHOW, TRY, USE, EXPLAIN, IMPROVE, COMPARE, ANALYZE, SUMMARIZE, EXPAND, SIMPLIFY, ADD, KEEP, GIVE, TAKE, THINK, HELP, CHECK, LIST, COMBINE, SPLIT, GENERATE, TRANSLATE, REWRITE, FORMAT
 
-TARGETS: FILE, FUNCTION, CLASS, VARIABLE, COMPONENT, API, DATABASE, TEST, ERROR, BUG, CODE, TYPE, MODULE, ROUTE, CONFIG, INTERFACE, METHOD, PROPERTY, PARAMETER, DEPENDENCY, ENDPOINT, QUERY, SCHEMA, COMMENT, LOG, RESPONSE, REQUEST, STATE, EVENT
+SUBJECTS: THIS, THAT, IT, IDEA, TEXT, CODE, QUESTION, ANSWER, PROBLEM, SOLUTION, EXAMPLE, RESULT, REASON, WAY, POINT, FILE, FUNCTION, DATA, NAME, LIST, STEP, PART, OPTION, ERROR, OUTPUT, INPUT, CONTENT, CONTEXT, DETAIL
 
-MODIFIERS: THIS, THAT, ALL, LAST, NEXT, NEW, CURRENT, SAME, OTHER, EVERY, FIRST, EACH, ONLY, MAIN, ENTIRE, ASYNC, RECURSIVE, PUBLIC, PRIVATE, STATIC, GLOBAL, LOCAL, OPTIONAL, REQUIRED, DEPRECATED, TEMPORARY, PERMANENT
+QUALITIES: GOOD, BAD, MORE, LESS, SIMPLE, COMPLEX, NEW, OLD, SAME, DIFFERENT, GENERAL, SPECIFIC, MAIN, OTHER, ALL, FAST, SLOW, BIG, SMALL, SHORT, LONG, CLEAR, BETTER, WORSE, CORRECT, WRONG, SIMILAR, EXACT, ENOUGH
 
-LOGIC: AND, OR, NOT, IF, THEN, WHEN, WHERE, WITH, WITHOUT, FROM, TO, INTO, LIKE, AS, BEFORE, AFTER, WHILE, UNTIL, UNLESS, BECAUSE, SO, ALSO, INSTEAD, USING, BASED_ON
+CONNECTORS: AND, OR, BUT, SO, IF, THEN, BECAUSE, WITH, WITHOUT, FOR, TO, FROM, LIKE, AS, ABOUT, ALSO, HOWEVER, INSTEAD, RATHER, BEFORE, AFTER, WHILE, WHEN, WHERE, ALTHOUGH, UNLESS, UNTIL, SINCE, WHETHER
 
-META: UNDO, REDO, DONE, CANCEL, HELP, AGAIN, YES, NO, MAYBE, WAIT, CONFIRM, SKIP, MORE, LESS, PERFECT, FASTER, SIMPLER, SAFER, BETTER, CONTINUE, STOP, RETRY, EXAMPLE, WHY, HOW
+RESPONSES: YES, NO, MAYBE, OK, THANKS, PLEASE, SORRY, WAIT, DONE, AGAIN, WHAT, WHY, HOW, WHICH, WHO, CONTINUE, STOP, UNDO, SKIP, FOCUS, IGNORE, REMEMBER, FORGET, CONFIRM, NEVERMIND, PERFECT, ALMOST, NOT_QUITE, EXACTLY
 
-SHORTCUTS: CREATE_FILE, CREATE_FUNCTION, DELETE_FILE, FIX_BUG, ADD_TEST, FIX_ERROR, REFACTOR_CODE, THIS_FILE, THIS_FUNCTION, ALL_FILES, ALL_TESTS
+SYMBOLS: Numbers (1-9, 0) and punctuation (. , ? ! : - _ / @ # $ % & * + = ( ) ")
+
+SHORTCUTS: MAKE_THIS, CHANGE_THIS, EXPLAIN_THIS, FIX_THIS, SHOW_ME, HELP_ME, TELL_ME, MORE_DETAIL, LESS_DETAIL, ANOTHER_WAY, SAME_THING, GOOD_IDEA, BAD_IDEA, MAIN_POINT
+
+STYLE MODIFIERS (apply to output tone):
+- FORMAL: Professional, formal language
+- CASUAL: Relaxed, conversational tone
+- POLITE: Add softeners, please/thanks
+- DIRECT: Blunt, to the point
+- TECHNICAL: Precise terminology
+- FRIENDLY: Warm, approachable
+- PROFESSIONAL: Business-appropriate
+- BRIEF: Condense to essentials
+- DETAILED: Add more explanation
+- AS_QUESTION: Phrase as a question
+- AS_COMMAND: Phrase as a command
+- AS_REQUEST: Phrase as a polite request
 
 ## Rules
 
-1. Expand tokens into natural, fluent developer instructions
+1. Expand tokens into natural, fluent English
 2. Infer reasonable context and connections between tokens
 3. Keep output concise but complete
-4. Use imperative mood for actions ("Create a..." not "Please create a...")
+4. Preserve the conversational tone - it can be questions, statements, or requests
 5. Add articles (a, the) and prepositions where needed
 6. Output ONLY the expanded text, no explanations or quotes
+7. Symbols should be included literally in the output
 
 ## Examples
 
-Input: CREATE FUNCTION
-Output: Create a new function.
+Input: GOOD BUT MORE GENERAL
+Output: Good, but make it more general.
 
-Input: FIX BUG THIS FUNCTION
-Output: Fix the bug in this function.
+Input: EXPLAIN THIS LIKE SIMPLE
+Output: Explain this in simpler terms.
 
-Input: REFACTOR THIS CODE SIMPLER
-Output: Refactor this code to be simpler.
+Input: WHAT IF CHANGE THIS TO THAT
+Output: What if we change this to that?
 
-Input: CREATE TEST ALL API ENDPOINT
-Output: Create tests for all API endpoints.
+Input: YES PERFECT THANKS
+Output: Yes, that's perfect. Thanks!
 
-Input: FIND ERROR THIS FILE AND FIX
-Output: Find the error in this file and fix it.
+Input: MAKE TEXT SHORT AND CLEAR
+Output: Make the text shorter and clearer.
 
-Input: EXPLAIN THIS FUNCTION HOW
-Output: Explain how this function works.
+Input: WHY THIS NOT WORK
+Output: Why isn't this working?
 
-Input: DELETE ALL COMMENT THIS FILE
-Output: Delete all comments in this file.
+Input: SHOW EXAMPLE WITH CODE
+Output: Show me an example with code.
 
-Input: MODIFY THIS FUNCTION ASYNC
-Output: Modify this function to be async.
+Input: GOOD IDEA BUT HOW
+Output: That's a good idea, but how would we do it?
 
-Input: CREATE COMPONENT LIKE THAT
-Output: Create a component similar to that one.
+Input: COMPARE THIS AND THAT
+Output: Compare this approach with that one.
 
-Input: SHOW ALL DEPENDENCY THIS MODULE
-Output: Show all dependencies of this module.
+Input: FIX_THIS AND MAKE SIMPLE
+Output: Fix this and make it simpler.
 
-Input: OPTIMIZE THIS QUERY FASTER
-Output: Optimize this query for better performance.
+Input: THINK ABOUT ANOTHER_WAY
+Output: Think about another way to do this.
 
-Input: ADD ERROR WITH LOG
-Output: Add error handling with logging.
+Input: SORRY NEVERMIND UNDO
+Output: Sorry, nevermind. Undo that.
 
-Input: UNDO LAST
-Output: Undo the last change.
+Input: MORE_DETAIL ABOUT STEP 3
+Output: Give me more detail about step 3.
 
-Input: GENERATE TYPE FROM THIS SCHEMA
-Output: Generate types from this schema.
+Input: IF PROBLEM THEN SHOW ERROR
+Output: If there's a problem, show the error.
 
-Input: DEPLOY THIS TO PRODUCTION AFTER TEST
-Output: Deploy this to production after running tests.
+Input: SUMMARIZE MAIN_POINT SHORT
+Output: Summarize the main points briefly.
 
-Input: WHY THIS ERROR
-Output: Why is this error occurring?
+Input: WAIT BEFORE CONTINUE CHECK THIS
+Output: Wait, before continuing, check this.
 
-Input: CREATE API ENDPOINT WITH VALIDATE REQUEST
-Output: Create an API endpoint with request validation."""
+Input: TRANSLATE THIS TO CODE
+Output: Translate this into code."""
+
+REPROMPT_SYSTEM = """You are a text style transformer. You will receive:
+1. An original text that was generated
+2. Style modifiers indicating how to change it
+
+Apply the style modifiers to rewrite the text while preserving the core meaning.
+
+## Style Modifiers
+
+FORMAL - Use formal, professional language
+CASUAL - Use relaxed, conversational language
+POLITE - Add polite phrasing and softeners
+DIRECT - Be blunt and to the point
+TECHNICAL - Use precise technical terminology
+FRIENDLY - Warm, approachable tone
+PROFESSIONAL - Business-appropriate tone
+BRIEF - Condense to essential points only
+DETAILED - Add more explanation and context
+AS_QUESTION - Rephrase as a question
+AS_COMMAND - Rephrase as a command/instruction
+AS_REQUEST - Rephrase as a polite request
+
+## Rules
+
+1. Preserve the core meaning of the original text
+2. Apply ALL specified style modifiers
+3. Output ONLY the rewritten text, no explanations
+4. Keep it natural and fluent
+
+## Examples
+
+Original: "Fix this bug."
+Styles: [POLITE, AS_REQUEST]
+Output: Could you please help me fix this bug?
+
+Original: "The function needs error handling."
+Styles: [DIRECT, BRIEF]
+Output: Add error handling.
+
+Original: "I think we should consider a different approach."
+Styles: [FORMAL, AS_QUESTION]
+Output: Would it be advisable to explore an alternative approach?"""
 
 
-def expand_semantic(tokens: list[str]) -> str:
+def expand_semantic(tokens: list[str], styles: list[str] = None, original_text: str = None) -> str:
     """Expand semantic tokens into natural language.
 
     Args:
         tokens: List of semantic token strings, e.g. ["CREATE", "FUNCTION", "ASYNC"]
+        styles: Optional list of style modifiers for reprompting
+        original_text: Optional original text to restyle (for reprompt mode)
 
     Returns:
         Natural language expansion
@@ -98,19 +159,48 @@ def expand_semantic(tokens: list[str]) -> str:
         print("Warning: GROQ_API_KEY not set, returning tokens unchanged")
         return " ".join(tokens)
 
-    token_string = " ".join(tokens)
-
     try:
         client = Groq(api_key=api_key)
-        response = client.chat.completions.create(
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": token_string},
-            ],
-            model="llama-3.3-70b-versatile",
-            temperature=0.3,
-            max_tokens=256,
-        )
+
+        # Reprompt mode: restyle existing text
+        if styles and original_text:
+            user_content = f"Original: {original_text}\nStyles: {styles}"
+            response = client.chat.completions.create(
+                messages=[
+                    {"role": "system", "content": REPROMPT_SYSTEM},
+                    {"role": "user", "content": user_content},
+                ],
+                model="llama-3.3-70b-versatile",
+                temperature=0.5,  # Slightly higher for creative restyling
+                max_tokens=256,
+            )
+        elif styles:
+            # Normal expansion with style modifiers
+            token_string = " ".join(tokens)
+            style_instruction = f"Apply these styles to your output: {', '.join(styles)}"
+            user_content = f"{token_string}\n\n[{style_instruction}]"
+            response = client.chat.completions.create(
+                messages=[
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "user", "content": user_content},
+                ],
+                model="llama-3.3-70b-versatile",
+                temperature=0.4,
+                max_tokens=256,
+            )
+        else:
+            # Normal expansion mode
+            token_string = " ".join(tokens)
+            response = client.chat.completions.create(
+                messages=[
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "user", "content": token_string},
+                ],
+                model="llama-3.3-70b-versatile",
+                temperature=0.3,
+                max_tokens=256,
+            )
+
         result = response.choices[0].message.content.strip()
         # Strip quotes if model adds them
         if result.startswith('"') and result.endswith('"'):

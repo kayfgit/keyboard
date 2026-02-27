@@ -23,14 +23,20 @@
 
     --action: #00d4ff;
     --action-glow: rgba(0, 212, 255, 0.4);
-    --target: #bf5fff;
-    --target-glow: rgba(191, 95, 255, 0.4);
-    --modifier: #ffb800;
-    --modifier-glow: rgba(255, 184, 0, 0.4);
-    --logic: #00ffa3;
-    --logic-glow: rgba(0, 255, 163, 0.4);
-    --meta: #ff5f87;
-    --meta-glow: rgba(255, 95, 135, 0.4);
+    --subject: #bf5fff;
+    --subject-glow: rgba(191, 95, 255, 0.4);
+    --quality: #ffb800;
+    --quality-glow: rgba(255, 184, 0, 0.4);
+    --connect: #00ffa3;
+    --connect-glow: rgba(0, 255, 163, 0.4);
+    --respond: #ff5f87;
+    --respond-glow: rgba(255, 95, 135, 0.4);
+    --symbol: #8b9dc3;
+    --symbol-glow: rgba(139, 157, 195, 0.4);
+    --style: #ff9f43;
+    --style-glow: rgba(255, 159, 67, 0.4);
+    --mode: #a29bfe;
+    --mode-glow: rgba(162, 155, 254, 0.4);
 
     --accent: #00ffa3;
     --accent-glow: rgba(0, 255, 163, 0.3);
@@ -191,29 +197,54 @@
     background: rgba(0, 212, 255, 0.1);
     box-shadow: 0 0 10px var(--action-glow);
   }
-  .intent-token.target {
-    color: var(--target);
-    border-color: var(--target);
+  .intent-token.subject {
+    color: var(--subject);
+    border-color: var(--subject);
     background: rgba(191, 95, 255, 0.1);
-    box-shadow: 0 0 10px var(--target-glow);
+    box-shadow: 0 0 10px var(--subject-glow);
   }
-  .intent-token.modifier {
-    color: var(--modifier);
-    border-color: var(--modifier);
+  .intent-token.quality {
+    color: var(--quality);
+    border-color: var(--quality);
     background: rgba(255, 184, 0, 0.1);
-    box-shadow: 0 0 10px var(--modifier-glow);
+    box-shadow: 0 0 10px var(--quality-glow);
   }
-  .intent-token.logic {
-    color: var(--logic);
-    border-color: var(--logic);
+  .intent-token.connect {
+    color: var(--connect);
+    border-color: var(--connect);
     background: rgba(0, 255, 163, 0.1);
-    box-shadow: 0 0 10px var(--logic-glow);
+    box-shadow: 0 0 10px var(--connect-glow);
   }
-  .intent-token.meta {
-    color: var(--meta);
-    border-color: var(--meta);
+  .intent-token.respond {
+    color: var(--respond);
+    border-color: var(--respond);
     background: rgba(255, 95, 135, 0.1);
-    box-shadow: 0 0 10px var(--meta-glow);
+    box-shadow: 0 0 10px var(--respond-glow);
+  }
+  .intent-token.symbol {
+    color: var(--symbol);
+    border-color: var(--symbol);
+    background: rgba(139, 157, 195, 0.1);
+    box-shadow: 0 0 10px var(--symbol-glow);
+  }
+  .intent-token.style {
+    color: var(--style);
+    border-color: var(--style);
+    background: rgba(255, 159, 67, 0.1);
+    box-shadow: 0 0 10px var(--style-glow);
+  }
+  .intent-token.mode {
+    color: var(--mode);
+    border-color: var(--mode);
+    background: rgba(162, 155, 254, 0.1);
+    box-shadow: 0 0 10px var(--mode-glow);
+  }
+  .intent-token.phonemic {
+    color: #9b7bf7;
+    border-color: #9b7bf7;
+    background: rgba(155, 123, 247, 0.1);
+    box-shadow: 0 0 10px rgba(155, 123, 247, 0.4);
+    font-style: italic;
   }
 
   .intent-placeholder {
@@ -245,10 +276,13 @@
   }
 
   #preview-result.action { color: var(--action); text-shadow: 0 0 15px var(--action-glow); }
-  #preview-result.target { color: var(--target); text-shadow: 0 0 15px var(--target-glow); }
-  #preview-result.modifier { color: var(--modifier); text-shadow: 0 0 15px var(--modifier-glow); }
-  #preview-result.logic { color: var(--logic); text-shadow: 0 0 15px var(--logic-glow); }
-  #preview-result.meta { color: var(--meta); text-shadow: 0 0 15px var(--meta-glow); }
+  #preview-result.subject { color: var(--subject); text-shadow: 0 0 15px var(--subject-glow); }
+  #preview-result.quality { color: var(--quality); text-shadow: 0 0 15px var(--quality-glow); }
+  #preview-result.connect { color: var(--connect); text-shadow: 0 0 15px var(--connect-glow); }
+  #preview-result.respond { color: var(--respond); text-shadow: 0 0 15px var(--respond-glow); }
+  #preview-result.symbol { color: var(--symbol); text-shadow: 0 0 15px var(--symbol-glow); }
+  #preview-result.style { color: var(--style); text-shadow: 0 0 15px var(--style-glow); }
+  #preview-result.mode { color: var(--mode); text-shadow: 0 0 15px var(--mode-glow); }
   #preview-result.control { color: var(--accent); text-shadow: 0 0 15px var(--accent-glow); }
   #preview-result.empty { color: var(--text-dim); text-shadow: none; }
 
@@ -365,37 +399,61 @@
   .key.left.pressed.action .key-letter { color: var(--action); }
   .key.left.pressed.action .key-label { color: var(--action); }
 
-  .key.left.pressed.target {
+  .key.left.pressed.subject {
     background: rgba(191, 95, 255, 0.15);
-    border-color: var(--target);
-    box-shadow: 0 0 20px var(--target-glow), inset 0 0 20px rgba(191, 95, 255, 0.1);
+    border-color: var(--subject);
+    box-shadow: 0 0 20px var(--subject-glow), inset 0 0 20px rgba(191, 95, 255, 0.1);
   }
-  .key.left.pressed.target .key-letter { color: var(--target); }
-  .key.left.pressed.target .key-label { color: var(--target); }
+  .key.left.pressed.subject .key-letter { color: var(--subject); }
+  .key.left.pressed.subject .key-label { color: var(--subject); }
 
-  .key.left.pressed.modifier {
+  .key.left.pressed.quality {
     background: rgba(255, 184, 0, 0.15);
-    border-color: var(--modifier);
-    box-shadow: 0 0 20px var(--modifier-glow), inset 0 0 20px rgba(255, 184, 0, 0.1);
+    border-color: var(--quality);
+    box-shadow: 0 0 20px var(--quality-glow), inset 0 0 20px rgba(255, 184, 0, 0.1);
   }
-  .key.left.pressed.modifier .key-letter { color: var(--modifier); }
-  .key.left.pressed.modifier .key-label { color: var(--modifier); }
+  .key.left.pressed.quality .key-letter { color: var(--quality); }
+  .key.left.pressed.quality .key-label { color: var(--quality); }
 
-  .key.left.pressed.logic {
+  .key.left.pressed.connect {
     background: rgba(0, 255, 163, 0.15);
-    border-color: var(--logic);
-    box-shadow: 0 0 20px var(--logic-glow), inset 0 0 20px rgba(0, 255, 163, 0.1);
+    border-color: var(--connect);
+    box-shadow: 0 0 20px var(--connect-glow), inset 0 0 20px rgba(0, 255, 163, 0.1);
   }
-  .key.left.pressed.logic .key-letter { color: var(--logic); }
-  .key.left.pressed.logic .key-label { color: var(--logic); }
+  .key.left.pressed.connect .key-letter { color: var(--connect); }
+  .key.left.pressed.connect .key-label { color: var(--connect); }
 
-  .key.left.pressed.meta {
+  .key.left.pressed.respond {
     background: rgba(255, 95, 135, 0.15);
-    border-color: var(--meta);
-    box-shadow: 0 0 20px var(--meta-glow), inset 0 0 20px rgba(255, 95, 135, 0.1);
+    border-color: var(--respond);
+    box-shadow: 0 0 20px var(--respond-glow), inset 0 0 20px rgba(255, 95, 135, 0.1);
   }
-  .key.left.pressed.meta .key-letter { color: var(--meta); }
-  .key.left.pressed.meta .key-label { color: var(--meta); }
+  .key.left.pressed.respond .key-letter { color: var(--respond); }
+  .key.left.pressed.respond .key-label { color: var(--respond); }
+
+  .key.left.pressed.symbol {
+    background: rgba(139, 157, 195, 0.15);
+    border-color: var(--symbol);
+    box-shadow: 0 0 20px var(--symbol-glow), inset 0 0 20px rgba(139, 157, 195, 0.1);
+  }
+  .key.left.pressed.symbol .key-letter { color: var(--symbol); }
+  .key.left.pressed.symbol .key-label { color: var(--symbol); }
+
+  .key.left.pressed.style {
+    background: rgba(255, 159, 67, 0.15);
+    border-color: var(--style);
+    box-shadow: 0 0 20px var(--style-glow), inset 0 0 20px rgba(255, 159, 67, 0.1);
+  }
+  .key.left.pressed.style .key-letter { color: var(--style); }
+  .key.left.pressed.style .key-label { color: var(--style); }
+
+  .key.left.pressed.mode {
+    background: rgba(162, 155, 254, 0.15);
+    border-color: var(--mode);
+    box-shadow: 0 0 20px var(--mode-glow), inset 0 0 20px rgba(162, 155, 254, 0.1);
+  }
+  .key.left.pressed.mode .key-letter { color: var(--mode); }
+  .key.left.pressed.mode .key-label { color: var(--mode); }
 
   /* Right hand - shows available options */
   .key.right {
@@ -421,10 +479,13 @@
   .key.right.has-option::before { opacity: 1; }
 
   .key.right.has-option.action .key-label { color: var(--action); }
-  .key.right.has-option.target .key-label { color: var(--target); }
-  .key.right.has-option.modifier .key-label { color: var(--modifier); }
-  .key.right.has-option.logic .key-label { color: var(--logic); }
-  .key.right.has-option.meta .key-label { color: var(--meta); }
+  .key.right.has-option.subject .key-label { color: var(--subject); }
+  .key.right.has-option.quality .key-label { color: var(--quality); }
+  .key.right.has-option.connect .key-label { color: var(--connect); }
+  .key.right.has-option.respond .key-label { color: var(--respond); }
+  .key.right.has-option.symbol .key-label { color: var(--symbol); }
+  .key.right.has-option.style .key-label { color: var(--style); }
+  .key.right.has-option.mode .key-label { color: var(--mode); }
 
   .key.right.pressed {
     transform: translateY(2px);
@@ -437,33 +498,54 @@
   }
   .key.right.pressed.action .key-letter { color: var(--action); }
 
-  .key.right.pressed.target {
+  .key.right.pressed.subject {
     background: rgba(191, 95, 255, 0.2);
-    border-color: var(--target);
-    box-shadow: 0 0 25px var(--target-glow);
+    border-color: var(--subject);
+    box-shadow: 0 0 25px var(--subject-glow);
   }
-  .key.right.pressed.target .key-letter { color: var(--target); }
+  .key.right.pressed.subject .key-letter { color: var(--subject); }
 
-  .key.right.pressed.modifier {
+  .key.right.pressed.quality {
     background: rgba(255, 184, 0, 0.2);
-    border-color: var(--modifier);
-    box-shadow: 0 0 25px var(--modifier-glow);
+    border-color: var(--quality);
+    box-shadow: 0 0 25px var(--quality-glow);
   }
-  .key.right.pressed.modifier .key-letter { color: var(--modifier); }
+  .key.right.pressed.quality .key-letter { color: var(--quality); }
 
-  .key.right.pressed.logic {
+  .key.right.pressed.connect {
     background: rgba(0, 255, 163, 0.2);
-    border-color: var(--logic);
-    box-shadow: 0 0 25px var(--logic-glow);
+    border-color: var(--connect);
+    box-shadow: 0 0 25px var(--connect-glow);
   }
-  .key.right.pressed.logic .key-letter { color: var(--logic); }
+  .key.right.pressed.connect .key-letter { color: var(--connect); }
 
-  .key.right.pressed.meta {
+  .key.right.pressed.respond {
     background: rgba(255, 95, 135, 0.2);
-    border-color: var(--meta);
-    box-shadow: 0 0 25px var(--meta-glow);
+    border-color: var(--respond);
+    box-shadow: 0 0 25px var(--respond-glow);
   }
-  .key.right.pressed.meta .key-letter { color: var(--meta); }
+  .key.right.pressed.respond .key-letter { color: var(--respond); }
+
+  .key.right.pressed.symbol {
+    background: rgba(139, 157, 195, 0.2);
+    border-color: var(--symbol);
+    box-shadow: 0 0 25px var(--symbol-glow);
+  }
+  .key.right.pressed.symbol .key-letter { color: var(--symbol); }
+
+  .key.right.pressed.style {
+    background: rgba(255, 159, 67, 0.2);
+    border-color: var(--style);
+    box-shadow: 0 0 25px var(--style-glow);
+  }
+  .key.right.pressed.style .key-letter { color: var(--style); }
+
+  .key.right.pressed.mode {
+    background: rgba(162, 155, 254, 0.2);
+    border-color: var(--mode);
+    box-shadow: 0 0 25px var(--mode-glow);
+  }
+  .key.right.pressed.mode .key-letter { color: var(--mode); }
 
   .key.right.pressed.control {
     background: rgba(0, 255, 163, 0.2);
@@ -595,7 +677,7 @@
     <span id="server-status">Checking server...</span>
   </div>
   <span id="mode-label">SEMANTIC MODE</span>
-  <span style="color: var(--text-dim);">Intent Interface v2.0</span>
+  <span style="color: var(--text-dim);">Universal Intent Interface</span>
 </div>
 
 <div id="output-area">
@@ -628,21 +710,21 @@
           <span class="key-letter">A</span>
           <span class="key-label">ACTION</span>
         </div>
-        <div class="key left" id="key-s" data-key="s" data-category="target">
+        <div class="key left" id="key-s" data-key="s" data-category="subject">
           <span class="key-letter">S</span>
-          <span class="key-label">TARGET</span>
+          <span class="key-label">SUBJECT</span>
         </div>
-        <div class="key left" id="key-d" data-key="d" data-category="modifier">
+        <div class="key left" id="key-d" data-key="d" data-category="quality">
           <span class="key-letter">D</span>
-          <span class="key-label">MODIFIER</span>
+          <span class="key-label">QUALITY</span>
         </div>
-        <div class="key left" id="key-f" data-key="f" data-category="logic">
+        <div class="key left" id="key-f" data-key="f" data-category="connect">
           <span class="key-letter">F</span>
-          <span class="key-label">LOGIC</span>
+          <span class="key-label">CONNECT</span>
         </div>
-        <div class="key left" id="key-c" data-key="c" data-category="meta">
+        <div class="key left" id="key-c" data-key="c" data-category="respond">
           <span class="key-letter">C</span>
-          <span class="key-label">META</span>
+          <span class="key-label">RESPOND</span>
         </div>
       </div>
     </div>
@@ -679,7 +761,8 @@
 
 <div id="help-bar">
   <span><kbd>Space</kbd> Expand to text</span>
-  <span><kbd>C</kbd>+<kbd>M</kbd> Backspace</span>
+  <span><kbd>D</kbd>+<kbd>C</kbd> Style modifiers</span>
+  <span><kbd>A</kbd>+<kbd>F</kbd> Symbols</span>
   <span><kbd>Backspace</kbd> Delete token</span>
   <a href="semantic-cheatsheet.html">Full Reference</a>
 </div>
@@ -690,163 +773,254 @@
 // ============================================================
 
 const SEMANTICS = {
-  // ACTIONS (A + right hand)
-  'A+J':     { symbol: 'CREATE', category: 'action' },
-  'A+K':     { symbol: 'DELETE', category: 'action' },
-  'A+L':     { symbol: 'MODIFY', category: 'action' },
-  'A+;':     { symbol: 'FIX', category: 'action' },
-  'A+J+K':   { symbol: 'FIND', category: 'action' },
-  'A+J+L':   { symbol: 'SHOW', category: 'action' },
-  'A+J+;':   { symbol: 'TEST', category: 'action' },
-  'A+K+L':   { symbol: 'RUN', category: 'action' },
-  'A+K+;':   { symbol: 'EXPLAIN', category: 'action' },
-  'A+L+;':   { symbol: 'REFACTOR', category: 'action' },
-  'A+J+K+L': { symbol: 'OPTIMIZE', category: 'action' },
-  'A+J+K+;': { symbol: 'DEBUG', category: 'action' },
-  'A+J+L+;': { symbol: 'DEPLOY', category: 'action' },
-  'A+K+L+;': { symbol: 'IMPORT', category: 'action' },
-  'A+J+K+L+;': { symbol: 'EXPORT', category: 'action' },
-  'A+M+J':   { symbol: 'ADD', category: 'action' },
-  'A+M+K':   { symbol: 'REMOVE', category: 'action' },
-  'A+M+L':   { symbol: 'RENAME', category: 'action' },
-  'A+M+;':   { symbol: 'MOVE', category: 'action' },
-  'A+M+J+K': { symbol: 'COPY', category: 'action' },
-  'A+M+J+L': { symbol: 'UPDATE', category: 'action' },
-  'A+M+J+;': { symbol: 'CHECK', category: 'action' },
-  'A+M+K+L': { symbol: 'BUILD', category: 'action' },
-  'A+M+K+;': { symbol: 'INSTALL', category: 'action' },
-  'A+M+L+;': { symbol: 'CONFIGURE', category: 'action' },
+  // ============================================================
+  // ACTIONS (A) - General verbs for doing things
+  // ============================================================
+  'A+J':       { symbol: 'MAKE', category: 'action' },
+  'A+K':       { symbol: 'CHANGE', category: 'action' },
+  'A+L':       { symbol: 'REMOVE', category: 'action' },
+  'A+;':       { symbol: 'FIX', category: 'action' },
+  'A+J+K':     { symbol: 'FIND', category: 'action' },
+  'A+J+L':     { symbol: 'SHOW', category: 'action' },
+  'A+J+;':     { symbol: 'TRY', category: 'action' },
+  'A+K+L':     { symbol: 'USE', category: 'action' },
+  'A+K+;':     { symbol: 'EXPLAIN', category: 'action' },
+  'A+L+;':     { symbol: 'IMPROVE', category: 'action' },
+  'A+J+K+L':   { symbol: 'COMPARE', category: 'action' },
+  'A+J+K+;':   { symbol: 'ANALYZE', category: 'action' },
+  'A+J+L+;':   { symbol: 'SUMMARIZE', category: 'action' },
+  'A+K+L+;':   { symbol: 'EXPAND', category: 'action' },
+  'A+J+K+L+;': { symbol: 'SIMPLIFY', category: 'action' },
+  // Extended actions (M+)
+  'A+M+J':     { symbol: 'ADD', category: 'action' },
+  'A+M+K':     { symbol: 'KEEP', category: 'action' },
+  'A+M+L':     { symbol: 'GIVE', category: 'action' },
+  'A+M+;':     { symbol: 'TAKE', category: 'action' },
+  'A+M+J+K':   { symbol: 'THINK', category: 'action' },
+  'A+M+J+L':   { symbol: 'HELP', category: 'action' },
+  'A+M+J+;':   { symbol: 'CHECK', category: 'action' },
+  'A+M+K+L':   { symbol: 'LIST', category: 'action' },
+  'A+M+K+;':   { symbol: 'COMBINE', category: 'action' },
+  'A+M+L+;':   { symbol: 'SPLIT', category: 'action' },
   'A+M+J+K+L': { symbol: 'GENERATE', category: 'action' },
-  'A+M+J+K+;': { symbol: 'VALIDATE', category: 'action' },
-  'A+M+J+L+;': { symbol: 'CLEAN', category: 'action' },
-  'A+M+K+L+;': { symbol: 'REVERT', category: 'action' },
+  'A+M+J+K+;': { symbol: 'TRANSLATE', category: 'action' },
+  'A+M+J+L+;': { symbol: 'REWRITE', category: 'action' },
+  'A+M+K+L+;': { symbol: 'FORMAT', category: 'action' },
 
-  // TARGETS (S + right hand)
-  'S+J':     { symbol: 'FILE', category: 'target' },
-  'S+K':     { symbol: 'FUNCTION', category: 'target' },
-  'S+L':     { symbol: 'CLASS', category: 'target' },
-  'S+;':     { symbol: 'VARIABLE', category: 'target' },
-  'S+J+K':   { symbol: 'COMPONENT', category: 'target' },
-  'S+J+L':   { symbol: 'API', category: 'target' },
-  'S+J+;':   { symbol: 'DATABASE', category: 'target' },
-  'S+K+L':   { symbol: 'TEST', category: 'target' },
-  'S+K+;':   { symbol: 'ERROR', category: 'target' },
-  'S+L+;':   { symbol: 'BUG', category: 'target' },
-  'S+J+K+L': { symbol: 'CODE', category: 'target' },
-  'S+J+K+;': { symbol: 'TYPE', category: 'target' },
-  'S+J+L+;': { symbol: 'MODULE', category: 'target' },
-  'S+K+L+;': { symbol: 'ROUTE', category: 'target' },
-  'S+J+K+L+;': { symbol: 'CONFIG', category: 'target' },
-  'S+M+J':   { symbol: 'INTERFACE', category: 'target' },
-  'S+M+K':   { symbol: 'METHOD', category: 'target' },
-  'S+M+L':   { symbol: 'PROPERTY', category: 'target' },
-  'S+M+;':   { symbol: 'PARAMETER', category: 'target' },
-  'S+M+J+K': { symbol: 'DEPENDENCY', category: 'target' },
-  'S+M+J+L': { symbol: 'ENDPOINT', category: 'target' },
-  'S+M+J+;': { symbol: 'QUERY', category: 'target' },
-  'S+M+K+L': { symbol: 'SCHEMA', category: 'target' },
-  'S+M+K+;': { symbol: 'COMMENT', category: 'target' },
-  'S+M+L+;': { symbol: 'LOG', category: 'target' },
-  'S+M+J+K+L': { symbol: 'RESPONSE', category: 'target' },
-  'S+M+J+K+;': { symbol: 'REQUEST', category: 'target' },
-  'S+M+J+L+;': { symbol: 'STATE', category: 'target' },
-  'S+M+K+L+;': { symbol: 'EVENT', category: 'target' },
+  // ============================================================
+  // SUBJECTS (S) - Things you talk about
+  // ============================================================
+  'S+J':       { symbol: 'THIS', category: 'subject' },
+  'S+K':       { symbol: 'THAT', category: 'subject' },
+  'S+L':       { symbol: 'IT', category: 'subject' },
+  'S+;':       { symbol: 'IDEA', category: 'subject' },
+  'S+J+K':     { symbol: 'TEXT', category: 'subject' },
+  'S+J+L':     { symbol: 'CODE', category: 'subject' },
+  'S+J+;':     { symbol: 'QUESTION', category: 'subject' },
+  'S+K+L':     { symbol: 'ANSWER', category: 'subject' },
+  'S+K+;':     { symbol: 'PROBLEM', category: 'subject' },
+  'S+L+;':     { symbol: 'SOLUTION', category: 'subject' },
+  'S+J+K+L':   { symbol: 'EXAMPLE', category: 'subject' },
+  'S+J+K+;':   { symbol: 'RESULT', category: 'subject' },
+  'S+J+L+;':   { symbol: 'REASON', category: 'subject' },
+  'S+K+L+;':   { symbol: 'WAY', category: 'subject' },
+  'S+J+K+L+;': { symbol: 'POINT', category: 'subject' },
+  // Extended subjects (M+)
+  'S+M+J':     { symbol: 'FILE', category: 'subject' },
+  'S+M+K':     { symbol: 'FUNCTION', category: 'subject' },
+  'S+M+L':     { symbol: 'DATA', category: 'subject' },
+  'S+M+;':     { symbol: 'NAME', category: 'subject' },
+  'S+M+J+K':   { symbol: 'LIST', category: 'subject' },
+  'S+M+J+L':   { symbol: 'STEP', category: 'subject' },
+  'S+M+J+;':   { symbol: 'PART', category: 'subject' },
+  'S+M+K+L':   { symbol: 'OPTION', category: 'subject' },
+  'S+M+K+;':   { symbol: 'ERROR', category: 'subject' },
+  'S+M+L+;':   { symbol: 'OUTPUT', category: 'subject' },
+  'S+M+J+K+L': { symbol: 'INPUT', category: 'subject' },
+  'S+M+J+K+;': { symbol: 'CONTENT', category: 'subject' },
+  'S+M+J+L+;': { symbol: 'CONTEXT', category: 'subject' },
+  'S+M+K+L+;': { symbol: 'DETAIL', category: 'subject' },
 
-  // MODIFIERS (D + right hand)
-  'D+J':     { symbol: 'THIS', category: 'modifier' },
-  'D+K':     { symbol: 'THAT', category: 'modifier' },
-  'D+L':     { symbol: 'ALL', category: 'modifier' },
-  'D+;':     { symbol: 'LAST', category: 'modifier' },
-  'D+J+K':   { symbol: 'NEXT', category: 'modifier' },
-  'D+J+L':   { symbol: 'NEW', category: 'modifier' },
-  'D+J+;':   { symbol: 'CURRENT', category: 'modifier' },
-  'D+K+L':   { symbol: 'SAME', category: 'modifier' },
-  'D+K+;':   { symbol: 'OTHER', category: 'modifier' },
-  'D+L+;':   { symbol: 'EVERY', category: 'modifier' },
-  'D+J+K+L': { symbol: 'FIRST', category: 'modifier' },
-  'D+J+K+;': { symbol: 'EACH', category: 'modifier' },
-  'D+J+L+;': { symbol: 'ONLY', category: 'modifier' },
-  'D+K+L+;': { symbol: 'MAIN', category: 'modifier' },
-  'D+J+K+L+;': { symbol: 'ENTIRE', category: 'modifier' },
-  'D+M+J':   { symbol: 'ASYNC', category: 'modifier' },
-  'D+M+K':   { symbol: 'RECURSIVE', category: 'modifier' },
-  'D+M+L':   { symbol: 'PUBLIC', category: 'modifier' },
-  'D+M+;':   { symbol: 'PRIVATE', category: 'modifier' },
-  'D+M+J+K': { symbol: 'STATIC', category: 'modifier' },
-  'D+M+J+L': { symbol: 'GLOBAL', category: 'modifier' },
-  'D+M+J+;': { symbol: 'LOCAL', category: 'modifier' },
-  'D+M+K+L': { symbol: 'OPTIONAL', category: 'modifier' },
-  'D+M+K+;': { symbol: 'REQUIRED', category: 'modifier' },
-  'D+M+L+;': { symbol: 'DEPRECATED', category: 'modifier' },
-  'D+M+J+K+L': { symbol: 'TEMPORARY', category: 'modifier' },
-  'D+M+J+K+;': { symbol: 'PERMANENT', category: 'modifier' },
+  // ============================================================
+  // QUALITY (D) - Descriptors and adjectives
+  // ============================================================
+  'D+J':       { symbol: 'GOOD', category: 'quality' },
+  'D+K':       { symbol: 'BAD', category: 'quality' },
+  'D+L':       { symbol: 'MORE', category: 'quality' },
+  'D+;':       { symbol: 'LESS', category: 'quality' },
+  'D+J+K':     { symbol: 'SIMPLE', category: 'quality' },
+  'D+J+L':     { symbol: 'COMPLEX', category: 'quality' },
+  'D+J+;':     { symbol: 'NEW', category: 'quality' },
+  'D+K+L':     { symbol: 'OLD', category: 'quality' },
+  'D+K+;':     { symbol: 'SAME', category: 'quality' },
+  'D+L+;':     { symbol: 'DIFFERENT', category: 'quality' },
+  'D+J+K+L':   { symbol: 'GENERAL', category: 'quality' },
+  'D+J+K+;':   { symbol: 'SPECIFIC', category: 'quality' },
+  'D+J+L+;':   { symbol: 'MAIN', category: 'quality' },
+  'D+K+L+;':   { symbol: 'OTHER', category: 'quality' },
+  'D+J+K+L+;': { symbol: 'ALL', category: 'quality' },
+  // Extended qualities (M+)
+  'D+M+J':     { symbol: 'FAST', category: 'quality' },
+  'D+M+K':     { symbol: 'SLOW', category: 'quality' },
+  'D+M+L':     { symbol: 'BIG', category: 'quality' },
+  'D+M+;':     { symbol: 'SMALL', category: 'quality' },
+  'D+M+J+K':   { symbol: 'SHORT', category: 'quality' },
+  'D+M+J+L':   { symbol: 'LONG', category: 'quality' },
+  'D+M+J+;':   { symbol: 'CLEAR', category: 'quality' },
+  'D+M+K+L':   { symbol: 'BETTER', category: 'quality' },
+  'D+M+K+;':   { symbol: 'WORSE', category: 'quality' },
+  'D+M+L+;':   { symbol: 'CORRECT', category: 'quality' },
+  'D+M+J+K+L': { symbol: 'WRONG', category: 'quality' },
+  'D+M+J+K+;': { symbol: 'SIMILAR', category: 'quality' },
+  'D+M+J+L+;': { symbol: 'EXACT', category: 'quality' },
+  'D+M+K+L+;': { symbol: 'ENOUGH', category: 'quality' },
 
-  // LOGIC (F + right hand)
-  'F+J':     { symbol: 'AND', category: 'logic' },
-  'F+K':     { symbol: 'OR', category: 'logic' },
-  'F+L':     { symbol: 'NOT', category: 'logic' },
-  'F+;':     { symbol: 'IF', category: 'logic' },
-  'F+J+K':   { symbol: 'THEN', category: 'logic' },
-  'F+J+L':   { symbol: 'WHEN', category: 'logic' },
-  'F+J+;':   { symbol: 'WHERE', category: 'logic' },
-  'F+K+L':   { symbol: 'WITH', category: 'logic' },
-  'F+K+;':   { symbol: 'WITHOUT', category: 'logic' },
-  'F+L+;':   { symbol: 'FROM', category: 'logic' },
-  'F+J+K+L': { symbol: 'TO', category: 'logic' },
-  'F+J+K+;': { symbol: 'INTO', category: 'logic' },
-  'F+J+L+;': { symbol: 'LIKE', category: 'logic' },
-  'F+K+L+;': { symbol: 'AS', category: 'logic' },
-  'F+J+K+L+;': { symbol: 'BEFORE', category: 'logic' },
-  'F+M+J':   { symbol: 'AFTER', category: 'logic' },
-  'F+M+K':   { symbol: 'WHILE', category: 'logic' },
-  'F+M+L':   { symbol: 'UNTIL', category: 'logic' },
-  'F+M+;':   { symbol: 'UNLESS', category: 'logic' },
-  'F+M+J+K': { symbol: 'BECAUSE', category: 'logic' },
-  'F+M+J+L': { symbol: 'SO', category: 'logic' },
-  'F+M+J+;': { symbol: 'ALSO', category: 'logic' },
-  'F+M+K+L': { symbol: 'INSTEAD', category: 'logic' },
-  'F+M+K+;': { symbol: 'USING', category: 'logic' },
-  'F+M+L+;': { symbol: 'BASED_ON', category: 'logic' },
+  // ============================================================
+  // CONNECT (F) - Connectors and flow
+  // ============================================================
+  'F+J':       { symbol: 'AND', category: 'connect' },
+  'F+K':       { symbol: 'OR', category: 'connect' },
+  'F+L':       { symbol: 'BUT', category: 'connect' },
+  'F+;':       { symbol: 'SO', category: 'connect' },
+  'F+J+K':     { symbol: 'IF', category: 'connect' },
+  'F+J+L':     { symbol: 'THEN', category: 'connect' },
+  'F+J+;':     { symbol: 'BECAUSE', category: 'connect' },
+  'F+K+L':     { symbol: 'WITH', category: 'connect' },
+  'F+K+;':     { symbol: 'WITHOUT', category: 'connect' },
+  'F+L+;':     { symbol: 'FOR', category: 'connect' },
+  'F+J+K+L':   { symbol: 'TO', category: 'connect' },
+  'F+J+K+;':   { symbol: 'FROM', category: 'connect' },
+  'F+J+L+;':   { symbol: 'LIKE', category: 'connect' },
+  'F+K+L+;':   { symbol: 'AS', category: 'connect' },
+  'F+J+K+L+;': { symbol: 'ABOUT', category: 'connect' },
+  // Extended connectors (M+)
+  'F+M+J':     { symbol: 'ALSO', category: 'connect' },
+  'F+M+K':     { symbol: 'HOWEVER', category: 'connect' },
+  'F+M+L':     { symbol: 'INSTEAD', category: 'connect' },
+  'F+M+;':     { symbol: 'RATHER', category: 'connect' },
+  'F+M+J+K':   { symbol: 'BEFORE', category: 'connect' },
+  'F+M+J+L':   { symbol: 'AFTER', category: 'connect' },
+  'F+M+J+;':   { symbol: 'WHILE', category: 'connect' },
+  'F+M+K+L':   { symbol: 'WHEN', category: 'connect' },
+  'F+M+K+;':   { symbol: 'WHERE', category: 'connect' },
+  'F+M+L+;':   { symbol: 'ALTHOUGH', category: 'connect' },
+  'F+M+J+K+L': { symbol: 'UNLESS', category: 'connect' },
+  'F+M+J+K+;': { symbol: 'UNTIL', category: 'connect' },
+  'F+M+J+L+;': { symbol: 'SINCE', category: 'connect' },
+  'F+M+K+L+;': { symbol: 'WHETHER', category: 'connect' },
 
-  // META (C + right hand)
-  'C+J':     { symbol: 'UNDO', category: 'meta' },
-  'C+K':     { symbol: 'REDO', category: 'meta' },
-  'C+L':     { symbol: 'DONE', category: 'meta' },
-  'C+;':     { symbol: 'CANCEL', category: 'meta' },
-  'C+J+K':   { symbol: 'HELP', category: 'meta' },
-  'C+J+L':   { symbol: 'AGAIN', category: 'meta' },
-  'C+J+;':   { symbol: 'YES', category: 'meta' },
-  'C+K+L':   { symbol: 'NO', category: 'meta' },
-  'C+K+;':   { symbol: 'MAYBE', category: 'meta' },
-  'C+L+;':   { symbol: 'WAIT', category: 'meta' },
-  'C+J+K+L': { symbol: 'CONFIRM', category: 'meta' },
-  'C+J+K+;': { symbol: 'SKIP', category: 'meta' },
-  'C+J+L+;': { symbol: 'MORE', category: 'meta' },
-  'C+K+L+;': { symbol: 'LESS', category: 'meta' },
-  'C+J+K+L+;': { symbol: 'PERFECT', category: 'meta' },
-  'C+M+J':   { symbol: 'FASTER', category: 'meta' },
-  'C+M+K':   { symbol: 'SIMPLER', category: 'meta' },
-  'C+M+L':   { symbol: 'SAFER', category: 'meta' },
-  'C+M+;':   { symbol: 'BETTER', category: 'meta' },
-  'C+M+J+K': { symbol: 'CONTINUE', category: 'meta' },
-  'C+M+J+L': { symbol: 'STOP', category: 'meta' },
-  'C+M+J+;': { symbol: 'RETRY', category: 'meta' },
-  'C+M+K+L': { symbol: 'EXAMPLE', category: 'meta' },
-  'C+M+K+;': { symbol: 'WHY', category: 'meta' },
-  'C+M+L+;': { symbol: 'HOW', category: 'meta' },
+  // ============================================================
+  // RESPOND (C) - Feedback, questions, meta
+  // ============================================================
+  'C+J':       { symbol: 'YES', category: 'respond' },
+  'C+K':       { symbol: 'NO', category: 'respond' },
+  'C+L':       { symbol: 'MAYBE', category: 'respond' },
+  'C+;':       { symbol: 'OK', category: 'respond' },
+  'C+J+K':     { symbol: 'THANKS', category: 'respond' },
+  'C+J+L':     { symbol: 'PLEASE', category: 'respond' },
+  'C+J+;':     { symbol: 'SORRY', category: 'respond' },
+  'C+K+L':     { symbol: 'WAIT', category: 'respond' },
+  'C+K+;':     { symbol: 'DONE', category: 'respond' },
+  'C+L+;':     { symbol: 'AGAIN', category: 'respond' },
+  'C+J+K+L':   { symbol: 'WHAT', category: 'respond' },
+  'C+J+K+;':   { symbol: 'WHY', category: 'respond' },
+  'C+J+L+;':   { symbol: 'HOW', category: 'respond' },
+  'C+K+L+;':   { symbol: 'WHICH', category: 'respond' },
+  'C+J+K+L+;': { symbol: 'WHO', category: 'respond' },
+  // Extended respond (M+)
+  'C+M+J':     { symbol: 'CONTINUE', category: 'respond' },
+  'C+M+K':     { symbol: 'STOP', category: 'respond' },
+  'C+M+L':     { symbol: 'UNDO', category: 'respond' },
+  'C+M+;':     { symbol: 'SKIP', category: 'respond' },
+  'C+M+J+K':   { symbol: 'FOCUS', category: 'respond' },
+  'C+M+J+L':   { symbol: 'IGNORE', category: 'respond' },
+  'C+M+J+;':   { symbol: 'REMEMBER', category: 'respond' },
+  'C+M+K+L':   { symbol: 'FORGET', category: 'respond' },
+  'C+M+K+;':   { symbol: 'CONFIRM', category: 'respond' },
+  'C+M+L+;':   { symbol: 'NEVERMIND', category: 'respond' },
+  'C+M+J+K+L': { symbol: 'PERFECT', category: 'respond' },
+  'C+M+J+K+;': { symbol: 'ALMOST', category: 'respond' },
+  'C+M+J+L+;': { symbol: 'NOT_QUITE', category: 'respond' },
+  'C+M+K+L+;': { symbol: 'EXACTLY', category: 'respond' },
 
-  // Shortcuts
-  'A+S+J':     { symbol: 'CREATE_FILE', category: 'action' },
-  'A+S+K':     { symbol: 'CREATE_FUNCTION', category: 'action' },
-  'A+S+L':     { symbol: 'DELETE_FILE', category: 'action' },
-  'A+S+;':     { symbol: 'FIX_BUG', category: 'action' },
-  'A+S+J+K':   { symbol: 'ADD_TEST', category: 'action' },
-  'A+S+J+L':   { symbol: 'FIX_ERROR', category: 'action' },
-  'A+S+K+L':   { symbol: 'REFACTOR_CODE', category: 'action' },
-  'D+S+J':     { symbol: 'THIS_FILE', category: 'target' },
-  'D+S+K':     { symbol: 'THIS_FUNCTION', category: 'target' },
-  'D+S+L':     { symbol: 'ALL_FILES', category: 'target' },
-  'D+S+;':     { symbol: 'ALL_TESTS', category: 'target' },
+  // ============================================================
+  // SYMBOLS (A+F) - Numbers and punctuation
+  // ============================================================
+  'A+F+J':       { symbol: '1', category: 'symbol' },
+  'A+F+K':       { symbol: '2', category: 'symbol' },
+  'A+F+L':       { symbol: '3', category: 'symbol' },
+  'A+F+;':       { symbol: '4', category: 'symbol' },
+  'A+F+J+K':     { symbol: '5', category: 'symbol' },
+  'A+F+J+L':     { symbol: '6', category: 'symbol' },
+  'A+F+J+;':     { symbol: '7', category: 'symbol' },
+  'A+F+K+L':     { symbol: '8', category: 'symbol' },
+  'A+F+K+;':     { symbol: '9', category: 'symbol' },
+  'A+F+L+;':     { symbol: '0', category: 'symbol' },
+  'A+F+J+K+L':   { symbol: '.', category: 'symbol' },
+  'A+F+J+K+;':   { symbol: ',', category: 'symbol' },
+  'A+F+J+L+;':   { symbol: '?', category: 'symbol' },
+  'A+F+K+L+;':   { symbol: '!', category: 'symbol' },
+  'A+F+J+K+L+;': { symbol: ':', category: 'symbol' },
+  // Extended symbols (M+)
+  'A+F+M+J':     { symbol: '-', category: 'symbol' },
+  'A+F+M+K':     { symbol: '_', category: 'symbol' },
+  'A+F+M+L':     { symbol: '/', category: 'symbol' },
+  'A+F+M+;':     { symbol: '@', category: 'symbol' },
+  'A+F+M+J+K':   { symbol: '#', category: 'symbol' },
+  'A+F+M+J+L':   { symbol: '$', category: 'symbol' },
+  'A+F+M+J+;':   { symbol: '%', category: 'symbol' },
+  'A+F+M+K+L':   { symbol: '&', category: 'symbol' },
+  'A+F+M+K+;':   { symbol: '*', category: 'symbol' },
+  'A+F+M+L+;':   { symbol: '+', category: 'symbol' },
+  'A+F+M+J+K+L': { symbol: '=', category: 'symbol' },
+  'A+F+M+J+K+;': { symbol: '(', category: 'symbol' },
+  'A+F+M+J+L+;': { symbol: ')', category: 'symbol' },
+  'A+F+M+K+L+;': { symbol: '"', category: 'symbol' },
+
+  // ============================================================
+  // SHORTCUTS - Common combos
+  // ============================================================
+  // A+S = Quick actions on subjects
+  'A+S+J':       { symbol: 'MAKE_THIS', category: 'action' },
+  'A+S+K':       { symbol: 'CHANGE_THIS', category: 'action' },
+  'A+S+L':       { symbol: 'EXPLAIN_THIS', category: 'action' },
+  'A+S+;':       { symbol: 'FIX_THIS', category: 'action' },
+  'A+S+J+K':     { symbol: 'SHOW_ME', category: 'action' },
+  'A+S+J+L':     { symbol: 'HELP_ME', category: 'action' },
+  'A+S+K+L':     { symbol: 'TELL_ME', category: 'action' },
+
+  // D+S = Quality + subject
+  'D+S+J':       { symbol: 'MORE_DETAIL', category: 'quality' },
+  'D+S+K':       { symbol: 'LESS_DETAIL', category: 'quality' },
+  'D+S+L':       { symbol: 'ANOTHER_WAY', category: 'quality' },
+  'D+S+;':       { symbol: 'SAME_THING', category: 'quality' },
+
+  // S+D = Subject qualities
+  'S+D+J':       { symbol: 'GOOD_IDEA', category: 'subject' },
+  'S+D+K':       { symbol: 'BAD_IDEA', category: 'subject' },
+  'S+D+L':       { symbol: 'MAIN_POINT', category: 'subject' },
+
+  // ============================================================
+  // STYLE MODIFIERS (D+C) - For reprompting with different tone
+  // ============================================================
+  'D+C+J':       { symbol: 'FORMAL', category: 'style' },
+  'D+C+K':       { symbol: 'CASUAL', category: 'style' },
+  'D+C+L':       { symbol: 'POLITE', category: 'style' },
+  'D+C+;':       { symbol: 'DIRECT', category: 'style' },
+  'D+C+J+K':     { symbol: 'TECHNICAL', category: 'style' },
+  'D+C+J+L':     { symbol: 'FRIENDLY', category: 'style' },
+  'D+C+J+;':     { symbol: 'PROFESSIONAL', category: 'style' },
+  'D+C+K+L':     { symbol: 'BRIEF', category: 'style' },
+  'D+C+K+;':     { symbol: 'DETAILED', category: 'style' },
+  'D+C+L+;':     { symbol: 'AS_QUESTION', category: 'style' },
+  'D+C+J+K+L':   { symbol: 'AS_COMMAND', category: 'style' },
+  'D+C+J+K+;':   { symbol: 'AS_REQUEST', category: 'style' },
+  'D+C+M+J':     { symbol: 'REPROMPT', category: 'style' },
+
+  // ============================================================
+  // HYBRID MODE (S+C) - Switch to phonemic input
+  // ============================================================
+  'S+C+J':       { symbol: '[PHONEMIC]', category: 'mode' },
 };
 
 // Normalize chord key for consistent lookup
@@ -900,7 +1074,7 @@ let serverOnline = false;
 
 const LEFT_KEYS = { 'c': 4, 'f': 3, 'd': 2, 's': 1, 'a': 0 };
 const RIGHT_KEYS = { 'm': 4, 'j': 3, 'k': 2, 'l': 1, ';': 0 };
-const LEFT_KEY_CATEGORIES = { 'a': 'action', 's': 'target', 'd': 'modifier', 'f': 'logic', 'c': 'meta' };
+const LEFT_KEY_CATEGORIES = { 'a': 'action', 's': 'subject', 'd': 'quality', 'f': 'connect', 'c': 'respond' };
 
 const heldKeys = new Set();
 const chordBuffer = new Set();
@@ -908,6 +1082,8 @@ let chordActive = false;
 let completedLines = [];
 let semanticBuffer = [];
 let expanding = false;
+let lastExpansionTokens = [];  // For reprompt feature
+let lastExpansionResult = '';  // Store last AI output
 
 // DOM elements
 const textOutput = document.getElementById('text-output');
@@ -975,6 +1151,20 @@ function getHeldRightKeys() {
 }
 
 function getCurrentCategory() {
+  const leftHeld = getHeldLeftKeys();
+
+  // Check for combo categories first
+  if (leftHeld.includes('A') && leftHeld.includes('F')) {
+    return 'symbol';
+  }
+  if (leftHeld.includes('D') && leftHeld.includes('C')) {
+    return 'style';
+  }
+  if (leftHeld.includes('S') && leftHeld.includes('C')) {
+    return 'mode';
+  }
+
+  // Single category
   for (const key of chordBuffer) {
     if (key in LEFT_KEY_CATEGORIES) {
       return LEFT_KEY_CATEGORIES[key];
@@ -1015,16 +1205,23 @@ function updateKeyVisuals() {
   const rightHeld = getHeldRightKeys();
   const category = getCurrentCategory();
 
+  // Check if symbol mode (A+F combo)
+  const isSymbolMode = leftHeld.includes('A') && leftHeld.includes('F');
+
   // Update left hand keys
   document.querySelectorAll('.key.left').forEach(keyEl => {
     const key = keyEl.dataset.key;
     const isPressed = heldKeys.has(key);
     const keyCategory = keyEl.dataset.category;
 
-    keyEl.classList.remove('pressed', 'action', 'target', 'modifier', 'logic', 'meta');
+    keyEl.classList.remove('pressed', 'action', 'subject', 'quality', 'connect', 'respond', 'symbol', 'style', 'mode');
 
     if (isPressed) {
-      keyEl.classList.add('pressed', keyCategory);
+      if (isSymbolMode) {
+        keyEl.classList.add('pressed', 'symbol');
+      } else {
+        keyEl.classList.add('pressed', keyCategory);
+      }
     }
   });
 
@@ -1037,7 +1234,7 @@ function updateKeyVisuals() {
     const isPressed = heldKeys.has(key);
     const labelEl = keyEl.querySelector('.key-label');
 
-    keyEl.classList.remove('pressed', 'has-option', 'action', 'target', 'modifier', 'logic', 'meta', 'control');
+    keyEl.classList.remove('pressed', 'has-option', 'action', 'subject', 'quality', 'connect', 'respond', 'symbol', 'style', 'mode', 'control');
 
     // Check for backspace control chord
     if (leftHeld.includes('C') && leftHeld.length === 1 && key === 'm') {
@@ -1087,7 +1284,7 @@ function updatePreview() {
   const leftCode = getLeftCode();
   const rightCode = getRightCode();
 
-  previewResult.classList.remove('action', 'target', 'modifier', 'logic', 'meta', 'control', 'empty');
+  previewResult.classList.remove('action', 'subject', 'quality', 'connect', 'respond', 'symbol', 'style', 'mode', 'control', 'empty');
 
   if (!chordActive || (leftCode === 0 && rightCode === 0)) {
     previewResult.textContent = 'READY';
@@ -1148,13 +1345,23 @@ async function checkServer() {
   }
 }
 
-async function expandSemantic(tokens) {
+async function expandSemantic(tokens, options = {}) {
   if (!serverOnline) return tokens.map(t => t.symbol).join(' ');
   try {
+    const payload = { tokens: tokens.map(t => t.symbol) };
+
+    // Add style modifiers if reprompting
+    if (options.styles && options.styles.length > 0) {
+      payload.styles = options.styles;
+    }
+    if (options.originalText) {
+      payload.original_text = options.originalText;
+    }
+
     const res = await fetch(`${API_BASE}/expand`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tokens: tokens.map(t => t.symbol) }),
+      body: JSON.stringify(payload),
       signal: AbortSignal.timeout(15000),
     });
     if (res.ok) {
@@ -1263,18 +1470,53 @@ async function handleSpace() {
   document.body.classList.add('expanding');
   updateDisplay();
 
-  const result = await expandSemantic(semanticBuffer);
+  // Check for REPROMPT in buffer
+  const hasReprompt = semanticBuffer.some(t => t.symbol === 'REPROMPT');
+  const styleTokens = semanticBuffer.filter(t => t.category === 'style' && t.symbol !== 'REPROMPT');
+  const contentTokens = semanticBuffer.filter(t => t.category !== 'style');
+
+  let result;
+
+  if (hasReprompt && lastExpansionTokens.length > 0) {
+    // Reprompt: use original tokens with new style modifiers
+    result = await expandSemantic(lastExpansionTokens, {
+      styles: styleTokens.map(t => t.symbol),
+      originalText: lastExpansionResult
+    });
+
+    // Replace the last output instead of appending
+    if (completedLines.length > 0) {
+      // Find and replace the last non-empty line
+      for (let i = completedLines.length - 1; i >= 0; i--) {
+        if (completedLines[i].trim() !== '') {
+          completedLines[i] = result;
+          break;
+        }
+      }
+    }
+  } else {
+    // Normal expansion - include style modifiers if present
+    const options = {};
+    if (styleTokens.length > 0) {
+      options.styles = styleTokens.map(t => t.symbol);
+    }
+    result = await expandSemantic(contentTokens, options);
+
+    // Store for potential reprompt
+    lastExpansionTokens = [...contentTokens];
+    lastExpansionResult = result;
+
+    if (completedLines.length > 0 && completedLines[completedLines.length - 1] !== '') {
+      completedLines[completedLines.length - 1] += ' ' + result;
+    } else if (completedLines.length > 0) {
+      completedLines[completedLines.length - 1] = result;
+    } else {
+      completedLines.push(result);
+    }
+  }
 
   expanding = false;
   document.body.classList.remove('expanding');
-
-  if (completedLines.length > 0 && completedLines[completedLines.length - 1] !== '') {
-    completedLines[completedLines.length - 1] += ' ' + result;
-  } else if (completedLines.length > 0) {
-    completedLines[completedLines.length - 1] = result;
-  } else {
-    completedLines.push(result);
-  }
 
   semanticBuffer = [];
   updateDisplay();
