@@ -28,13 +28,15 @@ controller = Controller()
 class KeyboardHook:
     """Global keyboard interceptor (Plover-style)."""
 
-    def __init__(self, chord_engine, on_toggle, on_space, on_chord,
-                 on_backspace, on_enter):
+    def __init__(self, chord_engine, on_toggle, on_space, on_token,
+                 on_backspace, on_mode_toggle, on_cheatsheet, on_enter):
         self.engine = chord_engine
         self.on_toggle = on_toggle
         self.on_space = on_space
-        self.on_chord = on_chord
+        self.on_token = on_token
         self.on_backspace = on_backspace
+        self.on_mode_toggle = on_mode_toggle
+        self.on_cheatsheet = on_cheatsheet
         self.on_enter = on_enter
         self.enabled = False
         self.converting = False
@@ -129,7 +131,7 @@ class KeyboardHook:
 
         # --- Space ---
         if vk == VK_SPACE:
-            if not self.converting and is_down and self.engine.phoneme_buffer:
+            if not self.converting and is_down and self.engine.token_buffer:
                 self.on_space()
             self._listener.suppress_event()
             return
@@ -139,14 +141,36 @@ class KeyboardHook:
 
     def _handle_chord_result(self, result):
         action = result[0]
-        if action == 'phoneme':
+        if action == 'token':
+            token = result[1]
+            # Type token with space separator if not first
+            if len(self.engine.token_buffer) > 1:
+                controller.type(' ' + token)
+            else:
+                controller.type(token)
+            self.on_token(token)
+        elif action == 'phoneme':
             phoneme = result[1]
-            controller.type(phoneme)
-            self.on_chord(phoneme)
+            # Add space before first phoneme if previous token was semantic
+            # Semantic tokens are UPPERCASE or symbols, phonemes are lowercase letters
+            if len(self.engine.token_buffer) > 1:
+                prev_token = self.engine.token_buffer[-2]  # -2 because current is already added
+                prev_is_phoneme = prev_token.islower() and prev_token.isalpha()
+                if prev_is_phoneme:
+                    controller.type(phoneme)  # Previous was phoneme, no space
+                else:
+                    controller.type(' ' + phoneme)  # Previous was semantic, add space
+            else:
+                controller.type(phoneme)
+            self.on_token(phoneme)
         elif action == 'backspace':
             self.on_backspace()
         elif action == 'enter':
             self.on_enter()
+        elif action == 'toggle_mode':
+            self.on_mode_toggle()
+        elif action == 'cheatsheet':
+            self.on_cheatsheet()
         elif action == 'invalid':
             pass  # Silent
 

@@ -1,9 +1,11 @@
-"""Chord Keyboard Desktop App — entry point.
+"""Chord Keyboard Desktop App — Semantic Mode
 
 Flow:
-  1. User chords keys → phoneme typed into focused app immediately
-  2. Space → phonemes sent to AI → AI result replaces typed phonemes
-  3. C+M → backspace (deletes last phoneme/word from app + buffer)
+  1. User chords keys → token typed into focused app immediately
+  2. Space → tokens sent to AI → AI result replaces typed tokens
+  3. C+M → backspace (deletes last token)
+  4. S+C+M → toggle semantic/phonemic mode
+  5. C+M+K → show cheatsheet popup
 """
 
 import sys
@@ -16,25 +18,26 @@ from chord_engine import ChordEngine
 from ai_engine import AIEngine
 from keyboard_hook import KeyboardHook
 from tray import TrayApp
-from feedback import beep_toggle_on, beep_toggle_off
+from feedback import beep_toggle_on, beep_toggle_off, beep_mode_semantic, beep_mode_phonemic
 from config import get_groq_api_key
 
 
 def main():
     engine = ChordEngine()
     pending_chars = [0]
+    cheatsheet_window = [None]  # Mutable container for window reference
 
     def on_ai_result(text):
         count = pending_chars[0]
         pending_chars[0] = 0
-        print(f"  Replacing {count} chars with: {text}", flush=True)
+        print(f"  AI: {text}", flush=True)
         if count > 0:
             KeyboardHook.send_backspace(count)
             time.sleep(0.05)
         KeyboardHook.type_text(text)
         hook.converting = False
 
-    def on_ai_error(phonemes, error):
+    def on_ai_error(tokens, error):
         pending_chars[0] = 0
         hook.converting = False
         print(f"  AI error: {error}", flush=True)
@@ -51,32 +54,55 @@ def main():
             beep_toggle_off()
 
     def on_space():
-        phonemes, char_count = engine.flush_buffer()
-        if phonemes:
+        tokens, char_count = engine.flush_buffer()
+        if tokens:
             pending_chars[0] = char_count
             hook.converting = True
-            ai.convert(phonemes)
-            print(f"  Converting: {phonemes} ({char_count} chars)", flush=True)
-            tray.set_tooltip_buffer("converting...")
+            ai.expand(tokens)
+            print(f"  Expanding: {tokens} ({char_count} chars)", flush=True)
+            tray.set_tooltip_buffer("expanding...")
 
-    def on_chord(phoneme):
+    def on_token(token):
+        """Handle semantic token or phoneme."""
         buf = engine.get_buffer_display()
-        print(f"  Chord: {phoneme}  Buffer: [{buf}]", flush=True)
+        print(f"  Token: {token}  Buffer: [{buf}]", flush=True)
         tray.set_tooltip_buffer(buf)
 
     def on_backspace():
-        """C+M chord — delete last phoneme (whole unit) from app and buffer."""
-        popped = engine.pop_last_phoneme()
-        if popped:
-            # Delete the entire phoneme (could be multiple chars like "str", "ing")
-            KeyboardHook.send_backspace(len(popped))
+        """C+M chord — delete last token from app and buffer."""
+        token, is_marker = engine.pop_last_token()
+        if token:
+            # Delete the token + space before it (if not first)
+            delete_len = len(token)
+            if len(engine.token_buffer) > 0:
+                delete_len += 1  # Include space separator
+            KeyboardHook.send_backspace(delete_len)
             buf = engine.get_buffer_display()
-            print(f"  Backspace: -{popped}  Buffer: [{buf}]", flush=True)
+            print(f"  Backspace: -{token}  Buffer: [{buf}]", flush=True)
             tray.set_tooltip_buffer(buf)
         else:
             # Buffer empty — send Ctrl+Backspace to delete previous word
             KeyboardHook.send_ctrl_backspace()
             print("  Ctrl+Backspace (delete word)", flush=True)
+
+    def on_mode_toggle():
+        """S+C+M chord — toggle semantic/phonemic mode."""
+        new_mode = engine.toggle_mode()
+        tray.set_mode(new_mode)
+        if new_mode == 'semantic':
+            beep_mode_semantic()
+        else:
+            beep_mode_phonemic()
+        print(f"  Mode: {new_mode}", flush=True)
+
+    def on_cheatsheet():
+        """C+M+K chord — show cheatsheet popup."""
+        from cheatsheet import show_cheatsheet
+        if cheatsheet_window[0] is None or not cheatsheet_window[0].winfo_exists():
+            cheatsheet_window[0] = show_cheatsheet(engine.mode)
+        else:
+            cheatsheet_window[0].lift()
+            cheatsheet_window[0].focus_force()
 
     def on_enter():
         KeyboardHook.send_enter()
@@ -85,8 +111,10 @@ def main():
         chord_engine=engine,
         on_toggle=on_toggle,
         on_space=on_space,
-        on_chord=on_chord,
+        on_token=on_token,
         on_backspace=on_backspace,
+        on_mode_toggle=on_mode_toggle,
+        on_cheatsheet=on_cheatsheet,
         on_enter=on_enter,
     )
 
@@ -100,38 +128,30 @@ def main():
         else:
             beep_toggle_off()
 
-    def tray_language(lang):
-        ai.set_language(lang)
-        print(f"[Language: {lang}]", flush=True)
-
-    def tray_raw_mode(enabled):
-        ai.set_raw_mode(enabled)
-        mode = "raw (no punctuation)" if enabled else "formal"
-        print(f"[Mode: {mode}]", flush=True)
-
     def tray_quit():
         hook.stop()
         ai.stop()
 
     tray = TrayApp(
         on_toggle=tray_toggle,
-        on_language_change=tray_language,
-        on_raw_mode_change=tray_raw_mode,
         on_quit=tray_quit,
     )
 
     api_key = get_groq_api_key()
     print("=" * 50, flush=True)
-    print("  Chord Keyboard Desktop App", flush=True)
+    print("  Chord Keyboard — Semantic Mode", flush=True)
     print("=" * 50, flush=True)
     if api_key:
         print("  Groq AI: enabled", flush=True)
     else:
         print("  Groq AI: disabled (no GROQ_API_KEY)", flush=True)
     print(flush=True)
-    print("  Alt+Q  = toggle ON/OFF", flush=True)
-    print("  C+M    = backspace (word)", flush=True)
-    print("  Space  = convert to text", flush=True)
+    print("  Alt+Q     = toggle ON/OFF", flush=True)
+    print("  C+M       = backspace (delete token)", flush=True)
+    print("  C+;       = enter (new line)", flush=True)
+    print("  S+C+M     = toggle semantic/phonemic", flush=True)
+    print("  C+M+K     = show cheatsheet", flush=True)
+    print("  Space     = expand to text", flush=True)
     print("=" * 50, flush=True)
 
     ai.start()

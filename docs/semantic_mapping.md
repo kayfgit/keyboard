@@ -225,21 +225,63 @@ Extended meta (C+M + right):
 | C+M+K+; | WHY |
 | C+M+L+; | HOW |
 
-### Shortcuts (multiple left keys)
+### Daily Verbs (A+S combo)
 
-| Chord | Symbol | Equivalent |
-|-------|--------|-----------|
-| A+S+J | CREATE_FILE | CREATE + FILE |
-| A+S+K | CREATE_FUNCTION | CREATE + FUNCTION |
-| A+S+L | DELETE_FILE | DELETE + FILE |
-| A+S+; | FIX_BUG | FIX + BUG |
-| A+S+J+K | ADD_TEST | ADD + TEST |
-| A+S+J+L | FIX_ERROR | FIX + ERROR |
-| A+S+K+L | REFACTOR_CODE | REFACTOR + CODE |
-| D+S+J | THIS_FILE | THIS + FILE |
-| D+S+K | THIS_FUNCTION | THIS + FUNCTION |
-| D+S+L | ALL_FILES | ALL + FILE |
-| D+S+; | ALL_TESTS | ALL + TEST |
+| Chord | Symbol | Use |
+|-------|--------|-----|
+| A+S+J | GREET | Hello, greeting |
+| A+S+K | ASK | Ask a question |
+| A+S+L | TELL | Tell someone |
+| A+S+; | WANT | Want/desire |
+| A+S+J+K | NEED | Need something |
+| A+S+J+L | KNOW | Know/understand |
+| A+S+J+; | MEET | Meet someone |
+| A+S+K+L | CALL | Call someone |
+| A+S+K+; | SEND | Send something |
+| A+S+L+; | GET | Get/obtain |
+| A+S+J+K+L | START | Start/begin |
+| A+S+J+K+; | FINISH | Finish/complete |
+| A+S+J+L+; | SCHEDULE | Schedule event |
+| A+S+K+L+; | CANCEL | Cancel event |
+
+### People & Places (D+S combo)
+
+| Chord | Symbol | Use |
+|-------|--------|-----|
+| D+S+J | NAME | Marks next literal as proper noun |
+| D+S+K | PERSON | A person |
+| D+S+L | PLACE | A place |
+| D+S+; | THING | A thing |
+| D+S+J+K | TEAM | Team/group |
+| D+S+J+L | COMPANY | Company/org |
+| D+S+K+L | PROJECT | Project |
+| D+S+K+; | MEETING | Meeting |
+
+### Time (A+D combo)
+
+| Chord | Symbol |
+|-------|--------|
+| A+D+J | TODAY |
+| A+D+K | TOMORROW |
+| A+D+L | NOW |
+| A+D+; | LATER |
+| A+D+J+K | SOON |
+| A+D+J+L | YESTERDAY |
+| A+D+K+L | TIME |
+| A+D+K+; | DATE |
+
+### States (F+D combo)
+
+| Chord | Symbol |
+|-------|--------|
+| F+D+J | HAPPY |
+| F+D+K | BUSY |
+| F+D+L | READY |
+| F+D+; | SURE |
+| F+D+J+K | AVAILABLE |
+| F+D+J+L | INTERESTED |
+| F+D+K+L | URGENT |
+| F+D+K+; | IMPORTANT |
 
 ### Symbols (A+F combo)
 
@@ -329,15 +371,29 @@ Use these to restyle the last AI output. Add style modifiers then press REPROMPT
 | Deploy after tests | `DEPLOY` `THIS` `AFTER` `TEST` | "Deploy this after running tests." |
 | Find unused vars | `FIND` `VARIABLE` `NOT` `USING` | "Find variables that are not being used." |
 
+### Hybrid Mode (Semantic + Phonemic Names)
+
+Toggle phonemic mode with **S+C+M** to type names phonetically. The AI distinguishes by case:
+- **UPPERCASE** = semantic tokens (expand based on meaning)
+- **lowercase** = phonemic text (convert to words based on sound)
+
+| Intent | Input | AI Output |
+|--------|-------|-----------|
+| Greet Wren | `CASUAL GREET NAME wren` | "Hey, Wren!" |
+| Ask Ian | `POLITE ASK NAME ian BUSY TODAY AS_QUESTION` | "Hello, Ian. Are you busy today?" |
+| Schedule with Viktor | `WANT SCHEDULE MEETING WITH NAME viktorchen TOMORROW` | "I want to schedule a meeting with Dr. Viktor Chen tomorrow." |
+
 ---
 
 ## Controls
 
-| Action | Input |
+| Action | Chord |
 |--------|-------|
 | Expand to text | Space |
-| Delete last token | Backspace or C+M (both thumbs) |
-| New line | Enter (when buffer empty) |
+| Delete last token | C+M (both thumbs) |
+| New line | C+; (left thumb + right pinky) |
+| Toggle semantic/phonemic | S+C+M |
+| Show cheatsheet | C+M+K |
 
 ---
 

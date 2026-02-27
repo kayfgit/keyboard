@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Semantic Chord Keyboard</title>
+<title>Universal Chord Keyboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
@@ -38,6 +38,10 @@
     --mode: #a29bfe;
     --mode-glow: rgba(162, 155, 254, 0.4);
 
+    --phonemic-consonant: #6ea8fe;
+    --phonemic-vowel: #f59e6e;
+    --phonemic-glow: rgba(124, 111, 239, 0.4);
+
     --accent: #00ffa3;
     --accent-glow: rgba(0, 255, 163, 0.3);
   }
@@ -64,8 +68,8 @@
       0deg,
       transparent,
       transparent 2px,
-      rgba(0, 0, 0, 0.1) 2px,
-      rgba(0, 0, 0, 0.1) 4px
+      rgba(0, 0, 0, 0.03) 2px,
+      rgba(0, 0, 0, 0.03) 4px
     );
     pointer-events: none;
     z-index: 1000;
@@ -80,7 +84,7 @@
     background: var(--bg-panel);
     border-bottom: 1px solid var(--border);
     font-size: 11px;
-    letter-spacing: 0.5px;
+    z-index: 10;
   }
 
   .status-indicator {
@@ -94,8 +98,6 @@
     height: 6px;
     border-radius: 50%;
     background: var(--text-dim);
-    box-shadow: 0 0 6px transparent;
-    transition: all 0.3s ease;
   }
 
   .status-dot.online {
@@ -106,26 +108,38 @@
   #mode-label {
     font-family: 'Orbitron', sans-serif;
     font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 3px;
+    letter-spacing: 2px;
+    padding: 4px 12px;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+  }
+
+  #mode-label.semantic {
     color: var(--accent);
-    text-shadow: 0 0 10px var(--accent-glow);
+    background: rgba(0, 255, 163, 0.1);
+    border: 1px solid rgba(0, 255, 163, 0.3);
+  }
+
+  #mode-label.phonemic {
+    color: var(--phonemic-vowel);
+    background: rgba(245, 158, 110, 0.1);
+    border: 1px solid rgba(245, 158, 110, 0.3);
   }
 
   /* Output area */
   #output-area {
     flex: 1;
-    padding: 16px 20px;
+    padding: 16px 20px 8px;
     display: flex;
     flex-direction: column;
     min-height: 0;
-    max-height: 30vh;
+    position: relative;
   }
 
   .section-label {
+    font-family: 'Orbitron', sans-serif;
     font-size: 9px;
-    font-weight: 600;
-    letter-spacing: 2px;
+    letter-spacing: 3px;
     color: var(--text-dim);
     margin-bottom: 8px;
     text-transform: uppercase;
@@ -135,34 +149,25 @@
     flex: 1;
     background: var(--bg-surface);
     border: 1px solid var(--border);
-    border-radius: 4px;
+    border-radius: 6px;
     padding: 16px;
-    font-size: 16px;
+    font-size: 18px;
     line-height: 1.7;
-    color: var(--text-bright);
     overflow-y: auto;
-    word-wrap: break-word;
     white-space: pre-wrap;
+    word-wrap: break-word;
   }
 
   #text-output .cursor {
     display: inline-block;
-    width: 8px;
-    height: 1.2em;
+    width: 2px;
+    height: 1.1em;
     background: var(--accent);
     vertical-align: text-bottom;
-    animation: cursorBlink 1s step-end infinite;
-    box-shadow: 0 0 8px var(--accent-glow);
+    animation: blink 1s step-end infinite;
   }
 
-  @keyframes cursorBlink {
-    50% { opacity: 0; }
-  }
-
-  .expanding #text-output {
-    border-color: var(--accent);
-    box-shadow: 0 0 20px var(--accent-glow), inset 0 0 30px rgba(0, 255, 163, 0.05);
-  }
+  @keyframes blink { 50% { opacity: 0; } }
 
   /* Intent buffer */
   #intent-buffer {
@@ -175,106 +180,79 @@
   #intent-display {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 6px;
     align-items: center;
     min-height: 28px;
   }
 
-  .intent-token {
-    padding: 4px 12px;
-    border-radius: 2px;
+  .intent-placeholder {
+    color: var(--text-dim);
     font-size: 12px;
+    font-style: italic;
+  }
+
+  .intent-token {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.5px;
-    text-transform: uppercase;
     border: 1px solid;
     transition: all 0.15s ease;
   }
 
-  .intent-token.action {
-    color: var(--action);
-    border-color: var(--action);
-    background: rgba(0, 212, 255, 0.1);
-    box-shadow: 0 0 10px var(--action-glow);
-  }
-  .intent-token.subject {
-    color: var(--subject);
-    border-color: var(--subject);
-    background: rgba(191, 95, 255, 0.1);
-    box-shadow: 0 0 10px var(--subject-glow);
-  }
-  .intent-token.quality {
-    color: var(--quality);
-    border-color: var(--quality);
-    background: rgba(255, 184, 0, 0.1);
-    box-shadow: 0 0 10px var(--quality-glow);
-  }
-  .intent-token.connect {
-    color: var(--connect);
-    border-color: var(--connect);
-    background: rgba(0, 255, 163, 0.1);
-    box-shadow: 0 0 10px var(--connect-glow);
-  }
-  .intent-token.respond {
-    color: var(--respond);
-    border-color: var(--respond);
-    background: rgba(255, 95, 135, 0.1);
-    box-shadow: 0 0 10px var(--respond-glow);
-  }
-  .intent-token.symbol {
-    color: var(--symbol);
-    border-color: var(--symbol);
-    background: rgba(139, 157, 195, 0.1);
-    box-shadow: 0 0 10px var(--symbol-glow);
-  }
-  .intent-token.style {
-    color: var(--style);
-    border-color: var(--style);
-    background: rgba(255, 159, 67, 0.1);
-    box-shadow: 0 0 10px var(--style-glow);
-  }
-  .intent-token.mode {
-    color: var(--mode);
-    border-color: var(--mode);
-    background: rgba(162, 155, 254, 0.1);
-    box-shadow: 0 0 10px var(--mode-glow);
-  }
-  .intent-token.phonemic {
-    color: #9b7bf7;
-    border-color: #9b7bf7;
-    background: rgba(155, 123, 247, 0.1);
-    box-shadow: 0 0 10px rgba(155, 123, 247, 0.4);
-    font-style: italic;
+  .intent-token.action { color: var(--action); border-color: rgba(0, 212, 255, 0.4); background: rgba(0, 212, 255, 0.1); }
+  .intent-token.subject { color: var(--subject); border-color: rgba(191, 95, 255, 0.4); background: rgba(191, 95, 255, 0.1); }
+  .intent-token.quality { color: var(--quality); border-color: rgba(255, 184, 0, 0.4); background: rgba(255, 184, 0, 0.1); }
+  .intent-token.connect { color: var(--connect); border-color: rgba(0, 255, 163, 0.4); background: rgba(0, 255, 163, 0.1); }
+  .intent-token.respond { color: var(--respond); border-color: rgba(255, 95, 135, 0.4); background: rgba(255, 95, 135, 0.1); }
+  .intent-token.symbol { color: var(--symbol); border-color: rgba(139, 157, 195, 0.4); background: rgba(139, 157, 195, 0.1); }
+  .intent-token.style { color: var(--style); border-color: rgba(255, 159, 67, 0.4); background: rgba(255, 159, 67, 0.1); }
+  .intent-token.literal { color: var(--phonemic-vowel); border-color: rgba(245, 158, 110, 0.4); background: rgba(245, 158, 110, 0.1); }
+  .intent-token.phonemic { color: var(--phonemic-vowel); border-color: rgba(245, 158, 110, 0.6); background: rgba(245, 158, 110, 0.15); font-style: italic; }
+  .intent-token.phonemic::before { content: '⟨'; margin-right: 2px; opacity: 0.6; }
+  .intent-token.phonemic::after { content: '⟩'; margin-left: 2px; opacity: 0.6; }
+
+  /* Phonemic buffer (shown when in phonemic mode) */
+  .phonemic-buffer {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    color: var(--phonemic-vowel);
+    border: 1px dashed rgba(245, 158, 110, 0.5);
+    background: rgba(245, 158, 110, 0.05);
   }
 
-  .intent-placeholder {
+  .phonemic-buffer::before {
+    content: 'IPA:';
+    font-size: 9px;
     color: var(--text-dim);
-    font-size: 11px;
-    letter-spacing: 1px;
+    margin-right: 4px;
   }
 
-  /* Chord preview - current selection */
+  /* Chord preview */
   #chord-preview {
-    padding: 16px 20px;
+    padding: 10px 20px;
     background: var(--bg-surface);
     border-top: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 20px;
-    min-height: 60px;
+    min-height: 48px;
   }
 
   #preview-result {
     font-family: 'Orbitron', sans-serif;
-    font-size: 18px;
-    font-weight: 700;
+    font-size: 16px;
+    font-weight: 500;
     letter-spacing: 2px;
-    min-width: 200px;
-    text-align: center;
     transition: all 0.15s ease;
   }
 
+  #preview-result.empty { color: var(--text-dim); }
   #preview-result.action { color: var(--action); text-shadow: 0 0 15px var(--action-glow); }
   #preview-result.subject { color: var(--subject); text-shadow: 0 0 15px var(--subject-glow); }
   #preview-result.quality { color: var(--quality); text-shadow: 0 0 15px var(--quality-glow); }
@@ -284,11 +262,58 @@
   #preview-result.style { color: var(--style); text-shadow: 0 0 15px var(--style-glow); }
   #preview-result.mode { color: var(--mode); text-shadow: 0 0 15px var(--mode-glow); }
   #preview-result.control { color: var(--accent); text-shadow: 0 0 15px var(--accent-glow); }
-  #preview-result.empty { color: var(--text-dim); text-shadow: none; }
+  #preview-result.phonemic { color: var(--phonemic-vowel); text-shadow: 0 0 15px var(--phonemic-glow); }
+
+  /* Predictions panel */
+  #predictions-panel {
+    padding: 8px 20px;
+    background: var(--bg-panel);
+    border-top: 1px solid var(--border);
+    display: none;
+  }
+
+  #predictions-panel.visible {
+    display: block;
+  }
+
+  .predictions-label {
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+
+  .predictions-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .prediction-item {
+    padding: 4px 10px;
+    border-radius: 3px;
+    font-size: 10px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--text-mid);
+    cursor: default;
+    transition: all 0.15s ease;
+  }
+
+  .prediction-item:first-child {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .prediction-item .chord-hint {
+    font-size: 8px;
+    color: var(--text-dim);
+    margin-left: 6px;
+  }
 
   /* Keyboard area */
   #keyboard-area {
-    padding: 20px;
+    padding: 16px 20px 20px;
     background: var(--bg-panel);
     border-top: 1px solid var(--border);
   }
@@ -297,51 +322,48 @@
     display: flex;
     justify-content: center;
     gap: 40px;
-    max-width: 900px;
-    margin: 0 auto;
   }
 
   .hand {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    align-items: center;
+    gap: 8px;
   }
 
   .hand-header {
-    text-align: center;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 4px;
   }
 
   .hand-title {
     font-family: 'Orbitron', sans-serif;
-    font-size: 10px;
-    font-weight: 500;
+    font-size: 9px;
     letter-spacing: 2px;
-    color: var(--text-mid);
+    color: var(--text-dim);
     text-transform: uppercase;
   }
 
   .keys-row {
     display: flex;
-    gap: 8px;
+    gap: 6px;
   }
 
-  /* Key styling */
   .key {
-    width: 72px;
-    height: 80px;
-    border-radius: 6px;
+    width: 60px;
+    height: 70px;
+    border-radius: 8px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: var(--bg-surface);
     border: 1px solid var(--border);
-    transition: all 0.12s ease;
-    cursor: default;
+    background: var(--bg-surface);
+    transition: all 0.1s ease;
     position: relative;
-    overflow: hidden;
+    cursor: default;
   }
 
   .key::before {
@@ -350,47 +372,34 @@
     top: 0;
     left: 0;
     right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--border-glow), transparent);
+    bottom: 0;
+    border-radius: 8px;
     opacity: 0;
-    transition: opacity 0.2s ease;
+    transition: opacity 0.15s ease;
   }
 
   .key .key-letter {
-    font-family: 'Orbitron', sans-serif;
     font-size: 18px;
-    font-weight: 700;
-    color: var(--text-dim);
-    transition: all 0.12s ease;
+    font-weight: 600;
+    color: var(--text-mid);
+    transition: color 0.1s ease;
+    z-index: 1;
   }
 
   .key .key-label {
-    font-size: 8px;
-    font-weight: 600;
-    letter-spacing: 1px;
+    font-size: 9px;
     color: var(--text-dim);
     margin-top: 4px;
-    text-transform: uppercase;
-    transition: all 0.12s ease;
-    max-width: 64px;
     text-align: center;
-    line-height: 1.2;
-    min-height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    max-width: 54px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    z-index: 1;
+    transition: all 0.15s ease;
   }
 
-  /* Left hand key states */
-  .key.left.available {
-    border-color: var(--border-glow);
-  }
-  .key.left.available::before { opacity: 1; }
-
-  .key.left.pressed {
-    transform: translateY(2px);
-  }
-
+  /* Left hand - category keys */
   .key.left.pressed.action {
     background: rgba(0, 212, 255, 0.15);
     border-color: var(--action);
@@ -455,7 +464,16 @@
   .key.left.pressed.mode .key-letter { color: var(--mode); }
   .key.left.pressed.mode .key-label { color: var(--mode); }
 
-  /* Right hand - shows available options */
+  /* Phonemic mode left hand */
+  .key.left.pressed.phonemic-consonant {
+    background: rgba(110, 168, 254, 0.15);
+    border-color: var(--phonemic-consonant);
+    box-shadow: 0 0 20px rgba(110, 168, 254, 0.4), inset 0 0 20px rgba(110, 168, 254, 0.1);
+  }
+  .key.left.pressed.phonemic-consonant .key-letter { color: var(--phonemic-consonant); }
+  .key.left.pressed.phonemic-consonant .key-label { color: var(--phonemic-consonant); }
+
+  /* Right hand */
   .key.right {
     height: 80px;
   }
@@ -486,6 +504,7 @@
   .key.right.has-option.symbol .key-label { color: var(--symbol); }
   .key.right.has-option.style .key-label { color: var(--style); }
   .key.right.has-option.mode .key-label { color: var(--mode); }
+  .key.right.has-option.phonemic .key-label { color: var(--phonemic-vowel); }
 
   .key.right.pressed {
     transform: translateY(2px);
@@ -547,6 +566,13 @@
   }
   .key.right.pressed.mode .key-letter { color: var(--mode); }
 
+  .key.right.pressed.phonemic {
+    background: rgba(245, 158, 110, 0.2);
+    border-color: var(--phonemic-vowel);
+    box-shadow: 0 0 25px rgba(245, 158, 110, 0.4);
+  }
+  .key.right.pressed.phonemic .key-letter { color: var(--phonemic-vowel); }
+
   .key.right.pressed.control {
     background: rgba(0, 255, 163, 0.2);
     border-color: var(--accent);
@@ -595,53 +621,6 @@
     text-decoration: none;
   }
 
-  /* Options panel - shows all available options for current state */
-  #options-panel {
-    padding: 12px 20px;
-    background: var(--bg-surface);
-    border-top: 1px solid var(--border);
-    display: none;
-  }
-
-  #options-panel.visible {
-    display: block;
-  }
-
-  .options-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 6px;
-    max-height: 120px;
-    overflow-y: auto;
-  }
-
-  .option-item {
-    padding: 6px 10px;
-    background: var(--bg-panel);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    font-size: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .option-item .chord {
-    color: var(--text-dim);
-    font-size: 9px;
-  }
-
-  .option-item .symbol {
-    font-weight: 600;
-  }
-
-  .option-item.action .symbol { color: var(--action); }
-  .option-item.target .symbol { color: var(--target); }
-  .option-item.modifier .symbol { color: var(--modifier); }
-  .option-item.logic .symbol { color: var(--logic); }
-  .option-item.meta .symbol { color: var(--meta); }
-
   /* Invalid flash */
   .invalid-flash {
     animation: invalidShake 0.3s ease;
@@ -654,19 +633,10 @@
   }
 
   /* Scrollbar */
-  ::-webkit-scrollbar {
-    width: 6px;
-  }
-  ::-webkit-scrollbar-track {
-    background: var(--bg-surface);
-  }
-  ::-webkit-scrollbar-thumb {
-    background: var(--border);
-    border-radius: 3px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: var(--border-glow);
-  }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-surface); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border-glow); }
 </style>
 </head>
 <body>
@@ -676,7 +646,7 @@
     <span class="status-dot" id="status-dot"></span>
     <span id="server-status">Checking server...</span>
   </div>
-  <span id="mode-label">SEMANTIC MODE</span>
+  <span id="mode-label" class="semantic">SEMANTIC MODE</span>
   <span style="color: var(--text-dim);">Universal Intent Interface</span>
 </div>
 
@@ -691,19 +661,20 @@
   </div>
 </div>
 
-<div id="chord-preview">
-  <div id="preview-result" class="empty">READY</div>
+<div id="predictions-panel">
+  <div class="predictions-label">PREDICTED NEXT</div>
+  <div class="predictions-list" id="predictions-list"></div>
 </div>
 
-<div id="options-panel">
-  <div class="options-grid" id="options-grid"></div>
+<div id="chord-preview">
+  <div id="preview-result" class="empty">READY</div>
 </div>
 
 <div id="keyboard-area">
   <div class="keyboard-container">
     <div class="hand" id="left-hand">
       <div class="hand-header">
-        <div class="hand-title">Category Select</div>
+        <div class="hand-title" id="left-hand-title">Category Select</div>
       </div>
       <div class="keys-row">
         <div class="key left" id="key-a" data-key="a" data-category="action">
@@ -731,7 +702,7 @@
 
     <div class="hand" id="right-hand">
       <div class="hand-header">
-        <div class="hand-title">Command Select</div>
+        <div class="hand-title" id="right-hand-title">Command Select</div>
       </div>
       <div class="keys-row">
         <div class="key right" id="key-m" data-key="m">
@@ -760,11 +731,12 @@
 </div>
 
 <div id="help-bar">
-  <span><kbd>Space</kbd> Expand to text</span>
-  <span><kbd>D</kbd>+<kbd>C</kbd> Style modifiers</span>
-  <span><kbd>A</kbd>+<kbd>F</kbd> Symbols</span>
-  <span><kbd>Backspace</kbd> Delete token</span>
-  <a href="semantic-cheatsheet.html">Full Reference</a>
+  <span><kbd>Space</kbd> Expand</span>
+  <span><kbd>C</kbd>+<kbd>M</kbd> Backspace</span>
+  <span><kbd>C</kbd>+<kbd>;</kbd> Enter</span>
+  <span><kbd>S</kbd>+<kbd>C</kbd>+<kbd>M</kbd> Toggle phonemic</span>
+  <span><kbd>D</kbd>+<kbd>S</kbd>+<kbd>J</kbd> NAME</span>
+  <a href="semantic-cheatsheet.html">Reference</a>
 </div>
 
 <script>
@@ -773,9 +745,7 @@
 // ============================================================
 
 const SEMANTICS = {
-  // ============================================================
-  // ACTIONS (A) - General verbs for doing things
-  // ============================================================
+  // ACTIONS (A)
   'A+J':       { symbol: 'MAKE', category: 'action' },
   'A+K':       { symbol: 'CHANGE', category: 'action' },
   'A+L':       { symbol: 'REMOVE', category: 'action' },
@@ -791,7 +761,6 @@ const SEMANTICS = {
   'A+J+L+;':   { symbol: 'SUMMARIZE', category: 'action' },
   'A+K+L+;':   { symbol: 'EXPAND', category: 'action' },
   'A+J+K+L+;': { symbol: 'SIMPLIFY', category: 'action' },
-  // Extended actions (M+)
   'A+M+J':     { symbol: 'ADD', category: 'action' },
   'A+M+K':     { symbol: 'KEEP', category: 'action' },
   'A+M+L':     { symbol: 'GIVE', category: 'action' },
@@ -807,9 +776,7 @@ const SEMANTICS = {
   'A+M+J+L+;': { symbol: 'REWRITE', category: 'action' },
   'A+M+K+L+;': { symbol: 'FORMAT', category: 'action' },
 
-  // ============================================================
-  // SUBJECTS (S) - Things you talk about
-  // ============================================================
+  // SUBJECTS (S)
   'S+J':       { symbol: 'THIS', category: 'subject' },
   'S+K':       { symbol: 'THAT', category: 'subject' },
   'S+L':       { symbol: 'IT', category: 'subject' },
@@ -825,7 +792,6 @@ const SEMANTICS = {
   'S+J+L+;':   { symbol: 'REASON', category: 'subject' },
   'S+K+L+;':   { symbol: 'WAY', category: 'subject' },
   'S+J+K+L+;': { symbol: 'POINT', category: 'subject' },
-  // Extended subjects (M+)
   'S+M+J':     { symbol: 'FILE', category: 'subject' },
   'S+M+K':     { symbol: 'FUNCTION', category: 'subject' },
   'S+M+L':     { symbol: 'DATA', category: 'subject' },
@@ -841,9 +807,7 @@ const SEMANTICS = {
   'S+M+J+L+;': { symbol: 'CONTEXT', category: 'subject' },
   'S+M+K+L+;': { symbol: 'DETAIL', category: 'subject' },
 
-  // ============================================================
-  // QUALITY (D) - Descriptors and adjectives
-  // ============================================================
+  // QUALITY (D)
   'D+J':       { symbol: 'GOOD', category: 'quality' },
   'D+K':       { symbol: 'BAD', category: 'quality' },
   'D+L':       { symbol: 'MORE', category: 'quality' },
@@ -859,7 +823,6 @@ const SEMANTICS = {
   'D+J+L+;':   { symbol: 'MAIN', category: 'quality' },
   'D+K+L+;':   { symbol: 'OTHER', category: 'quality' },
   'D+J+K+L+;': { symbol: 'ALL', category: 'quality' },
-  // Extended qualities (M+)
   'D+M+J':     { symbol: 'FAST', category: 'quality' },
   'D+M+K':     { symbol: 'SLOW', category: 'quality' },
   'D+M+L':     { symbol: 'BIG', category: 'quality' },
@@ -875,9 +838,7 @@ const SEMANTICS = {
   'D+M+J+L+;': { symbol: 'EXACT', category: 'quality' },
   'D+M+K+L+;': { symbol: 'ENOUGH', category: 'quality' },
 
-  // ============================================================
-  // CONNECT (F) - Connectors and flow
-  // ============================================================
+  // CONNECT (F)
   'F+J':       { symbol: 'AND', category: 'connect' },
   'F+K':       { symbol: 'OR', category: 'connect' },
   'F+L':       { symbol: 'BUT', category: 'connect' },
@@ -893,7 +854,6 @@ const SEMANTICS = {
   'F+J+L+;':   { symbol: 'LIKE', category: 'connect' },
   'F+K+L+;':   { symbol: 'AS', category: 'connect' },
   'F+J+K+L+;': { symbol: 'ABOUT', category: 'connect' },
-  // Extended connectors (M+)
   'F+M+J':     { symbol: 'ALSO', category: 'connect' },
   'F+M+K':     { symbol: 'HOWEVER', category: 'connect' },
   'F+M+L':     { symbol: 'INSTEAD', category: 'connect' },
@@ -909,9 +869,7 @@ const SEMANTICS = {
   'F+M+J+L+;': { symbol: 'SINCE', category: 'connect' },
   'F+M+K+L+;': { symbol: 'WHETHER', category: 'connect' },
 
-  // ============================================================
-  // RESPOND (C) - Feedback, questions, meta
-  // ============================================================
+  // RESPOND (C)
   'C+J':       { symbol: 'YES', category: 'respond' },
   'C+K':       { symbol: 'NO', category: 'respond' },
   'C+L':       { symbol: 'MAYBE', category: 'respond' },
@@ -927,7 +885,6 @@ const SEMANTICS = {
   'C+J+L+;':   { symbol: 'HOW', category: 'respond' },
   'C+K+L+;':   { symbol: 'WHICH', category: 'respond' },
   'C+J+K+L+;': { symbol: 'WHO', category: 'respond' },
-  // Extended respond (M+)
   'C+M+J':     { symbol: 'CONTINUE', category: 'respond' },
   'C+M+K':     { symbol: 'STOP', category: 'respond' },
   'C+M+L':     { symbol: 'UNDO', category: 'respond' },
@@ -943,9 +900,7 @@ const SEMANTICS = {
   'C+M+J+L+;': { symbol: 'NOT_QUITE', category: 'respond' },
   'C+M+K+L+;': { symbol: 'EXACTLY', category: 'respond' },
 
-  // ============================================================
-  // SYMBOLS (A+F) - Numbers and punctuation
-  // ============================================================
+  // SYMBOLS (A+F)
   'A+F+J':       { symbol: '1', category: 'symbol' },
   'A+F+K':       { symbol: '2', category: 'symbol' },
   'A+F+L':       { symbol: '3', category: 'symbol' },
@@ -961,7 +916,6 @@ const SEMANTICS = {
   'A+F+J+L+;':   { symbol: '?', category: 'symbol' },
   'A+F+K+L+;':   { symbol: '!', category: 'symbol' },
   'A+F+J+K+L+;': { symbol: ':', category: 'symbol' },
-  // Extended symbols (M+)
   'A+F+M+J':     { symbol: '-', category: 'symbol' },
   'A+F+M+K':     { symbol: '_', category: 'symbol' },
   'A+F+M+L':     { symbol: '/', category: 'symbol' },
@@ -977,32 +931,53 @@ const SEMANTICS = {
   'A+F+M+J+L+;': { symbol: ')', category: 'symbol' },
   'A+F+M+K+L+;': { symbol: '"', category: 'symbol' },
 
-  // ============================================================
-  // SHORTCUTS - Common combos
-  // ============================================================
-  // A+S = Quick actions on subjects
-  'A+S+J':       { symbol: 'MAKE_THIS', category: 'action' },
-  'A+S+K':       { symbol: 'CHANGE_THIS', category: 'action' },
-  'A+S+L':       { symbol: 'EXPLAIN_THIS', category: 'action' },
-  'A+S+;':       { symbol: 'FIX_THIS', category: 'action' },
-  'A+S+J+K':     { symbol: 'SHOW_ME', category: 'action' },
-  'A+S+J+L':     { symbol: 'HELP_ME', category: 'action' },
-  'A+S+K+L':     { symbol: 'TELL_ME', category: 'action' },
+  // DAILY CONVERSATION (A+S = common verbs)
+  'A+S+J':       { symbol: 'GREET', category: 'action' },
+  'A+S+K':       { symbol: 'ASK', category: 'action' },
+  'A+S+L':       { symbol: 'TELL', category: 'action' },
+  'A+S+;':       { symbol: 'WANT', category: 'action' },
+  'A+S+J+K':     { symbol: 'NEED', category: 'action' },
+  'A+S+J+L':     { symbol: 'KNOW', category: 'action' },
+  'A+S+J+;':     { symbol: 'MEET', category: 'action' },
+  'A+S+K+L':     { symbol: 'CALL', category: 'action' },
+  'A+S+K+;':     { symbol: 'SEND', category: 'action' },
+  'A+S+L+;':     { symbol: 'GET', category: 'action' },
+  'A+S+J+K+L':   { symbol: 'START', category: 'action' },
+  'A+S+J+K+;':   { symbol: 'FINISH', category: 'action' },
+  'A+S+J+L+;':   { symbol: 'SCHEDULE', category: 'action' },
+  'A+S+K+L+;':   { symbol: 'CANCEL', category: 'action' },
 
-  // D+S = Quality + subject
-  'D+S+J':       { symbol: 'MORE_DETAIL', category: 'quality' },
-  'D+S+K':       { symbol: 'LESS_DETAIL', category: 'quality' },
-  'D+S+L':       { symbol: 'ANOTHER_WAY', category: 'quality' },
-  'D+S+;':       { symbol: 'SAME_THING', category: 'quality' },
+  // PEOPLE & PLACES (D+S = noun markers)
+  'D+S+J':       { symbol: 'NAME', category: 'subject' },   // Critical: marks next literal as proper noun
+  'D+S+K':       { symbol: 'PERSON', category: 'subject' },
+  'D+S+L':       { symbol: 'PLACE', category: 'subject' },
+  'D+S+;':       { symbol: 'THING', category: 'subject' },
+  'D+S+J+K':     { symbol: 'TEAM', category: 'subject' },
+  'D+S+J+L':     { symbol: 'COMPANY', category: 'subject' },
+  'D+S+K+L':     { symbol: 'PROJECT', category: 'subject' },
+  'D+S+K+;':     { symbol: 'MEETING', category: 'subject' },
 
-  // S+D = Subject qualities
-  'S+D+J':       { symbol: 'GOOD_IDEA', category: 'subject' },
-  'S+D+K':       { symbol: 'BAD_IDEA', category: 'subject' },
-  'S+D+L':       { symbol: 'MAIN_POINT', category: 'subject' },
+  // TIME (A+D = temporal)
+  'A+D+J':       { symbol: 'TODAY', category: 'subject' },
+  'A+D+K':       { symbol: 'TOMORROW', category: 'subject' },
+  'A+D+L':       { symbol: 'NOW', category: 'subject' },
+  'A+D+;':       { symbol: 'LATER', category: 'subject' },
+  'A+D+J+K':     { symbol: 'SOON', category: 'subject' },
+  'A+D+J+L':     { symbol: 'YESTERDAY', category: 'subject' },
+  'A+D+K+L':     { symbol: 'TIME', category: 'subject' },
+  'A+D+K+;':     { symbol: 'DATE', category: 'subject' },
 
-  // ============================================================
-  // STYLE MODIFIERS (D+C) - For reprompting with different tone
-  // ============================================================
+  // FEELINGS (F+D = states)
+  'F+D+J':       { symbol: 'HAPPY', category: 'quality' },
+  'F+D+K':       { symbol: 'BUSY', category: 'quality' },
+  'F+D+L':       { symbol: 'READY', category: 'quality' },
+  'F+D+;':       { symbol: 'SURE', category: 'quality' },
+  'F+D+J+K':     { symbol: 'AVAILABLE', category: 'quality' },
+  'F+D+J+L':     { symbol: 'INTERESTED', category: 'quality' },
+  'F+D+K+L':     { symbol: 'URGENT', category: 'quality' },
+  'F+D+K+;':     { symbol: 'IMPORTANT', category: 'quality' },
+
+  // STYLE MODIFIERS (D+C)
   'D+C+J':       { symbol: 'FORMAL', category: 'style' },
   'D+C+K':       { symbol: 'CASUAL', category: 'style' },
   'D+C+L':       { symbol: 'POLITE', category: 'style' },
@@ -1016,14 +991,159 @@ const SEMANTICS = {
   'D+C+J+K+L':   { symbol: 'AS_COMMAND', category: 'style' },
   'D+C+J+K+;':   { symbol: 'AS_REQUEST', category: 'style' },
   'D+C+M+J':     { symbol: 'REPROMPT', category: 'style' },
-
-  // ============================================================
-  // HYBRID MODE (S+C) - Switch to phonemic input
-  // ============================================================
-  'S+C+J':       { symbol: '[PHONEMIC]', category: 'mode' },
 };
 
-// Normalize chord key for consistent lookup
+// ============================================================
+// PHONEMIC VOCABULARY (from index.html)
+// ============================================================
+
+const CONSONANTS = {
+  0:  null,   1:  'f',    2:  'p',    3:  'st',   4:  't',
+  5:  's',    6:  'θ',    7:  'ð',    8:  'r',
+  9:  'ʃ',    10: 'nd',   11: 'tr',   12: 'k',
+  13: 'h',    14: 'pr',   15: 'str',  16: 'b',
+  17: 'v',    18: 'm',    19: 'w',    20: 'd',
+  21: 'z',    22: 'n',    23: 'dʒ',   24: 'l',
+  25: 'ʒ',    26: 'nt',   27: 'tʃ',   28: 'g',
+  29: 'sp',   30: 'ŋ',    31: 'j',
+};
+
+const VOWELS = {
+  0:  null,
+  1:  'i',    2:  'o',    3:  'u',    4:  'e',
+  5:  'ə',    6:  'at',   7:  'in',   8:  'a',
+  9:  'an',   10: 'on',   11: 'it',   12: 'er',
+  13: 'or',   14: 'al',   15: 'ing',
+  16: 'ot',   17: 'ī',    18: 'ō',    19: 'ū',
+  20: 'ē',    21: 'et',   22: 'ut',   23: 'en',
+  24: 'ā',    25: 'un',   26: 'ad',   27: 'is',
+  28: 'il',   29: 'aw',   30: 'oi',   31: 'ow',
+};
+
+// Phonemic key labels for display
+const CONSONANT_LABELS = {
+  'a': 'manner', 's': 'manner', 'd': 'place', 'f': 'place', 'c': 'voice'
+};
+
+const VOWEL_LABELS = {
+  'm': 'mod', 'j': 'height', 'k': 'height', 'l': 'back', ';': 'back'
+};
+
+// ============================================================
+// PREDICTIVE NEXT-TOKEN
+// ============================================================
+
+// Transition probabilities: what tokens commonly follow what
+const TOKEN_TRANSITIONS = {
+  // After actions, expect subjects or qualities
+  'MAKE': ['THIS', 'IT', 'SIMPLE', 'NEW', 'BETTER', 'MORE'],
+  'CHANGE': ['THIS', 'IT', 'TO', 'THAT', 'NAME'],
+  'FIX': ['THIS', 'IT', 'ERROR', 'PROBLEM'],
+  'FIND': ['THIS', 'IT', 'ALL', 'ERROR', 'FILE', 'TIME'],
+  'SHOW': ['THIS', 'EXAMPLE', 'MORE', 'ALL'],
+  'EXPLAIN': ['THIS', 'HOW', 'WHY', 'MORE', 'SIMPLE'],
+  'ADD': ['THIS', 'MORE', 'NEW', 'TO', 'AND'],
+  'HELP': ['WITH', 'THIS', 'PLEASE', 'NAME'],
+  'CHECK': ['THIS', 'IT', 'IF', 'ERROR', 'TIME'],
+
+  // Daily conversation actions
+  'GREET': ['NAME', 'POLITE', 'FORMAL', 'CASUAL'],
+  'ASK': ['NAME', 'ABOUT', 'IF', 'QUESTION', 'TIME'],
+  'TELL': ['NAME', 'ABOUT', 'THIS', 'THAT'],
+  'WANT': ['TO', 'THIS', 'MEET', 'KNOW', 'NAME'],
+  'NEED': ['TO', 'THIS', 'HELP', 'MORE', 'TIME'],
+  'KNOW': ['IF', 'ABOUT', 'THIS', 'THAT', 'WHEN'],
+  'MEET': ['NAME', 'TODAY', 'TOMORROW', 'LATER', 'SOON'],
+  'CALL': ['NAME', 'TODAY', 'LATER', 'BACK'],
+  'SEND': ['THIS', 'TO', 'NAME', 'EMAIL'],
+  'GET': ['THIS', 'BACK', 'TO', 'FROM'],
+  'START': ['THIS', 'NOW', 'TODAY', 'WITH'],
+  'FINISH': ['THIS', 'TODAY', 'BY', 'BEFORE'],
+  'SCHEDULE': ['MEETING', 'CALL', 'WITH', 'NAME', 'FOR'],
+  'CANCEL': ['THIS', 'MEETING', 'THAT'],
+
+  // After NAME, expect phonemic input or more context
+  'NAME': ['AND', 'ABOUT', 'TODAY', 'TOMORROW'],
+
+  // After subjects, expect qualities or connectors
+  'THIS': ['AND', 'TO', 'WITH', 'BUT', 'OR', 'SIMPLE', 'BETTER'],
+  'IT': ['TO', 'WITH', 'AND', 'BUT', 'SIMPLE', 'BETTER'],
+  'CODE': ['AND', 'TO', 'WITH', 'SIMPLE', 'BETTER', 'ERROR'],
+  'TEXT': ['AND', 'TO', 'SHORT', 'CLEAR', 'MORE'],
+  'IDEA': ['AND', 'BUT', 'ABOUT', 'INTERESTING'],
+  'ERROR': ['AND', 'FIX', 'SHOW', 'WHY'],
+  'PERSON': ['NAME', 'AND', 'WHO'],
+  'PLACE': ['NAME', 'AND', 'WHERE'],
+  'MEETING': ['WITH', 'NAME', 'TODAY', 'TOMORROW', 'ABOUT'],
+  'PROJECT': ['AND', 'ABOUT', 'THIS', 'NAME'],
+
+  // Time tokens
+  'TODAY': ['LATER', 'NOW', 'AND', 'PLEASE'],
+  'TOMORROW': ['AND', 'PLEASE', 'IF'],
+  'NOW': ['AND', 'PLEASE', 'IF'],
+  'LATER': ['TODAY', 'AND', 'PLEASE'],
+  'SOON': ['AND', 'PLEASE', 'THANKS'],
+
+  // After qualities, expect connectors or subjects
+  'GOOD': ['AND', 'BUT', 'IDEA', 'THANKS'],
+  'BAD': ['AND', 'BUT', 'IDEA', 'FIX'],
+  'MORE': ['DETAIL', 'SIMPLE', 'CLEAR', 'AND', 'TIME'],
+  'SIMPLE': ['AND', 'CLEAR', 'BUT', 'MORE'],
+  'BETTER': ['AND', 'BUT', 'MORE', 'WAY'],
+  'BUSY': ['NOW', 'TODAY', 'BUT', 'LATER'],
+  'READY': ['TO', 'FOR', 'NOW', 'AND'],
+  'INTERESTED': ['IN', 'ABOUT', 'AND'],
+  'AVAILABLE': ['TODAY', 'TOMORROW', 'NOW', 'LATER'],
+
+  // After connectors, expect subjects or actions
+  'AND': ['MAKE', 'ADD', 'SHOW', 'THIS', 'MORE', 'ALSO', 'MEET'],
+  'BUT': ['MORE', 'SIMPLE', 'HOW', 'WHY', 'DIFFERENT', 'BUSY'],
+  'TO': ['THIS', 'THAT', 'IT', 'MAKE', 'MEET', 'NAME'],
+  'WITH': ['THIS', 'MORE', 'EXAMPLE', 'NAME', 'TEAM'],
+  'IF': ['THIS', 'IT', 'AVAILABLE', 'POSSIBLE', 'OK'],
+  'ABOUT': ['THIS', 'THAT', 'PROJECT', 'MEETING', 'IDEA'],
+
+  // After responses, expect actions or end
+  'YES': ['AND', 'BUT', 'THANKS', 'PLEASE', 'PERFECT'],
+  'NO': ['BUT', 'BECAUSE', 'INSTEAD', 'WAIT', 'SORRY'],
+  'THANKS': ['AND', 'BUT', 'PLEASE', 'FOR'],
+  'PLEASE': ['MAKE', 'SHOW', 'HELP', 'FIX', 'ADD', 'CALL', 'SEND'],
+  'OK': ['AND', 'THANKS', 'PLEASE', 'SOUNDS'],
+
+  // Style modifiers
+  'POLITE': ['PROFESSIONAL', 'FRIENDLY', 'FORMAL', 'GREET', 'ASK'],
+  'FORMAL': ['PROFESSIONAL', 'BRIEF', 'GREET', 'REPROMPT'],
+  'CASUAL': ['FRIENDLY', 'BRIEF', 'GREET', 'REPROMPT'],
+  'PROFESSIONAL': ['GREET', 'ASK', 'REPROMPT'],
+};
+
+// Default predictions when no specific match
+const DEFAULT_PREDICTIONS = ['THIS', 'AND', 'NAME', 'PLEASE', 'TODAY', 'ABOUT'];
+
+function getPredictions(buffer) {
+  if (buffer.length === 0) {
+    // Show common starters for daily use
+    return ['GREET', 'PLEASE', 'WANT', 'NEED', 'ASK', 'POLITE'];
+  }
+
+  const lastToken = buffer[buffer.length - 1];
+
+  // Handle phonemic tokens (raw IPA)
+  if (lastToken.isRawIPA) {
+    return ['AND', 'ABOUT', 'TODAY', 'TOMORROW', 'PLEASE', 'THANKS'];
+  }
+
+  const predictions = TOKEN_TRANSITIONS[lastToken.symbol] || DEFAULT_PREDICTIONS;
+
+  // Filter out tokens already in buffer (by symbol, not phonemic)
+  const usedSymbols = new Set(buffer.filter(t => !t.isRawIPA).map(t => t.symbol));
+  return predictions.filter(p => !usedSymbols.has(p)).slice(0, 6);
+}
+
+// ============================================================
+// CHORD ENGINE UTILITIES
+// ============================================================
+
 const LEFT_KEY_ORDER = ['A', 'S', 'D', 'F', 'C'];
 const RIGHT_KEY_ORDER = ['M', 'J', 'K', 'L', ';'];
 
@@ -1037,7 +1157,7 @@ function normalizeChordKey(leftKeys, rightKeys) {
   return sortedLeft.join('+') + '+' + sortedRight.join('+');
 }
 
-// Build normalized lookup table at startup
+// Build normalized lookup table
 const SEMANTICS_LOOKUP = {};
 for (const [chord, data] of Object.entries(SEMANTICS)) {
   const parts = chord.split('+');
@@ -1047,7 +1167,6 @@ for (const [chord, data] of Object.entries(SEMANTICS)) {
   SEMANTICS_LOOKUP[normalized] = data;
 }
 
-// Map for getting options for each left key combination
 function getOptionsForLeftKeys(leftKeys) {
   const options = {};
   const leftPrefix = sortByOrder(leftKeys, LEFT_KEY_ORDER).join('+');
@@ -1069,6 +1188,7 @@ function getOptionsForLeftKeys(leftKeys) {
 // ============================================================
 // CONFIG & STATE
 // ============================================================
+
 const API_BASE = 'http://localhost:8000';
 let serverOnline = false;
 
@@ -1081,16 +1201,94 @@ const chordBuffer = new Set();
 let chordActive = false;
 let completedLines = [];
 let semanticBuffer = [];
+let phonemicBuffer = [];
 let expanding = false;
-let lastExpansionTokens = [];  // For reprompt feature
-let lastExpansionResult = '';  // Store last AI output
+let lastExpansionTokens = [];
+let lastExpansionResult = '';
+
+// MODE: 'semantic' or 'phonemic'
+let currentMode = 'semantic';
+let phonemicStartIndex = -1;  // Where phonemic input started in semantic buffer
 
 // DOM elements
 const textOutput = document.getElementById('text-output');
 const intentDisplay = document.getElementById('intent-display');
 const previewResult = document.getElementById('preview-result');
-const optionsPanel = document.getElementById('options-panel');
-const optionsGrid = document.getElementById('options-grid');
+const predictionsPanel = document.getElementById('predictions-panel');
+const predictionsList = document.getElementById('predictions-list');
+const modeLabel = document.getElementById('mode-label');
+const leftHandTitle = document.getElementById('left-hand-title');
+const rightHandTitle = document.getElementById('right-hand-title');
+
+// ============================================================
+// MODE SWITCHING
+// ============================================================
+
+function setMode(mode) {
+  currentMode = mode;
+  modeLabel.textContent = mode === 'semantic' ? 'SEMANTIC MODE' : 'PHONEMIC MODE';
+  modeLabel.className = mode;
+
+  // Update hand labels
+  if (mode === 'semantic') {
+    leftHandTitle.textContent = 'Category Select';
+    rightHandTitle.textContent = 'Command Select';
+  } else {
+    leftHandTitle.textContent = 'Consonant';
+    rightHandTitle.textContent = 'Vowel';
+  }
+
+  // Update key labels
+  updateKeyLabelsForMode();
+  updateDisplay();
+  updateKeyVisuals();
+  updatePreview();
+}
+
+function toggleMode() {
+  if (currentMode === 'semantic') {
+    // Entering phonemic mode
+    phonemicStartIndex = semanticBuffer.length;
+    phonemicBuffer = [];
+    setMode('phonemic');
+  } else {
+    // Exiting phonemic mode - lock IPA in place
+    if (phonemicBuffer.length > 0) {
+      const ipa = phonemicBuffer.join('');
+      // Add as phonemic token (raw IPA, will be converted later)
+      semanticBuffer.push({ symbol: ipa, category: 'phonemic', isRawIPA: true });
+      phonemicBuffer = [];
+    }
+    phonemicStartIndex = -1;
+    setMode('semantic');
+  }
+}
+
+function updateKeyLabelsForMode() {
+  // Update left hand labels
+  document.querySelectorAll('.key.left').forEach(keyEl => {
+    const key = keyEl.dataset.key;
+    const labelEl = keyEl.querySelector('.key-label');
+
+    if (currentMode === 'semantic') {
+      const cat = keyEl.dataset.category;
+      labelEl.textContent = cat ? cat.toUpperCase() : '';
+    } else {
+      labelEl.textContent = CONSONANT_LABELS[key] || '';
+    }
+  });
+
+  // Update right hand labels (will be updated dynamically)
+  document.querySelectorAll('.key.right').forEach(keyEl => {
+    const key = keyEl.dataset.key;
+    const labelEl = keyEl.querySelector('.key-label');
+
+    if (currentMode === 'phonemic') {
+      labelEl.textContent = VOWEL_LABELS[key] || '';
+      keyEl.classList.add('has-option', 'phonemic');
+    }
+  });
+}
 
 // ============================================================
 // CHORD ENGINE
@@ -1153,16 +1351,10 @@ function getHeldRightKeys() {
 function getCurrentCategory() {
   const leftHeld = getHeldLeftKeys();
 
-  // Check for combo categories first
-  if (leftHeld.includes('A') && leftHeld.includes('F')) {
-    return 'symbol';
-  }
-  if (leftHeld.includes('D') && leftHeld.includes('C')) {
-    return 'style';
-  }
-  if (leftHeld.includes('S') && leftHeld.includes('C')) {
-    return 'mode';
-  }
+  // Check for combo categories
+  if (leftHeld.includes('A') && leftHeld.includes('F')) return 'symbol';
+  if (leftHeld.includes('D') && leftHeld.includes('C')) return 'style';
+  if (leftHeld.includes('S') && leftHeld.includes('C')) return 'mode';
 
   // Single category
   for (const key of chordBuffer) {
@@ -1191,12 +1383,51 @@ function updateDisplay() {
   textOutput.scrollTop = textOutput.scrollHeight;
 
   // Update intent buffer
-  if (semanticBuffer.length > 0) {
-    intentDisplay.innerHTML = semanticBuffer.map(token =>
-      `<span class="intent-token ${token.category}">${token.symbol}</span>`
-    ).join('');
+  if (semanticBuffer.length > 0 || phonemicBuffer.length > 0 || currentMode === 'phonemic') {
+    let bufferHtml = '';
+
+    // Show semantic tokens (including locked phonemic tokens)
+    bufferHtml += semanticBuffer.map(token => {
+      if (token.isRawIPA) {
+        // Show phonemic tokens with special styling
+        return `<span class="intent-token phonemic">${escapeHtml(token.symbol)}</span>`;
+      }
+      return `<span class="intent-token ${token.category}">${escapeHtml(token.symbol)}</span>`;
+    }).join('');
+
+    // Show active phonemic buffer if currently typing IPA
+    if (currentMode === 'phonemic') {
+      const ipaContent = phonemicBuffer.length > 0 ? phonemicBuffer.join('') : '...';
+      bufferHtml += `<span class="phonemic-buffer">${escapeHtml(ipaContent)}</span>`;
+    }
+
+    intentDisplay.innerHTML = bufferHtml || '<span class="intent-placeholder">Chord consonants + vowels...</span>';
   } else {
     intentDisplay.innerHTML = '<span class="intent-placeholder">Hold category key to see options...</span>';
+  }
+
+  // Update predictions
+  updatePredictions();
+}
+
+function updatePredictions() {
+  if (currentMode !== 'semantic' || expanding) {
+    predictionsPanel.classList.remove('visible');
+    return;
+  }
+
+  const predictions = getPredictions(semanticBuffer);
+
+  if (predictions.length > 0 && !chordActive) {
+    predictionsPanel.classList.add('visible');
+    predictionsList.innerHTML = predictions.map(p => {
+      // Find the chord for this prediction
+      const chord = Object.entries(SEMANTICS).find(([k, v]) => v.symbol === p);
+      const chordHint = chord ? chord[0].replace(/\+/g, '+') : '';
+      return `<span class="prediction-item">${p}<span class="chord-hint">${chordHint}</span></span>`;
+    }).join('');
+  } else {
+    predictionsPanel.classList.remove('visible');
   }
 }
 
@@ -1205,8 +1436,9 @@ function updateKeyVisuals() {
   const rightHeld = getHeldRightKeys();
   const category = getCurrentCategory();
 
-  // Check if symbol mode (A+F combo)
   const isSymbolMode = leftHeld.includes('A') && leftHeld.includes('F');
+  const isStyleMode = leftHeld.includes('D') && leftHeld.includes('C');
+  const isModeToggle = leftHeld.includes('S') && leftHeld.includes('C');
 
   // Update left hand keys
   document.querySelectorAll('.key.left').forEach(keyEl => {
@@ -1214,18 +1446,32 @@ function updateKeyVisuals() {
     const isPressed = heldKeys.has(key);
     const keyCategory = keyEl.dataset.category;
 
-    keyEl.classList.remove('pressed', 'action', 'subject', 'quality', 'connect', 'respond', 'symbol', 'style', 'mode');
+    keyEl.classList.remove('pressed', 'action', 'subject', 'quality', 'connect', 'respond', 'symbol', 'style', 'mode', 'phonemic-consonant');
 
     if (isPressed) {
-      if (isSymbolMode) {
+      if (currentMode === 'phonemic') {
+        keyEl.classList.add('pressed', 'phonemic-consonant');
+      } else if (isSymbolMode) {
         keyEl.classList.add('pressed', 'symbol');
+      } else if (isStyleMode) {
+        keyEl.classList.add('pressed', 'style');
+      } else if (isModeToggle) {
+        keyEl.classList.add('pressed', 'mode');
       } else {
         keyEl.classList.add('pressed', keyCategory);
       }
     }
   });
 
-  // Update right hand keys with available options
+  // Update right hand keys
+  if (currentMode === 'phonemic') {
+    updateRightKeysPhonemic();
+  } else {
+    updateRightKeysSemantic(leftHeld, rightHeld, category);
+  }
+}
+
+function updateRightKeysSemantic(leftHeld, rightHeld, category) {
   const options = leftHeld.length > 0 ? getOptionsForLeftKeys(leftHeld) : {};
 
   document.querySelectorAll('.key.right').forEach(keyEl => {
@@ -1234,48 +1480,73 @@ function updateKeyVisuals() {
     const isPressed = heldKeys.has(key);
     const labelEl = keyEl.querySelector('.key-label');
 
-    keyEl.classList.remove('pressed', 'has-option', 'action', 'subject', 'quality', 'connect', 'respond', 'symbol', 'style', 'mode', 'control');
+    keyEl.classList.remove('pressed', 'has-option', 'action', 'subject', 'quality', 'connect', 'respond', 'symbol', 'style', 'mode', 'phonemic', 'control');
 
     // Check for backspace control chord
     if (leftHeld.includes('C') && leftHeld.length === 1 && key === 'm') {
       keyEl.classList.add('has-option', 'control');
       labelEl.textContent = 'BACKSPACE';
-      if (isPressed) {
-        keyEl.classList.add('pressed', 'control');
-      }
+      if (isPressed) keyEl.classList.add('pressed', 'control');
+      return;
+    }
+
+    // Check for mode toggle chord (S+C+M)
+    if (leftHeld.includes('S') && leftHeld.includes('C') && key === 'm') {
+      keyEl.classList.add('has-option', 'mode');
+      labelEl.textContent = 'PHONEMIC';
+      if (isPressed) keyEl.classList.add('pressed', 'mode');
+      return;
+    }
+
+    // Check for Enter chord (C+;)
+    if (leftHeld.includes('C') && leftHeld.length === 1 && key === ';') {
+      keyEl.classList.add('has-option', 'control');
+      labelEl.textContent = 'ENTER';
+      if (isPressed) keyEl.classList.add('pressed', 'control');
       return;
     }
 
     // Find what this key would produce
     const currentRight = [...rightHeld];
-    if (!currentRight.includes(keyUpper)) {
-      currentRight.push(keyUpper);
-    }
+    if (!currentRight.includes(keyUpper)) currentRight.push(keyUpper);
     const rightKey = sortByOrder(currentRight, RIGHT_KEY_ORDER).join('+');
 
     if (options[rightKey]) {
       const opt = options[rightKey];
       keyEl.classList.add('has-option', opt.category);
       labelEl.textContent = opt.symbol;
-
-      if (isPressed) {
-        keyEl.classList.add('pressed', opt.category);
-      }
+      if (isPressed) keyEl.classList.add('pressed', opt.category);
     } else if (key === 'm' && leftHeld.length > 0) {
-      // M key always shows "EXTEND" when a category is selected
       keyEl.classList.add('has-option');
       labelEl.textContent = '+MORE';
       labelEl.style.color = 'var(--text-mid)';
-
       if (isPressed) {
         keyEl.classList.add('pressed');
         keyEl.style.borderColor = 'var(--border-glow)';
       }
     } else {
       labelEl.textContent = '';
-      if (isPressed) {
-        keyEl.classList.add('pressed');
-      }
+      if (isPressed) keyEl.classList.add('pressed');
+    }
+  });
+}
+
+function updateRightKeysPhonemic() {
+  const rightCode = getRightCode();
+  const vowel = VOWELS[rightCode];
+
+  document.querySelectorAll('.key.right').forEach(keyEl => {
+    const key = keyEl.dataset.key;
+    const isPressed = heldKeys.has(key);
+    const labelEl = keyEl.querySelector('.key-label');
+
+    keyEl.classList.remove('pressed', 'has-option', 'action', 'subject', 'quality', 'connect', 'respond', 'symbol', 'style', 'mode', 'phonemic', 'control');
+
+    keyEl.classList.add('has-option', 'phonemic');
+    labelEl.textContent = VOWEL_LABELS[key] || '';
+
+    if (isPressed) {
+      keyEl.classList.add('pressed', 'phonemic');
     }
   });
 }
@@ -1284,7 +1555,7 @@ function updatePreview() {
   const leftCode = getLeftCode();
   const rightCode = getRightCode();
 
-  previewResult.classList.remove('action', 'subject', 'quality', 'connect', 'respond', 'symbol', 'style', 'mode', 'control', 'empty');
+  previewResult.classList.remove('action', 'subject', 'quality', 'connect', 'respond', 'symbol', 'style', 'mode', 'control', 'phonemic', 'empty');
 
   if (!chordActive || (leftCode === 0 && rightCode === 0)) {
     previewResult.textContent = 'READY';
@@ -1292,25 +1563,48 @@ function updatePreview() {
     return;
   }
 
-  // Check for control chord (backspace)
+  // Mode toggle (S+C+M)
+  if (leftCode === 18 && rightCode === 16) {  // S+C = 2+16=18, M = 16
+    previewResult.textContent = '⇄ TOGGLE MODE';
+    previewResult.classList.add('mode');
+    return;
+  }
+
+  // Backspace (C+M)
   if (leftCode === 16 && rightCode === 16) {
     previewResult.textContent = '⌫ BACKSPACE';
     previewResult.classList.add('control');
     return;
   }
 
-  const chordKey = getChordKey(leftCode, rightCode);
-  const sem = chordKey ? lookupSemantic(chordKey) : null;
-  if (sem) {
-    previewResult.textContent = sem.symbol;
-    previewResult.classList.add(sem.category);
-  } else if (leftCode > 0) {
-    const category = getCurrentCategory();
-    previewResult.textContent = category ? category.toUpperCase() + '...' : 'SELECT...';
-    previewResult.classList.add(category || 'empty');
+  // Enter (C+;)
+  if (leftCode === 16 && rightCode === 1) {
+    previewResult.textContent = '↵ ENTER';
+    previewResult.classList.add('control');
+    return;
+  }
+
+  if (currentMode === 'phonemic') {
+    // Show phonemic preview
+    const consonant = CONSONANTS[leftCode] || '';
+    const vowel = VOWELS[rightCode] || '';
+    previewResult.textContent = consonant + vowel || '...';
+    previewResult.classList.add('phonemic');
   } else {
-    previewResult.textContent = 'READY';
-    previewResult.classList.add('empty');
+    // Show semantic preview
+    const chordKey = getChordKey(leftCode, rightCode);
+    const sem = chordKey ? lookupSemantic(chordKey) : null;
+    if (sem) {
+      previewResult.textContent = sem.symbol;
+      previewResult.classList.add(sem.category);
+    } else if (leftCode > 0) {
+      const category = getCurrentCategory();
+      previewResult.textContent = category ? category.toUpperCase() + '...' : 'SELECT...';
+      previewResult.classList.add(category || 'empty');
+    } else {
+      previewResult.textContent = 'READY';
+      previewResult.classList.add('empty');
+    }
   }
 }
 
@@ -1348,15 +1642,17 @@ async function checkServer() {
 async function expandSemantic(tokens, options = {}) {
   if (!serverOnline) return tokens.map(t => t.symbol).join(' ');
   try {
-    const payload = { tokens: tokens.map(t => t.symbol) };
+    // Format tokens: UPPERCASE = semantic, lowercase = phonemic
+    const formattedTokens = tokens.map(t => {
+      if (t.isRawIPA) {
+        return t.symbol.toLowerCase();  // Phonemic stays lowercase
+      }
+      return t.symbol.toUpperCase();  // Semantic is UPPERCASE
+    });
 
-    // Add style modifiers if reprompting
-    if (options.styles && options.styles.length > 0) {
-      payload.styles = options.styles;
-    }
-    if (options.originalText) {
-      payload.original_text = options.originalText;
-    }
+    const payload = { tokens: formattedTokens };
+    if (options.styles && options.styles.length > 0) payload.styles = options.styles;
+    if (options.originalText) payload.original_text = options.originalText;
 
     const res = await fetch(`${API_BASE}/expand`, {
       method: 'POST',
@@ -1372,6 +1668,25 @@ async function expandSemantic(tokens, options = {}) {
     checkServer();
   }
   return tokens.map(t => t.symbol).join(' ');
+}
+
+async function convertPhonemic(ipa) {
+  if (!serverOnline) return ipa;
+  try {
+    const res = await fetch(`${API_BASE}/convert`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ipa, lang: 'en' }),
+      signal: AbortSignal.timeout(15000),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return data.text;
+    }
+  } catch {
+    checkServer();
+  }
+  return ipa;
 }
 
 // ============================================================
@@ -1444,15 +1759,38 @@ function fireChord() {
   const leftCode = getLeftCode();
   const rightCode = getRightCode();
 
-  // Control: both thumbs = backspace
+  // Mode toggle: S+C+M (leftCode = 18 (S=2, C=16), rightCode = 16 (M))
+  if (leftCode === 18 && rightCode === 16) {
+    flashFired();
+    toggleMode();
+    return;
+  }
+
+  // Backspace: C+M (both thumbs)
   if (leftCode === 16 && rightCode === 16) {
     flashFired();
     handleBackspace();
     return;
   }
 
+  // Enter: C+; (left thumb + right pinky)
+  if (leftCode === 16 && rightCode === 1) {
+    flashFired();
+    handleEnter();
+    return;
+  }
+
+  if (currentMode === 'phonemic') {
+    firePhonemic(leftCode, rightCode);
+  } else {
+    fireSemantic(leftCode, rightCode);
+  }
+}
+
+function fireSemantic(leftCode, rightCode) {
   const chordKey = getChordKey(leftCode, rightCode);
   const sem = chordKey ? lookupSemantic(chordKey) : null;
+
   if (sem) {
     flashFired();
     semanticBuffer.push(sem);
@@ -1462,7 +1800,40 @@ function fireChord() {
   }
 }
 
+function firePhonemic(leftCode, rightCode) {
+  let ipa = '';
+  let valid = true;
+
+  if (leftCode !== 0) {
+    const c = CONSONANTS[leftCode];
+    if (c) ipa += c;
+    else valid = false;
+  }
+
+  if (rightCode !== 0) {
+    const v = VOWELS[rightCode];
+    if (v) ipa += v;
+    else valid = false;
+  }
+
+  if (ipa && valid) {
+    flashFired();
+    phonemicBuffer.push(ipa);
+    updateDisplay();
+  } else if (!valid) {
+    flashInvalid();
+  }
+}
+
 async function handleSpace() {
+  if (currentMode === 'phonemic') {
+    // In phonemic mode, Space just locks the IPA and returns to semantic
+    // (same as toggle, but more natural)
+    toggleMode();
+    return;
+  }
+
+  // Semantic mode - expand everything including raw IPA
   if (semanticBuffer.length === 0) return;
   if (expanding) return;
 
@@ -1470,7 +1841,6 @@ async function handleSpace() {
   document.body.classList.add('expanding');
   updateDisplay();
 
-  // Check for REPROMPT in buffer
   const hasReprompt = semanticBuffer.some(t => t.symbol === 'REPROMPT');
   const styleTokens = semanticBuffer.filter(t => t.category === 'style' && t.symbol !== 'REPROMPT');
   const contentTokens = semanticBuffer.filter(t => t.category !== 'style');
@@ -1478,15 +1848,12 @@ async function handleSpace() {
   let result;
 
   if (hasReprompt && lastExpansionTokens.length > 0) {
-    // Reprompt: use original tokens with new style modifiers
     result = await expandSemantic(lastExpansionTokens, {
       styles: styleTokens.map(t => t.symbol),
       originalText: lastExpansionResult
     });
 
-    // Replace the last output instead of appending
     if (completedLines.length > 0) {
-      // Find and replace the last non-empty line
       for (let i = completedLines.length - 1; i >= 0; i--) {
         if (completedLines[i].trim() !== '') {
           completedLines[i] = result;
@@ -1495,14 +1862,17 @@ async function handleSpace() {
       }
     }
   } else {
-    // Normal expansion - include style modifiers if present
     const options = {};
-    if (styleTokens.length > 0) {
-      options.styles = styleTokens.map(t => t.symbol);
+    if (styleTokens.length > 0) options.styles = styleTokens.map(t => t.symbol);
+
+    // Check if there are phonemic tokens that need conversion
+    const hasPhonemic = contentTokens.some(t => t.isRawIPA);
+    if (hasPhonemic) {
+      options.hasPhonemic = true;
     }
+
     result = await expandSemantic(contentTokens, options);
 
-    // Store for potential reprompt
     lastExpansionTokens = [...contentTokens];
     lastExpansionResult = result;
 
@@ -1517,24 +1887,42 @@ async function handleSpace() {
 
   expanding = false;
   document.body.classList.remove('expanding');
-
   semanticBuffer = [];
   updateDisplay();
 }
 
 function handleEnter() {
-  if (semanticBuffer.length > 0) return;
+  if (semanticBuffer.length > 0 || phonemicBuffer.length > 0) return;
   completedLines.push('');
   updateDisplay();
 }
 
 function handleBackspace() {
   if (expanding) return;
-  if (semanticBuffer.length > 0) {
+
+  if (currentMode === 'phonemic') {
+    // In phonemic mode, delete from phonemic buffer first
+    if (phonemicBuffer.length > 0) {
+      phonemicBuffer.pop();
+      updateDisplay();
+    } else {
+      // If phonemic buffer empty, cancel phonemic mode and go back
+      phonemicStartIndex = -1;
+      setMode('semantic');
+    }
+  } else if (semanticBuffer.length > 0) {
     semanticBuffer.pop();
     updateDisplay();
   } else if (completedLines.length > 0) {
     completedLines.pop();
+    updateDisplay();
+  }
+}
+
+function handleEnter() {
+  // Add a new line to the output
+  if (semanticBuffer.length === 0 && phonemicBuffer.length === 0) {
+    completedLines.push('');
     updateDisplay();
   }
 }

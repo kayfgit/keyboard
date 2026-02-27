@@ -43,3 +43,13 @@ def beep_toggle_off():
         winsound.Beep(900, 50)
         winsound.Beep(600, 50)
     threading.Thread(target=_play, daemon=True).start()
+
+
+def beep_mode_semantic():
+    """High ping — switched to semantic mode."""
+    _beep(1400, 60)
+
+
+def beep_mode_phonemic():
+    """Low ping — switched to phonemic mode."""
+    _beep(700, 60)

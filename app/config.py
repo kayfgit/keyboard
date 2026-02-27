@@ -75,5 +75,3 @@ PASSTHROUGH_VKS = {
     0x78, 0x79, 0x7A, 0x7B,    # F9-F12
 }
 
-# Supported AI output languages
-AI_LANGUAGES = {'en': 'English', 'pt': 'Português'}

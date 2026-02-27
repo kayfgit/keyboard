@@ -21,7 +21,22 @@ RESPONSES: YES, NO, MAYBE, OK, THANKS, PLEASE, SORRY, WAIT, DONE, AGAIN, WHAT, W
 
 SYMBOLS: Numbers (1-9, 0) and punctuation (. , ? ! : - _ / @ # $ % & * + = ( ) ")
 
-SHORTCUTS: MAKE_THIS, CHANGE_THIS, EXPLAIN_THIS, FIX_THIS, SHOW_ME, HELP_ME, TELL_ME, MORE_DETAIL, LESS_DETAIL, ANOTHER_WAY, SAME_THING, GOOD_IDEA, BAD_IDEA, MAIN_POINT
+DAILY: GREET, ASK, TELL, WANT, NEED, KNOW, MEET, CALL, SEND, GET, START, FINISH, SCHEDULE, CANCEL
+
+PEOPLE/PLACES: NAME, PERSON, PLACE, THING, TEAM, COMPANY, PROJECT, MEETING
+
+TIME: TODAY, TOMORROW, NOW, LATER, SOON, YESTERDAY, TIME, DATE
+
+STATES: HAPPY, BUSY, READY, SURE, AVAILABLE, INTERESTED, URGENT, IMPORTANT
+
+SPECIAL MARKERS:
+- NAME: The next token is a proper noun (person's name). Preserve spelling, capitalize appropriately, and use honorifics if POLITE/FORMAL style is applied (e.g., "Mr.", "Ms.").
+- <IPA:...>: Raw phonemic input that needs conversion to a word. Convert the IPA/phonemic string to the most likely intended word based on context. Examples:
+  - <IPA:wren> after NAME → "Wren" (proper noun)
+  - <IPA:ian> after NAME → "Ian" (proper noun)
+  - <IPA:projektpreviəslimenʃənd> → "the project previously mentioned"
+  - <IPA:həlow> → "hello"
+  - Use context to disambiguate (e.g., after NAME, treat as proper noun and preserve phonetic spelling as a name)
 
 STYLE MODIFIERS (apply to output tone):
 - FORMAL: Professional, formal language
@@ -98,7 +113,31 @@ Input: WAIT BEFORE CONTINUE CHECK THIS
 Output: Wait, before continuing, check this.
 
 Input: TRANSLATE THIS TO CODE
-Output: Translate this into code."""
+Output: Translate this into code.
+
+Input: GREET NAME <IPA:wren>
+Output: Hello, Wren!
+
+Input: POLITE GREET NAME <IPA:ian>
+Output: Hello, Mr. Ian. Nice to meet you.
+
+Input: WANT MEET NAME <IPA:sera> TOMORROW
+Output: I'd like to meet Sarah tomorrow.
+
+Input: FORMAL PROFESSIONAL GREET NAME <IPA:dokterʧen> INTERESTED DISCUSS PROJECT
+Output: Good morning, Dr. Chen. I'm interested in discussing the project with you.
+
+Input: POLITE GREET NAME <IPA:wren> NEED SCHEDULE MEETING DISCUSS <IPA:projektpreviəslimenʃənd>
+Output: Hello, Mr. Wren, I hope you are doing well. We need to schedule a meeting to discuss the project you previously mentioned.
+
+Input: ASK NAME <IPA:ʤɑn> ABOUT MEETING TIME
+Output: John, what time is the meeting?
+
+Input: SCHEDULE CALL NAME <IPA:æləks> TODAY LATER
+Output: Schedule a call with Alex for later today.
+
+Input: GREET TEAM WANT DISCUSS <IPA:njuprodəktlɔnʧ> AND <IPA:mɑrkətɪŋstretəʤi>
+Output: Hello team, I want to discuss the new product launch and marketing strategy."""
 
 REPROMPT_SYSTEM = """You are a text style transformer. You will receive:
 1. An original text that was generated

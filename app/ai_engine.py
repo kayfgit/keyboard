@@ -1,140 +1,65 @@
-"""AI engine: Groq SDK worker thread for phoneme-to-text conversion."""
+"""AI engine: expand semantic tokens to natural language via Groq."""
 
 import queue
 import threading
 
 from groq import Groq
-
 from config import get_groq_api_key
 
-# System prompts — formal (with grammar/punctuation) and raw (lowercase, no punctuation)
-SYSTEM_PROMPTS = {
-    "en": """You are a universal phonemic decoder. The user types on a chord keyboard using a simplified phonemic notation. You receive a continuous stream of phonemic symbols with no spaces or word boundaries. Convert to correct English text.
+SYSTEM_PROMPT = """You are a semantic-to-text expander. Users input sequences that mix semantic tokens (UPPERCASE) and phonemic text (lowercase). Expand them into natural, fluent text.
 
-Phoneme inventory:
-- Base consonants: p b t d k g f v s z ʃ h m n ŋ r l w j
-- Consonant chunks: θ(=th voiceless) ð(=th voiced) tʃ(=ch) dʒ(=j sound) ʒ(=zh)
-- Clusters: st nd tr pr str nt sp
-- Base vowels: i e a o u ə
-- Modified vowels: ī ē ā ō ū (long/diphthong variants)
-- VC chunks: at in an on it ot ut et ad un en al er or il is ing aw oi ow
+## Input Format
+- UPPERCASE = semantic tokens (expand based on meaning)
+- lowercase = phonemic text (convert to actual words based on sound/context)
 
-The input is LOSSY — multiple English sounds map to one symbol:
-- "i" covers ɪ (bit) AND unstressed i
-- "e" covers ɛ (bed) AND unstressed e
-- "a" covers æ (cat) AND similar short a sounds
-- "o" covers ɒ (not) AND similar short o sounds
-- "u" covers ʊ (put) AND unstressed u
-- "ī" covers iː (see) OR aɪ (eye) — use context
-- "ē" covers eɪ (day) — long e sound
-- "ā" covers ɑː (father) — long a sound
-- "ō" covers oʊ (go) OR ɔː (thought) — use context
-- "ū" covers uː (blue) — long u sound
-- "r" is a generic rhotic (covers all r-like sounds)
+## Token Categories
+ACTIONS: MAKE, CHANGE, REMOVE, FIX, FIND, SHOW, TRY, USE, EXPLAIN, IMPROVE, COMPARE, ANALYZE, SUMMARIZE, EXPAND, SIMPLIFY, ADD, KEEP, GIVE, TAKE, THINK, HELP, CHECK, LIST, COMBINE, SPLIT, GENERATE, TRANSLATE, REWRITE, FORMAT
+DAILY: GREET, ASK, TELL, WANT, NEED, KNOW, MEET, CALL, SEND, GET, START, FINISH, SCHEDULE, CANCEL, GO, COME, LEAVE, STAY, RETURN, BRING, ARRIVE, PUT, MOVE, OPEN, SEE, HEAR, FEEL
+SUBJECTS: THIS, THAT, IT, IDEA, TEXT, CODE, QUESTION, ANSWER, PROBLEM, SOLUTION, EXAMPLE, RESULT, REASON, WAY, POINT, FILE, FUNCTION, DATA, LIST, STEP, PART, OPTION, ERROR, OUTPUT, INPUT, CONTENT, CONTEXT, DETAIL
+NOUNS: NAME, PERSON, PLACE, THING, TEAM, COMPANY, GROUP, PROJECT, MEETING, EVENT, WORK, HOME, OFFICE, EMAIL, MESSAGE, PHONE, MONEY, DOCUMENT, REPORT, TASK, ISSUE, REQUEST, UPDATE
+TIME: TODAY, TOMORROW, NOW, LATER, SOON, YESTERDAY, TIME, DATE
+QUALITIES: GOOD, BAD, MORE, LESS, SIMPLE, COMPLEX, NEW, OLD, SAME, DIFFERENT, GENERAL, SPECIFIC, MAIN, OTHER, ALL, FAST, SLOW, BIG, SMALL, SHORT, LONG, CLEAR, BETTER, WORSE, CORRECT, WRONG, SIMILAR, EXACT, ENOUGH
+STATES: HAPPY, BUSY, READY, SURE, AVAILABLE, INTERESTED, URGENT, IMPORTANT
+PRONOUNS: I, YOU, WE, THEY, HE, SHE, SOMEONE, EVERYONE, ANYONE, NOONE, MY, YOUR, OUR, THEIR, HIS, HER, MYSELF, ME, US, THEM
+NEGATION/MODALS: NOT, CAN, WILL, SHOULD, NEVER, CANNOT, WONT, MUST, MIGHT, WOULD, DONT, DIDNT, DOESNT, ISNT, HAVENT, WASNT, WERENT, COULDNT, SHOULDNT, WOULDNT
+PREPOSITIONS: IN, ON, AT, BY, OUT, UP, DOWN, OVER, UNDER, THROUGH, INTO, ONTO, NEAR, AROUND, BETWEEN, BEHIND, ABOVE, BELOW, BESIDE, ACROSS
+CONNECTORS: AND, OR, BUT, SO, IF, THEN, BECAUSE, WITH, WITHOUT, FOR, TO, FROM, LIKE, AS, ABOUT, ALSO, HOWEVER, INSTEAD, RATHER, BEFORE, AFTER, WHILE, WHEN, WHERE, ALTHOUGH, UNLESS, UNTIL, SINCE, WHETHER
+RESPONSES: YES, NO, MAYBE, OK, THANKS, PLEASE, SORRY, WAIT, DONE, AGAIN, WHAT, WHY, HOW, WHICH, WHO, CONTINUE, STOP, UNDO, SKIP, FOCUS, IGNORE, REMEMBER, FORGET, CONFIRM, NEVERMIND, PERFECT, ALMOST, NOT_QUITE, EXACTLY
+STYLE: FORMAL, CASUAL, POLITE, DIRECT, TECHNICAL, FRIENDLY, PROFESSIONAL, BRIEF, DETAILED, AS_QUESTION, AS_COMMAND, AS_REQUEST
+SYMBOLS: Numbers and punctuation (1-9, 0, . , ? ! : - _ / @ # $ % & * + = ( ) ")
 
-Rules:
-1. Segment the stream into English words
-2. Use context to resolve ambiguities between lossy phoneme mappings
-3. Add proper spacing, punctuation, and capitalization
-4. Return ONLY the final English text. No explanations, no phonemes, no quotes.
+## Special Token
+- NAME: The next lowercase word is a proper noun (capitalize it, use honorifics with POLITE/FORMAL)
 
-Examples:
-Input: ðəkatsatonðəmat
-Output: The cat sat on the mat.
+## Rules
+1. UPPERCASE tokens → expand based on semantic meaning
+2. lowercase text → convert phonemic spelling to real words based on context
+3. Apply STYLE tokens (FORMAL, CASUAL, POLITE, etc.) to the entire output tone
+4. After NAME token, treat the following lowercase word as a proper noun
+5. Output ONLY the expanded text, no explanations or quotes
 
-Input: plizrītðəansər
-Output: Please write the answer.
-
-Input: ʃiwenttuðəʃop
-Output: She went to the shop.""",
-
-    "en_raw": """You are a universal phonemic decoder. Convert phonemic input to English words.
-
-Phoneme inventory:
-- Consonants: p b t d k g f v s z ʃ h m n ŋ r l w j θ ð tʃ dʒ ʒ
-- Clusters: st nd tr pr str nt sp
-- Vowels: i e a o u ə ī ē ā ō ū
-- VC chunks: at in an on it ot ut et ad un en al er or il is ing aw oi ow
-
-Rules:
-1. Segment into words with spaces
-2. ALL LOWERCASE — no capitalization
-3. NO PUNCTUATION — no periods, commas, apostrophes, nothing
-4. Return ONLY the words separated by spaces
-
-Examples:
-Input: ðəkatsatonðəmat
-Output: the cat sat on the mat
-
-Input: īhaevakat
-Output: i have a cat
-
-Input: ðisisðəbestwetugetit
-Output: this is the best way to get it""",
-
-    "pt": """You are a universal phonemic decoder. The user types on a chord keyboard using a simplified phonemic notation. You receive a continuous stream of phonemic symbols with no spaces or word boundaries. Convert to correct Brazilian Portuguese text.
-
-Phoneme inventory (same universal layout as English):
-- Base consonants: p b t d k g f v s z ʃ h m n ŋ r l w j
-- Consonant chunks: tʃ dʒ ʒ (θ and ð are not used in Portuguese)
-- Clusters: st nd tr pr str nt sp
-- Base vowels: i e a o u ə
-- Modified vowels: ī ē ā ō ū
-- VC chunks: at in an on it ot ut et ad un en al er or il is ing aw oi ow
-
-Portuguese-specific interpretation:
-- "r" = /ɾ/ (tap, intervocalic: "cara", "para") OR /h/ (initial/rr: "rato", "carro") — determine from position
-- "n+j" sequence = "nh" digraph (banho, senhor)
-- "l+j" sequence = "lh" digraph (trabalho, filho)
-- "tʃ" = t before i in Brazilian Portuguese (tia, noite)
-- "dʒ" = d before i in Brazilian Portuguese (dia, cidade)
-- Nasal vowels are represented by vowel followed by n or m (e.g., "an" = ã in context)
-- Modified vowels ā ō etc. may represent stressed open vowels (é, ó)
-
-Rules:
-1. Segment the stream into Portuguese words
-2. Add proper spacing, punctuation, capitalization, and diacritics (ã, õ, é, ê, ó, ô, á, â, ç, í, ú)
-3. Return ONLY the final Portuguese text. No explanations, no phonemes, no quotes.
-
-Examples:
-Input: ukaruegranji
-Output: O carro é grande.
-
-Input: eunansej
-Output: Eu não sei.""",
-
-    "pt_raw": """You are a universal phonemic decoder. Convert phonemic input to Brazilian Portuguese words.
-
-Phoneme inventory:
-- Consonants: p b t d k g f v s z ʃ h m n ŋ r l w j tʃ dʒ ʒ
-- Clusters: st nd tr pr str nt sp
-- Vowels: i e a o u ə ī ē ā ō ū
-- VC chunks: at in an on it ot ut et ad un en al er or il is ing aw oi ow
-
-Rules:
-1. Segment into words with spaces
-2. ALL LOWERCASE — no capitalization
-3. NO PUNCTUATION — no periods, commas, nothing
-4. Keep essential diacritics (ã õ é ê ó ô á â ç í ú) but lowercase
-5. Return ONLY the words separated by spaces
-
-Examples:
-Input: ukaruegranji
-Output: o carro é grande
-
-Input: eunansej
-Output: eu não sei""",
-}
+## Examples
+GREET NAME wren → Hello, Wren!
+POLITE GREET NAME ian → Hello, Mr. Ian. Nice to meet you.
+CASUAL GREET BUSY TODAY AS_QUESTION → Hey, are you busy today?
+WANT SCHEDULE MEETING DISCUSS projekt TOMORROW → I want to schedule a meeting to discuss the project tomorrow.
+THANKS FOR HELP PERFECT → Thanks for your help, that's perfect!
+FORMAL PROFESSIONAL GREET NAME viktorchen INTERESTED DISCUSS PROJECT → Good morning, Dr. Viktor Chen. I'm interested in discussing the project with you.
+CASUAL GREET NAME ian BUSY TODAY AS_QUESTION → Hey Ian, are you busy today?
+I CANT COME TO MEETING TODAY → I can't come to the meeting today.
+CAN YOU SEND ME EMAIL ABOUT PROJECT → Can you send me an email about the project?
+WE SHOULD PUT THIS IN DOCUMENT → We should put this in the document.
+I DONT KNOW WHERE HE GO → I don't know where he went.
+PLEASE GO TO MY OFFICE AND GET PHONE → Please go to my office and get my phone.
+EVERYONE IN TEAM MUST SEE THIS REPORT → Everyone on the team must see this report."""
 
 
 class AIEngine:
-    """Background worker that converts phoneme strings to text via Groq."""
+    """Background worker that expands semantic tokens via Groq."""
 
     def __init__(self, on_result, on_error):
         self.on_result = on_result
         self.on_error = on_error
-        self.lang = 'en'
-        self.raw_mode = False  # True = no grammar/punctuation
         self._queue = queue.Queue()
         self._thread = threading.Thread(target=self._worker, daemon=True)
         self._client = None
@@ -143,52 +68,52 @@ class AIEngine:
     def start(self):
         self._thread.start()
 
-    def convert(self, phonemes):
-        self._queue.put(phonemes)
+    def expand(self, tokens_text):
+        """Queue token text for AI expansion."""
+        self._queue.put(tokens_text)
+
+    # Keep old method name for compatibility
+    def convert(self, text):
+        self.expand(text)
 
     def set_language(self, lang):
-        self.lang = lang
+        pass  # Semantic mode is language-agnostic for now
 
     def set_raw_mode(self, enabled):
-        self.raw_mode = enabled
-
-    def _get_prompt_key(self):
-        key = self.lang
-        if self.raw_mode:
-            key += "_raw"
-        return key
+        pass  # Not used in semantic mode
 
     def _worker(self):
         while True:
-            phonemes = self._queue.get()
-            if phonemes is None:
+            tokens = self._queue.get()
+            if tokens is None:
                 break
 
             if not self._api_key:
-                self.on_result(phonemes)
+                # No API key - just return tokens as-is
+                self.on_result(tokens)
                 continue
 
             try:
                 if self._client is None:
                     self._client = Groq(api_key=self._api_key)
 
-                prompt_key = self._get_prompt_key()
-                prompt = SYSTEM_PROMPTS.get(prompt_key, SYSTEM_PROMPTS["en"])
                 response = self._client.chat.completions.create(
                     messages=[
-                        {"role": "system", "content": prompt},
-                        {"role": "user", "content": phonemes},
+                        {"role": "system", "content": SYSTEM_PROMPT},
+                        {"role": "user", "content": tokens},
                     ],
                     model="llama-3.3-70b-versatile",
-                    temperature=0.1,
-                    max_tokens=1024,
+                    temperature=0.4,
+                    max_tokens=512,
                 )
                 result = response.choices[0].message.content.strip()
+                # Strip quotes if model adds them
                 if result.startswith('"') and result.endswith('"'):
                     result = result[1:-1]
                 self.on_result(result)
+
             except Exception as e:
-                self.on_error(phonemes, str(e))
+                self.on_error(tokens, str(e))
 
     def stop(self):
         self._queue.put(None)
