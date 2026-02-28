@@ -28,6 +28,7 @@ VK_K = 0x4B
 VK_L = 0x4C
 VK_OEM_1 = 0xBA  # semicolon on US layout
 VK_SPACE = 0x20
+VK_BACKSPACE = 0x08
 
 # Toggle hotkey: Alt+Q
 VK_Q_TOGGLE = 0x51

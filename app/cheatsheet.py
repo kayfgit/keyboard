@@ -28,26 +28,48 @@ CATEGORIES = {
                     'WAIT', 'DONE', 'AGAIN', 'WHAT', 'WHY', 'HOW', 'WHICH', 'WHO'],
     'RESPOND+ (C+M)': ['CONTINUE', 'STOP', 'UNDO', 'SKIP', 'FOCUS', 'IGNORE', 'REMEMBER',
                        'FORGET', 'CONFIRM', 'NEVERMIND', 'PERFECT', 'ALMOST', 'NOT_QUITE', 'EXACTLY'],
-    'PRONOUNS (S+F)': ['I', 'YOU', 'WE', 'THEY', 'HE', 'SHE', 'SOMEONE', 'EVERYONE', 'ANYONE', 'NOONE'],
-    'PRONOUNS+ (S+F+M)': ['MY', 'YOUR', 'OUR', 'THEIR', 'HIS', 'HER', 'MYSELF', 'ME', 'US', 'THEM'],
-    'NEGATION (A+C)': ['NOT', 'CAN', 'WILL', 'SHOULD', 'NEVER', 'CANNOT', 'WONT', 'MUST', 'MIGHT', 'WOULD'],
-    'NEGATION+ (A+C+M)': ['DONT', 'DIDNT', 'DOESNT', 'ISNT', 'HAVENT', 'WASNT', 'WERENT', 'COULDNT', 'SHOULDNT', 'WOULDNT'],
-    'PREPOSITIONS (F+C)': ['IN', 'ON', 'AT', 'BY', 'OUT', 'UP', 'DOWN', 'OVER', 'UNDER', 'THROUGH'],
-    'PREPOSITIONS+ (F+C+M)': ['INTO', 'ONTO', 'NEAR', 'AROUND', 'BETWEEN', 'BEHIND', 'ABOVE', 'BELOW', 'BESIDE', 'ACROSS'],
+    'PRONOUNS (S+F)': ['I', 'YOU', 'WE', 'THEY', 'HE', 'SHE', 'SOMEONE', 'EVERYONE', 'ANYONE', 'NOONE',
+                       'SOMETHING', 'EVERYTHING', 'ANYTHING', 'NOTHING', 'ITSELF'],
+    'PRONOUNS+ (S+F+M)': ['MY', 'YOUR', 'OUR', 'THEIR', 'HIS', 'HER', 'MYSELF', 'ME', 'US', 'THEM',
+                          'HIMSELF', 'HERSELF', 'THEMSELVES', 'OURSELVES', 'YOURSELF'],
+    'NEGATION (A+C)': ['NOT', 'CAN', 'WILL', 'SHOULD', 'NEVER', 'CANNOT', 'WONT', 'MUST', 'MIGHT', 'WOULD',
+                       'ALWAYS', 'SOMETIMES', 'USUALLY', 'BARELY', 'HARDLY'],
+    'NEGATION+ (A+C+M)': ['DONT', 'DIDNT', 'DOESNT', 'ISNT', 'HAVENT', 'WASNT', 'WERENT', 'COULDNT', 'SHOULDNT', 'WOULDNT',
+                          'ARENT', 'WONT_BE', 'CANT_BE', 'MUSTNT', 'NEEDNT'],
+    'PREPOSITIONS (F+C)': ['IN', 'ON', 'AT', 'BY', 'OUT', 'UP', 'DOWN', 'OVER', 'UNDER', 'THROUGH',
+                           'WITHIN', 'THROUGHOUT', 'ALONG', 'AGAINST', 'AMONG'],
+    'PREPOSITIONS+ (F+C+M)': ['INTO', 'ONTO', 'NEAR', 'AROUND', 'BETWEEN', 'BEHIND', 'ABOVE', 'BELOW', 'BESIDE', 'ACROSS',
+                              'TOWARD', 'AWAY', 'APART', 'TOGETHER', 'INSIDE'],
     'DAILY (A+S)': ['GREET', 'ASK', 'TELL', 'WANT', 'NEED', 'KNOW', 'MEET',
-                    'CALL', 'SEND', 'GET', 'START', 'FINISH', 'SCHEDULE', 'CANCEL'],
+                    'CALL', 'SEND', 'GET', 'START', 'FINISH', 'SCHEDULE', 'CANCEL', 'COMPLETE'],
     'DAILY+ (A+S+M)': ['GO', 'COME', 'LEAVE', 'STAY', 'RETURN', 'BRING', 'ARRIVE',
-                       'PUT', 'MOVE', 'OPEN', 'SEE', 'HEAR', 'FEEL'],
+                       'PUT', 'MOVE', 'OPEN', 'SEE', 'HEAR', 'FEEL', 'CLOSE', 'TOUCH'],
+    'VERBS (S+C)': ['PLAY', 'WORK', 'REST', 'SLEEP', 'WAKE', 'EAT', 'DRINK',
+                    'READ', 'WRITE', 'SPEAK', 'LISTEN', 'WATCH', 'LEARN', 'TEACH', 'PRACTICE'],
+    'VERBS+ (S+C+M)': ['RUN', 'WALK', 'SIT', 'STAND', 'JUMP', 'CLIMB', 'FALL',
+                       'PUSH', 'PULL', 'HOLD', 'DROP', 'THROW', 'CATCH', 'CARRY', 'DRAG'],
     'NOUNS (D+S)': ['NAME', 'PERSON', 'PLACE', 'THING', 'TEAM', 'COMPANY', 'GROUP',
-                    'PROJECT', 'MEETING', 'EVENT', 'WORK', 'HOME', 'OFFICE'],
+                    'PROJECT', 'MEETING', 'EVENT', 'WORLD', 'HOME', 'OFFICE', 'ROOM', 'BUILDING'],
     'NOUNS+ (D+S+M)': ['EMAIL', 'MESSAGE', 'PHONE', 'MONEY', 'DOCUMENT', 'REPORT',
-                       'TASK', 'ISSUE', 'REQUEST', 'UPDATE'],
-    'TIME (A+D)': ['TODAY', 'TOMORROW', 'NOW', 'LATER', 'SOON', 'YESTERDAY', 'TIME', 'DATE'],
-    'STATES (F+D)': ['HAPPY', 'BUSY', 'READY', 'SURE', 'AVAILABLE', 'INTERESTED', 'URGENT', 'IMPORTANT'],
+                       'TASK', 'ISSUE', 'REQUEST', 'UPDATE', 'SCREEN', 'BUTTON', 'WINDOW', 'LINK', 'IMAGE'],
+    'TIME (A+D)': ['TODAY', 'TOMORROW', 'NOW', 'LATER', 'SOON', 'YESTERDAY', 'ALWAYS',
+                   'TIME', 'DATE', 'MOMENT', 'WEEK', 'MONTH', 'YEAR', 'HOUR', 'MINUTE'],
+    'TIME+ (A+D+M)': ['MORNING', 'AFTERNOON', 'EVENING', 'NIGHT', 'NOON', 'MIDNIGHT', 'WEEKEND',
+                      'DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY', 'ONCE', 'TWICE', 'OFTEN', 'RARELY'],
+    'STATES (F+D)': ['HAPPY', 'BUSY', 'READY', 'SURE', 'AVAILABLE', 'INTERESTED', 'EXCITED',
+                     'URGENT', 'IMPORTANT', 'NECESSARY', 'POSSIBLE', 'IMPOSSIBLE', 'REQUIRED', 'OPTIONAL', 'RECOMMENDED'],
+    'STATES+ (F+D+M)': ['SAD', 'ANGRY', 'TIRED', 'CONFUSED', 'WORRIED', 'NERVOUS', 'CALM',
+                        'BORED', 'STUCK', 'LOST', 'FOUND', 'BROKEN', 'FIXED', 'PENDING', 'COMPLETE'],
     'STYLE (D+C)': ['FORMAL', 'CASUAL', 'POLITE', 'DIRECT', 'TECHNICAL', 'FRIENDLY', 'PROFESSIONAL',
-                    'BRIEF', 'DETAILED', 'AS_QUESTION', 'AS_COMMAND', 'AS_REQUEST', 'REPROMPT'],
+                    'BRIEF', 'DETAILED', 'AS_QUESTION', 'AS_COMMAND', 'AS_REQUEST', 'AS_STATEMENT', 'AS_LIST', 'AS_SUMMARY'],
+    'STYLE+ (D+C+M)': ['REPROMPT', 'URGENT_TONE', 'GENTLE', 'FIRM', 'HUMOROUS', 'SERIOUS', 'EMPATHETIC',
+                       'CONFIDENT', 'HUMBLE', 'ENTHUSIASTIC', 'SKEPTICAL', 'SUPPORTIVE', 'CRITICAL', 'NEUTRAL', 'PERSUASIVE'],
     'SYMBOLS (A+F)': ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.', ',', '?', '!', ':'],
-    'SYMBOLS+ (A+F+M)': ['-', '_', '/', '@', '#', '$', '%', '&', '*', '+', '=', '(', ')', '"'],
+    'SYMBOLS+ (A+F+M)': ['-', '_', '/', '@', '#', '$', '%', '&', '*', '+', '=', '(', ')', '"', ';'],
+    'TECH (A+D+S)': ['DEBUG', 'TEST', 'BUILD', 'DEPLOY', 'COMMIT', 'PUSH', 'PULL',
+                     'MERGE', 'BRANCH', 'CLONE', 'INSTALL', 'UNINSTALL', 'UPGRADE', 'CONFIGURE', 'INITIALIZE'],
+    'TECH+ (A+D+S+M)': ['SERVER', 'CLIENT', 'DATABASE', 'API', 'ENDPOINT', 'REQUEST_NOUN', 'RESPONSE',
+                        'QUERY', 'CACHE', 'LOG', 'VARIABLE', 'CONSTANT', 'PARAMETER', 'ARGUMENT', 'EXCEPTION'],
 }
 
 
@@ -81,8 +103,7 @@ class CheatsheetWindow:
         ttk.Label(search_frame, text="Search:", style='TLabel').pack(side='left')
 
         self.search_var = tk.StringVar()
-        self.search_var.trace('w', self._on_search)
-        search_entry = tk.Entry(
+        self.search_entry = tk.Entry(
             search_frame,
             textvariable=self.search_var,
             font=('Consolas', 12),
@@ -91,8 +112,12 @@ class CheatsheetWindow:
             insertbackground='#e0e0e0',
             relief='flat'
         )
-        search_entry.pack(side='left', fill='x', expand=True, padx=(10, 0))
-        search_entry.focus_set()
+        self.search_entry.pack(side='left', fill='x', expand=True, padx=(10, 0))
+        self.search_entry.focus_set()
+
+        # Bind to key events for search
+        self.search_entry.bind('<KeyRelease>', self._on_search)
+        self.search_entry.bind('<Return>', self._on_search)
 
         # Mode indicator
         mode_text = "SEMANTIC" if self.mode == 'semantic' else "PHONEMIC"
@@ -269,7 +294,7 @@ class CheatsheetWindow:
                 col = 0
                 row += 1
 
-    def _on_search(self, *args):
+    def _on_search(self, event=None):
         self._populate_list(self.search_var.get())
 
     def winfo_exists(self):

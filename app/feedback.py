@@ -50,6 +50,6 @@ def beep_mode_semantic():
     _beep(1400, 60)
 
 
-def beep_mode_phonemic():
-    """Low ping — switched to phonemic mode."""
+def beep_mode_text():
+    """Low ping — switched to text mode."""
     _beep(700, 60)

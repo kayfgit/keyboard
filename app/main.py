@@ -3,9 +3,13 @@
 Flow:
   1. User chords keys → token typed into focused app immediately
   2. Space → tokens sent to AI → AI result replaces typed tokens
-  3. C+M → backspace (deletes last token)
-  4. S+C+M → toggle semantic/phonemic mode
+  3. C+M → backspace (deletes last token/char)
+  4. S+C+M → toggle semantic/text mode
   5. C+M+K → show cheatsheet popup
+
+Modes:
+  - Semantic: chord keys produce UPPERCASE tokens
+  - Text: normal QWERTY typing (lowercase), Space triggers AI expansion
 """
 
 import sys
@@ -18,8 +22,9 @@ from chord_engine import ChordEngine
 from ai_engine import AIEngine
 from keyboard_hook import KeyboardHook
 from tray import TrayApp
-from feedback import beep_toggle_on, beep_toggle_off, beep_mode_semantic, beep_mode_phonemic
+from feedback import beep_toggle_on, beep_toggle_off, beep_mode_semantic, beep_mode_text
 from config import get_groq_api_key
+from overlay import start_overlay
 
 
 def main():
@@ -69,7 +74,17 @@ def main():
         tray.set_tooltip_buffer(buf)
 
     def on_backspace():
-        """C+M chord — delete last token from app and buffer."""
+        """C+M chord — delete last token/char from app and buffer."""
+        # In text mode, first try to delete from text_buffer
+        if engine.mode == 'text' and engine.text_buffer:
+            engine.pop_text_char()
+            KeyboardHook.send_backspace(1)
+            buf = engine.get_buffer_display()
+            print(f"  Backspace (text): Buffer: [{buf}]", flush=True)
+            tray.set_tooltip_buffer(buf)
+            return
+
+        # Otherwise delete last token
         token, is_marker = engine.pop_last_token()
         if token:
             # Delete the token + space before it (if not first)
@@ -86,13 +101,22 @@ def main():
             print("  Ctrl+Backspace (delete word)", flush=True)
 
     def on_mode_toggle():
-        """S+C+M chord — toggle semantic/phonemic mode."""
+        """S+C+M chord — toggle semantic/text mode."""
         new_mode = engine.toggle_mode()
         tray.set_mode(new_mode)
         if new_mode == 'semantic':
             beep_mode_semantic()
         else:
-            beep_mode_phonemic()
+            beep_mode_text()
+        print(f"  Mode: {new_mode}", flush=True)
+
+    def on_mode_change(new_mode):
+        """Mode changed without toggling (e.g., Alt+Q in text mode)."""
+        tray.set_mode(new_mode)
+        if new_mode == 'semantic':
+            beep_mode_semantic()
+        else:
+            beep_mode_text()
         print(f"  Mode: {new_mode}", flush=True)
 
     def on_cheatsheet():
@@ -116,6 +140,7 @@ def main():
         on_mode_toggle=on_mode_toggle,
         on_cheatsheet=on_cheatsheet,
         on_enter=on_enter,
+        on_mode_change=on_mode_change,
     )
 
     def tray_toggle():
@@ -149,10 +174,15 @@ def main():
     print("  Alt+Q     = toggle ON/OFF", flush=True)
     print("  C+M       = backspace (delete token)", flush=True)
     print("  C+;       = enter (new line)", flush=True)
-    print("  S+C+M     = toggle semantic/phonemic", flush=True)
+    print("  S+C+M     = toggle semantic/text", flush=True)
     print("  C+M+K     = show cheatsheet", flush=True)
     print("  Space     = expand to text", flush=True)
+    print(flush=True)
+    print("  Chord preview overlay enabled", flush=True)
     print("=" * 50, flush=True)
+
+    # Start overlay for chord preview
+    start_overlay()
 
     ai.start()
     hook.start()

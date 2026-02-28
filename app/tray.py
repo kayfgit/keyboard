@@ -23,8 +23,8 @@ def _create_icon_image(enabled, mode='semantic'):
         fill=bg_color
     )
 
-    # Mode letter: S=semantic, P=phonemic
-    letter = 'S' if mode == 'semantic' else 'P'
+    # Mode letter: S=semantic, T=text
+    letter = 'S' if mode == 'semantic' else 'T'
     text_color = (0, 0, 0, 255) if enabled else (60, 60, 60, 255)
 
     # Try to use a larger font
@@ -55,7 +55,7 @@ class TrayApp:
         self._icon = None
 
     def _build_menu(self):
-        mode_display = "Semantic" if self.mode == 'semantic' else "Phonemic"
+        mode_display = "Semantic" if self.mode == 'semantic' else "Text"
         return pystray.Menu(
             pystray.MenuItem(
                 lambda _: f"{'ON' if self.enabled else 'OFF'}  (Alt+Q)",
@@ -107,7 +107,7 @@ class TrayApp:
 
     def _get_tooltip(self, buffer_text=''):
         status = "ON" if self.enabled else "OFF"
-        mode_name = "Semantic" if self.mode == 'semantic' else "Phonemic"
+        mode_name = "Semantic" if self.mode == 'semantic' else "Text"
         tip = f"Chord Keyboard [{status}] — {mode_name}"
         if buffer_text:
             tip += f"\nBuffer: {buffer_text}"

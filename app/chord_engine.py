@@ -110,35 +110,65 @@ SEMANTICS = {
     'A+F+M+J+K+L': '=', 'A+F+M+J+K+;': '(', 'A+F+M+J+L+;': ')',
     'A+F+M+K+L+;': '"',
 
-    # DAILY (A+S)
+    # DAILY (A+S) - common verbs
     'A+S+J': 'GREET', 'A+S+K': 'ASK', 'A+S+L': 'TELL', 'A+S+;': 'WANT',
     'A+S+J+K': 'NEED', 'A+S+J+L': 'KNOW', 'A+S+J+;': 'MEET',
     'A+S+K+L': 'CALL', 'A+S+K+;': 'SEND', 'A+S+L+;': 'GET',
     'A+S+J+K+L': 'START', 'A+S+J+K+;': 'FINISH',
-    'A+S+J+L+;': 'SCHEDULE', 'A+S+K+L+;': 'CANCEL',
+    'A+S+J+L+;': 'SCHEDULE', 'A+S+K+L+;': 'CANCEL', 'A+S+J+K+L+;': 'COMPLETE',
     'A+S+M+J': 'GO', 'A+S+M+K': 'COME', 'A+S+M+L': 'LEAVE', 'A+S+M+;': 'STAY',
     'A+S+M+J+K': 'RETURN', 'A+S+M+J+L': 'BRING', 'A+S+M+J+;': 'ARRIVE',
     'A+S+M+K+L': 'PUT', 'A+S+M+K+;': 'MOVE', 'A+S+M+L+;': 'OPEN',
     'A+S+M+J+K+L': 'SEE', 'A+S+M+J+K+;': 'HEAR', 'A+S+M+J+L+;': 'FEEL',
+    'A+S+M+K+L+;': 'CLOSE', 'A+S+M+J+K+L+;': 'TOUCH',
 
-    # PEOPLE/PLACES/THINGS (D+S -> normalized to S+D)
+    # VERBS2 (S+C) - more action verbs
+    'S+C+J': 'PLAY', 'S+C+K': 'WORK', 'S+C+L': 'REST', 'S+C+;': 'SLEEP',
+    'S+C+J+K': 'WAKE', 'S+C+J+L': 'EAT', 'S+C+J+;': 'DRINK',
+    'S+C+K+L': 'READ', 'S+C+K+;': 'WRITE', 'S+C+L+;': 'SPEAK',
+    'S+C+J+K+L': 'LISTEN', 'S+C+J+K+;': 'WATCH', 'S+C+J+L+;': 'LEARN',
+    'S+C+K+L+;': 'TEACH', 'S+C+J+K+L+;': 'PRACTICE',
+    'S+C+M+J': 'RUN', 'S+C+M+K': 'WALK', 'S+C+M+L': 'SIT', 'S+C+M+;': 'STAND',
+    'S+C+M+J+K': 'JUMP', 'S+C+M+J+L': 'CLIMB', 'S+C+M+J+;': 'FALL',
+    'S+C+M+K+L': 'PUSH', 'S+C+M+K+;': 'PULL', 'S+C+M+L+;': 'HOLD',
+    'S+C+M+J+K+L': 'DROP', 'S+C+M+J+K+;': 'THROW', 'S+C+M+J+L+;': 'CATCH',
+    'S+C+M+K+L+;': 'CARRY', 'S+C+M+J+K+L+;': 'DRAG',
+
+    # PEOPLE/PLACES/THINGS (D+S) - nouns
     'D+S+J': 'NAME', 'D+S+K': 'PERSON', 'D+S+L': 'PLACE', 'D+S+;': 'THING',
     'D+S+J+K': 'TEAM', 'D+S+J+L': 'COMPANY', 'D+S+J+;': 'GROUP',
     'D+S+K+L': 'PROJECT', 'D+S+K+;': 'MEETING', 'D+S+L+;': 'EVENT',
-    'D+S+J+K+L': 'WORK', 'D+S+J+K+;': 'HOME', 'D+S+J+L+;': 'OFFICE',
+    'D+S+J+K+L': 'WORLD', 'D+S+J+K+;': 'HOME', 'D+S+J+L+;': 'OFFICE',
+    'D+S+K+L+;': 'ROOM', 'D+S+J+K+L+;': 'BUILDING',
     'D+S+M+J': 'EMAIL', 'D+S+M+K': 'MESSAGE', 'D+S+M+L': 'PHONE', 'D+S+M+;': 'MONEY',
     'D+S+M+J+K': 'DOCUMENT', 'D+S+M+J+L': 'REPORT', 'D+S+M+J+;': 'TASK',
     'D+S+M+K+L': 'ISSUE', 'D+S+M+K+;': 'REQUEST', 'D+S+M+L+;': 'UPDATE',
+    'D+S+M+J+K+L': 'SCREEN', 'D+S+M+J+K+;': 'BUTTON', 'D+S+M+J+L+;': 'WINDOW',
+    'D+S+M+K+L+;': 'LINK', 'D+S+M+J+K+L+;': 'IMAGE',
 
     # TIME (A+D)
     'A+D+J': 'TODAY', 'A+D+K': 'TOMORROW', 'A+D+L': 'NOW', 'A+D+;': 'LATER',
-    'A+D+J+K': 'SOON', 'A+D+J+L': 'YESTERDAY',
-    'A+D+K+L': 'TIME', 'A+D+K+;': 'DATE',
+    'A+D+J+K': 'SOON', 'A+D+J+L': 'YESTERDAY', 'A+D+J+;': 'ALWAYS',
+    'A+D+K+L': 'TIME', 'A+D+K+;': 'DATE', 'A+D+L+;': 'MOMENT',
+    'A+D+J+K+L': 'WEEK', 'A+D+J+K+;': 'MONTH', 'A+D+J+L+;': 'YEAR',
+    'A+D+K+L+;': 'HOUR', 'A+D+J+K+L+;': 'MINUTE',
+    'A+D+M+J': 'MORNING', 'A+D+M+K': 'AFTERNOON', 'A+D+M+L': 'EVENING', 'A+D+M+;': 'NIGHT',
+    'A+D+M+J+K': 'NOON', 'A+D+M+J+L': 'MIDNIGHT', 'A+D+M+J+;': 'WEEKEND',
+    'A+D+M+K+L': 'DAILY', 'A+D+M+K+;': 'WEEKLY', 'A+D+M+L+;': 'MONTHLY',
+    'A+D+M+J+K+L': 'YEARLY', 'A+D+M+J+K+;': 'ONCE', 'A+D+M+J+L+;': 'TWICE',
+    'A+D+M+K+L+;': 'OFTEN', 'A+D+M+J+K+L+;': 'RARELY',
 
-    # STATES (F+D -> normalized to D+F)
+    # STATES (F+D)
     'F+D+J': 'HAPPY', 'F+D+K': 'BUSY', 'F+D+L': 'READY', 'F+D+;': 'SURE',
-    'F+D+J+K': 'AVAILABLE', 'F+D+J+L': 'INTERESTED',
-    'F+D+K+L': 'URGENT', 'F+D+K+;': 'IMPORTANT',
+    'F+D+J+K': 'AVAILABLE', 'F+D+J+L': 'INTERESTED', 'F+D+J+;': 'EXCITED',
+    'F+D+K+L': 'URGENT', 'F+D+K+;': 'IMPORTANT', 'F+D+L+;': 'NECESSARY',
+    'F+D+J+K+L': 'POSSIBLE', 'F+D+J+K+;': 'IMPOSSIBLE', 'F+D+J+L+;': 'REQUIRED',
+    'F+D+K+L+;': 'OPTIONAL', 'F+D+J+K+L+;': 'RECOMMENDED',
+    'F+D+M+J': 'SAD', 'F+D+M+K': 'ANGRY', 'F+D+M+L': 'TIRED', 'F+D+M+;': 'CONFUSED',
+    'F+D+M+J+K': 'WORRIED', 'F+D+M+J+L': 'NERVOUS', 'F+D+M+J+;': 'CALM',
+    'F+D+M+K+L': 'BORED', 'F+D+M+K+;': 'STUCK', 'F+D+M+L+;': 'LOST',
+    'F+D+M+J+K+L': 'FOUND', 'F+D+M+J+K+;': 'BROKEN', 'F+D+M+J+L+;': 'FIXED',
+    'F+D+M+K+L+;': 'PENDING', 'F+D+M+J+K+L+;': 'COMPLETE',
 
     # PRONOUNS (S+F)
     'S+F+J': 'I', 'S+F+K': 'YOU', 'S+F+L': 'WE', 'S+F+;': 'THEY',
@@ -168,8 +198,46 @@ SEMANTICS = {
     'D+C+J': 'FORMAL', 'D+C+K': 'CASUAL', 'D+C+L': 'POLITE', 'D+C+;': 'DIRECT',
     'D+C+J+K': 'TECHNICAL', 'D+C+J+L': 'FRIENDLY', 'D+C+J+;': 'PROFESSIONAL',
     'D+C+K+L': 'BRIEF', 'D+C+K+;': 'DETAILED', 'D+C+L+;': 'AS_QUESTION',
-    'D+C+J+K+L': 'AS_COMMAND', 'D+C+J+K+;': 'AS_REQUEST',
-    'D+C+M+J': 'REPROMPT',
+    'D+C+J+K+L': 'AS_COMMAND', 'D+C+J+K+;': 'AS_REQUEST', 'D+C+J+L+;': 'AS_STATEMENT',
+    'D+C+K+L+;': 'AS_LIST', 'D+C+J+K+L+;': 'AS_SUMMARY',
+    'D+C+M+J': 'REPROMPT', 'D+C+M+K': 'URGENT_TONE', 'D+C+M+L': 'GENTLE', 'D+C+M+;': 'FIRM',
+    'D+C+M+J+K': 'HUMOROUS', 'D+C+M+J+L': 'SERIOUS', 'D+C+M+J+;': 'EMPATHETIC',
+    'D+C+M+K+L': 'CONFIDENT', 'D+C+M+K+;': 'HUMBLE', 'D+C+M+L+;': 'ENTHUSIASTIC',
+    'D+C+M+J+K+L': 'SKEPTICAL', 'D+C+M+J+K+;': 'SUPPORTIVE', 'D+C+M+J+L+;': 'CRITICAL',
+    'D+C+M+K+L+;': 'NEUTRAL', 'D+C+M+J+K+L+;': 'PERSUASIVE',
+
+    # PRONOUNS extended (S+F)
+    'S+F+J+K+L': 'SOMETHING', 'S+F+J+K+;': 'EVERYTHING', 'S+F+J+L+;': 'ANYTHING',
+    'S+F+K+L+;': 'NOTHING', 'S+F+J+K+L+;': 'ITSELF',
+    'S+F+M+J+K+L': 'HIMSELF', 'S+F+M+J+K+;': 'HERSELF', 'S+F+M+J+L+;': 'THEMSELVES',
+    'S+F+M+K+L+;': 'OURSELVES', 'S+F+M+J+K+L+;': 'YOURSELF',
+
+    # NEGATION extended (A+C)
+    'A+C+J+K+L': 'ALWAYS', 'A+C+J+K+;': 'SOMETIMES', 'A+C+J+L+;': 'USUALLY',
+    'A+C+K+L+;': 'BARELY', 'A+C+J+K+L+;': 'HARDLY',
+    'A+C+M+J+K+L': 'ARENT', 'A+C+M+J+K+;': 'WONT_BE', 'A+C+M+J+L+;': 'CANT_BE',
+    'A+C+M+K+L+;': 'MUSTNT', 'A+C+M+J+K+L+;': 'NEEDNT',
+
+    # PREPOSITIONS extended (F+C)
+    'F+C+J+K+L': 'WITHIN', 'F+C+J+K+;': 'THROUGHOUT', 'F+C+J+L+;': 'ALONG',
+    'F+C+K+L+;': 'AGAINST', 'F+C+J+K+L+;': 'AMONG',
+    'F+C+M+J+K+L': 'TOWARD', 'F+C+M+J+K+;': 'AWAY', 'F+C+M+J+L+;': 'APART',
+    'F+C+M+K+L+;': 'TOGETHER', 'F+C+M+J+K+L+;': 'INSIDE',
+
+    # SYMBOLS extended (A+F)
+    'A+F+M+J+K+L+;': ';',
+
+    # TECH (A+D+S) - programming/tech terms - using 3-key left combo
+    'A+D+S+J': 'DEBUG', 'A+D+S+K': 'TEST', 'A+D+S+L': 'BUILD', 'A+D+S+;': 'DEPLOY',
+    'A+D+S+J+K': 'COMMIT', 'A+D+S+J+L': 'PUSH', 'A+D+S+J+;': 'PULL',
+    'A+D+S+K+L': 'MERGE', 'A+D+S+K+;': 'BRANCH', 'A+D+S+L+;': 'CLONE',
+    'A+D+S+J+K+L': 'INSTALL', 'A+D+S+J+K+;': 'UNINSTALL', 'A+D+S+J+L+;': 'UPGRADE',
+    'A+D+S+K+L+;': 'CONFIGURE', 'A+D+S+J+K+L+;': 'INITIALIZE',
+    'A+D+S+M+J': 'SERVER', 'A+D+S+M+K': 'CLIENT', 'A+D+S+M+L': 'DATABASE', 'A+D+S+M+;': 'API',
+    'A+D+S+M+J+K': 'ENDPOINT', 'A+D+S+M+J+L': 'REQUEST_NOUN', 'A+D+S+M+J+;': 'RESPONSE',
+    'A+D+S+M+K+L': 'QUERY', 'A+D+S+M+K+;': 'CACHE', 'A+D+S+M+L+;': 'LOG',
+    'A+D+S+M+J+K+L': 'VARIABLE', 'A+D+S+M+J+K+;': 'CONSTANT', 'A+D+S+M+J+L+;': 'PARAMETER',
+    'A+D+S+M+K+L+;': 'ARGUMENT', 'A+D+S+M+J+K+L+;': 'EXCEPTION',
 }
 
 # Build normalized lookup (sort keys for consistent matching)
@@ -201,7 +269,8 @@ class ChordEngine:
         self.chord_buffer = set()
         self.chord_active = False
         self.token_buffer = []  # List of tokens (strings)
-        self.mode = 'semantic'  # 'semantic' or 'phonemic'
+        self.mode = 'semantic'  # 'semantic' or 'text'
+        self.text_buffer = []   # Characters typed in text mode
 
     def is_chord_key(self, key):
         return key in ALL_CHORD_KEYS
@@ -264,7 +333,7 @@ class ChordEngine:
         if self.mode == 'semantic':
             return self._fire_semantic()
         else:
-            return self._fire_phonemic(left_code, right_code)
+            return self._fire_text_mode(left_code, right_code)
 
     def _fire_semantic(self):
         chord_key = self._get_chord_key()
@@ -274,41 +343,52 @@ class ChordEngine:
             return ('token', token)
         return ('invalid',)
 
-    def _fire_phonemic(self, left_code, right_code):
-        result = ''
-        valid = True
-
-        if left_code != 0:
-            c = CONSONANTS.get(left_code)
-            if c:
-                result += c
+    def _fire_text_mode(self, left_code, right_code):
+        # Text mode: type the chord keys as regular characters
+        # This handles cases where user presses chord keys in text mode
+        keys = []
+        for k in self.chord_buffer:
+            if k == ';':
+                keys.append(';')
             else:
-                valid = False
-
-        if right_code != 0:
-            v = VOWELS.get(right_code)
-            if v:
-                result += v
-            else:
-                valid = False
-
-        if result and valid:
-            self.token_buffer.append(result)
-            return ('phoneme', result)
+                keys.append(k.lower())
+        if keys:
+            return ('type_chars', keys)
         return ('invalid',)
 
     def toggle_mode(self):
-        """Switch between semantic and phonemic modes.
+        """Switch between semantic and text modes.
 
         No markers needed - AI distinguishes by case:
         - UPPERCASE = semantic tokens
-        - lowercase = phonemic text
+        - lowercase = regular text (typed via QWERTY)
         """
         if self.mode == 'semantic':
-            self.mode = 'phonemic'
+            # Switching to text mode - finalize any pending text
+            self.mode = 'text'
         else:
+            # Switching back to semantic - finalize typed text as token
+            if self.text_buffer:
+                text = ''.join(self.text_buffer)
+                self.token_buffer.append(text)
+                self.text_buffer.clear()
             self.mode = 'semantic'
         return self.mode
+
+    def add_text_char(self, char):
+        """Add a character typed in text mode."""
+        self.text_buffer.append(char)
+
+    def pop_text_char(self):
+        """Remove last character from text buffer. Returns True if removed."""
+        if self.text_buffer:
+            self.text_buffer.pop()
+            return True
+        return False
+
+    def get_text_buffer(self):
+        """Get current text being typed in text mode."""
+        return ''.join(self.text_buffer)
 
     def pop_last_token(self):
         """Remove last token. Returns (token, is_special)."""
@@ -319,9 +399,15 @@ class ChordEngine:
 
     def flush_buffer(self):
         """Get all tokens for AI conversion. Returns (text, char_count)."""
+        # Include any pending text from text mode
+        if self.text_buffer:
+            text = ''.join(self.text_buffer)
+            self.token_buffer.append(text)
+            self.text_buffer.clear()
+
         if not self.token_buffer:
             return '', 0
-        # Format: tokens separated by spaces, phonemic in angle brackets
+        # Format: tokens separated by spaces
         text = ' '.join(self.token_buffer)
         char_count = len(text)
         self.token_buffer.clear()
@@ -329,11 +415,15 @@ class ChordEngine:
 
     def get_buffer_display(self):
         """Get buffer for display."""
-        return ' '.join(self.token_buffer)
+        parts = list(self.token_buffer)
+        if self.text_buffer:
+            parts.append(''.join(self.text_buffer) + '_')  # Show cursor
+        return ' '.join(parts)
 
     def reset(self):
         self.held_keys.clear()
         self.chord_buffer.clear()
         self.chord_active = False
         self.token_buffer.clear()
+        self.text_buffer.clear()
         self.mode = 'semantic'
