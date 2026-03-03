@@ -97,30 +97,69 @@ MAKE backspace KEEP REMOVE WHEN HOLD → Make the backspace key keep removing wh
 class AIEngine:
     """Background worker that expands semantic tokens via Groq."""
 
-    def __init__(self, on_result, on_error):
+    MAX_CONTEXT_TURNS = 5  # Rolling context window size
+
+    def __init__(self, on_result, on_error, on_context_change=None):
         self.on_result = on_result
         self.on_error = on_error
+        self.on_context_change = on_context_change  # Called when context size changes
         self._queue = queue.Queue()
         self._thread = threading.Thread(target=self._worker, daemon=True)
         self._client = None
         self._api_key = get_groq_api_key()
+        # Conversation context: list of (tokens, result) tuples
+        self._context = []
+        self._pending_tokens = None  # Track tokens for context storage
 
     def start(self):
         self._thread.start()
 
     def expand(self, tokens_text):
         """Queue token text for AI expansion."""
+        self._pending_tokens = tokens_text
         self._queue.put(tokens_text)
 
     # Keep old method name for compatibility
     def convert(self, text):
         self.expand(text)
 
+    def clear_context(self):
+        """Clear conversation context (start fresh)."""
+        self._context.clear()
+        if self.on_context_change:
+            self.on_context_change(0)
+
+    def get_context_size(self):
+        """Return number of turns in context."""
+        return len(self._context)
+
     def set_language(self, lang):
         pass  # Semantic mode is language-agnostic for now
 
     def set_raw_mode(self, enabled):
         pass  # Not used in semantic mode
+
+    def _build_messages(self, tokens):
+        """Build message list with context history."""
+        messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+
+        # Add context history as conversation turns
+        for prev_tokens, prev_result in self._context:
+            messages.append({"role": "user", "content": prev_tokens})
+            messages.append({"role": "assistant", "content": prev_result})
+
+        # Add current request
+        messages.append({"role": "user", "content": tokens})
+        return messages
+
+    def _add_to_context(self, tokens, result):
+        """Add expansion to context, maintaining max size."""
+        self._context.append((tokens, result))
+        # Trim to max size
+        while len(self._context) > self.MAX_CONTEXT_TURNS:
+            self._context.pop(0)
+        if self.on_context_change:
+            self.on_context_change(len(self._context))
 
     def _worker(self):
         while True:
@@ -137,11 +176,10 @@ class AIEngine:
                 if self._client is None:
                     self._client = Groq(api_key=self._api_key)
 
+                messages = self._build_messages(tokens)
+
                 response = self._client.chat.completions.create(
-                    messages=[
-                        {"role": "system", "content": SYSTEM_PROMPT},
-                        {"role": "user", "content": tokens},
-                    ],
+                    messages=messages,
                     model="llama-3.3-70b-versatile",
                     temperature=0.4,
                     max_tokens=512,
@@ -150,6 +188,10 @@ class AIEngine:
                 # Strip quotes if model adds them
                 if result.startswith('"') and result.endswith('"'):
                     result = result[1:-1]
+
+                # Add to context before calling on_result
+                self._add_to_context(tokens, result)
+
                 self.on_result(result)
 
             except Exception as e:

@@ -359,6 +359,10 @@ class ChordEngine:
         if left_code == 16 and right_code == 20:  # C=16, M+K=16+4=20
             return ('cheatsheet',)
 
+        # Control: C+M+; = clear context (new conversation)
+        if left_code == 16 and right_code == 17:  # C=16, M+;=16+1=17
+            return ('clear_context',)
+
         if self.mode == 'semantic':
             return self._fire_semantic()
         else:

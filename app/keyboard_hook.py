@@ -34,7 +34,7 @@ class KeyboardHook:
 
     def __init__(self, chord_engine, on_toggle, on_send_ai, on_token,
                  on_backspace, on_mode_toggle, on_cheatsheet, on_enter,
-                 on_search, on_mode_change=None):
+                 on_search, on_mode_change=None, on_clear_context=None):
         self.engine = chord_engine
         self.on_toggle = on_toggle
         self.on_send_ai = on_send_ai
@@ -45,6 +45,7 @@ class KeyboardHook:
         self.on_enter = on_enter
         self.on_search = on_search
         self.on_mode_change = on_mode_change  # Just updates display, no toggle
+        self.on_clear_context = on_clear_context  # Clear AI context
         self.enabled = False
         self.converting = False
         self._listener = None
@@ -267,6 +268,9 @@ class KeyboardHook:
                 self.on_mode_toggle()
             elif action == 'cheatsheet':
                 self.on_cheatsheet()
+            elif action == 'clear_context':
+                if self.on_clear_context:
+                    self.on_clear_context()
             elif action == 'invalid':
                 pass  # Silent
         except Exception as e:

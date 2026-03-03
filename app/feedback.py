@@ -61,3 +61,12 @@ def beep_undo():
         winsound.Beep(1000, 40)
         winsound.Beep(700, 40)
     threading.Thread(target=_play, daemon=True).start()
+
+
+def beep_clear_context():
+    """Three descending tones — context cleared."""
+    def _play():
+        winsound.Beep(900, 30)
+        winsound.Beep(700, 30)
+        winsound.Beep(500, 30)
+    threading.Thread(target=_play, daemon=True).start()

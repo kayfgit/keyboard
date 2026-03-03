@@ -8,6 +8,7 @@ Flow:
   5. C+J → search popup (find tokens by name)
   6. S+C+M → toggle semantic/text mode
   7. C+M+K → show cheatsheet popup
+  8. C+M+; → clear context (start new conversation)
 
 Modes:
   - Semantic: chord keys produce UPPERCASE tokens
@@ -16,6 +17,10 @@ Modes:
 Inline Correction:
   - After AI expansion, C+; undoes the expansion and restores original tokens
   - User can then edit tokens and retry
+
+Context Memory:
+  - AI remembers last 5 expansions for coherent conversation
+  - C+M+; clears context to start fresh
 """
 
 import sys
@@ -28,7 +33,7 @@ from chord_engine import ChordEngine
 from ai_engine import AIEngine
 from keyboard_hook import KeyboardHook
 from tray import TrayApp
-from feedback import beep_toggle_on, beep_toggle_off, beep_mode_semantic, beep_mode_text, beep_undo
+from feedback import beep_toggle_on, beep_toggle_off, beep_mode_semantic, beep_mode_text, beep_undo, beep_clear_context
 from config import get_groq_api_key
 from overlay import start_overlay
 from search_popup import toggle_search
@@ -37,6 +42,7 @@ from search_popup import toggle_search
 def main():
     engine = ChordEngine()
     pending_chars = [0]
+    context_size = [0]  # Track context turns for display
 
     # Track last expansion for undo capability
     last_expansion = {
@@ -49,10 +55,15 @@ def main():
         """Clear undo state (called when user types new tokens)."""
         last_expansion['can_undo'] = False
 
+    def on_context_change(size):
+        """Called when AI context size changes."""
+        context_size[0] = size
+
     def on_ai_result(text):
         count = pending_chars[0]
         pending_chars[0] = 0
-        print(f"  AI: {text}", flush=True)
+        ctx = f" [ctx:{context_size[0]}]" if context_size[0] > 0 else ""
+        print(f"  AI{ctx}: {text}", flush=True)
         if count > 0:
             KeyboardHook.send_backspace(count)
             time.sleep(0.05)
@@ -70,7 +81,11 @@ def main():
         last_expansion['can_undo'] = False
         print(f"  AI error: {error}", flush=True)
 
-    ai = AIEngine(on_result=on_ai_result, on_error=on_ai_error)
+    ai = AIEngine(
+        on_result=on_ai_result,
+        on_error=on_ai_error,
+        on_context_change=on_context_change,
+    )
 
     def on_toggle():
         tray.set_enabled(hook.enabled)
@@ -93,7 +108,8 @@ def main():
             last_expansion['tokens'] = tokens
             last_expansion['can_undo'] = False  # Not undoable until result arrives
             ai.expand(tokens)
-            print(f"  Expanding: {tokens} ({char_count} chars)", flush=True)
+            ctx = f" [ctx:{context_size[0]}]" if context_size[0] > 0 else ""
+            print(f"  Expanding{ctx}: {tokens} ({char_count} chars)", flush=True)
             tray.set_tooltip_buffer("expanding...")
 
     def on_token(token):
@@ -108,6 +124,13 @@ def main():
         print("  on_search called", flush=True)
         toggle_search()
         print("  on_search completed", flush=True)
+
+    def on_clear_context():
+        """C+M+; chord — clear AI context (new conversation)."""
+        ai.clear_context()
+        clear_undo()
+        print("  Context cleared (new conversation)", flush=True)
+        beep_clear_context()
 
     def on_backspace():
         """C+; chord — undo expansion, or delete last token/char."""
@@ -201,6 +224,7 @@ def main():
         on_enter=on_enter,
         on_search=on_search,
         on_mode_change=on_mode_change,
+        on_clear_context=on_clear_context,
     )
 
     def tray_toggle():
@@ -233,12 +257,14 @@ def main():
     print(flush=True)
     print("  Alt+Q     = toggle ON/OFF", flush=True)
     print("  ALL 10    = send to AI (expand)", flush=True)
-    print("  C+;       = backspace (delete token)", flush=True)
+    print("  C+;       = backspace / undo expansion", flush=True)
     print("  C+M       = enter (new line)", flush=True)
     print("  C+J       = search tokens", flush=True)
     print("  S+C+M     = toggle semantic/text", flush=True)
     print("  C+M+K     = show cheatsheet", flush=True)
+    print("  C+M+;     = clear context (new conversation)", flush=True)
     print(flush=True)
+    print("  Context: AI remembers last 5 turns", flush=True)
     print("  Chord preview overlay enabled", flush=True)
     print("=" * 50, flush=True)
 
