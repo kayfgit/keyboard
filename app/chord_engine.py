@@ -1,6 +1,6 @@
-"""Chord engine: semantic + phonemic modes with token output.
+"""Chord engine: semantic + text modes with token output.
 
-Outputs tokens as typed text, AI replaces on Space.
+Outputs tokens as typed text, AI replaces on all-10-keys chord.
 """
 
 # Bit positions for each key
@@ -11,94 +11,134 @@ RIGHT_KEY_ORDER = ['M', 'J', 'K', 'L', ';']
 
 ALL_CHORD_KEYS = set(LEFT_KEYS) | set(RIGHT_KEYS)
 
-# Phonemic mappings
-CONSONANTS = {
-    0:  None,
-    1:  'f',    2:  'p',    3:  'st',   4:  't',
-    5:  's',    6:  'th',   7:  'dh',   8:  'r',
-    9:  'sh',   10: 'nd',   11: 'tr',   12: 'k',
-    13: 'h',    14: 'pr',   15: 'str',  16: 'b',
-    17: 'v',    18: 'm',    19: 'w',    20: 'd',
-    21: 'z',    22: 'n',    23: 'j',    24: 'l',
-    25: 'zh',   26: 'nt',   27: 'ch',   28: 'g',
-    29: 'sp',   30: 'ng',   31: 'y',
-}
+# =============================================================================
+# SEMANTIC VOCABULARY - Reorganized v2
+# =============================================================================
+# Categories:
+#   A       = VERBS-CORE (abstract manipulation)
+#   S       = NOUNS (concepts, abstract things)
+#   D       = MODIFIERS (adjectives, adverbs, intensifiers)
+#   F       = CONNECTORS (logic, conjunctions)
+#   C       = RESPONSES (dialog flow)
+#   A+S     = VERBS-SOCIAL (communication, interpersonal)
+#   A+D     = TIME (temporal, sequence)
+#   A+F     = SYMBOLS (numbers, punctuation)
+#   A+C     = MODALS (can, will, should, frequency)
+#   S+D     = NOUNS-THINGS (objects, places)
+#   S+F     = PRONOUNS (personal, quantifiers)
+#   S+C     = VERBS-PHYSICAL (body actions)
+#   D+F     = STATES (emotions, conditions)
+#   D+C     = STYLE (tone modifiers)
+#   F+C     = PREPOSITIONS (spatial, relational)
+#   A+D+S   = TECH (programming)
+#
+# Right-hand positions are frequency-based:
+#   J = most common, K = second, L = third, ; = fourth
+#   M extends each category with 15 more tokens
+# =============================================================================
 
-VOWELS = {
-    0:  None,
-    1:  'i',    2:  'o',    3:  'u',    4:  'e',
-    5:  'uh',   6:  'at',   7:  'in',   8:  'a',
-    9:  'an',   10: 'on',   11: 'it',   12: 'er',
-    13: 'or',   14: 'al',   15: 'ing',  16: 'ot',
-    17: 'ee',   18: 'oh',   19: 'oo',   20: 'ay',
-    21: 'et',   22: 'ut',   23: 'en',   24: 'ah',
-    25: 'un',   26: 'ad',   27: 'is',   28: 'il',
-    29: 'aw',   30: 'oi',   31: 'ow',
-}
-
-# Semantic vocabulary - same as semantic.html
 SEMANTICS = {
-    # ACTIONS (A)
-    'A+J': 'MAKE', 'A+K': 'CHANGE', 'A+L': 'REMOVE', 'A+;': 'FIX',
-    'A+J+K': 'FIND', 'A+J+L': 'SHOW', 'A+J+;': 'TRY', 'A+K+L': 'USE',
-    'A+K+;': 'EXPLAIN', 'A+L+;': 'IMPROVE', 'A+J+K+L': 'COMPARE',
-    'A+J+K+;': 'ANALYZE', 'A+J+L+;': 'SUMMARIZE', 'A+K+L+;': 'EXPAND',
-    'A+J+K+L+;': 'SIMPLIFY',
-    'A+M+J': 'ADD', 'A+M+K': 'KEEP', 'A+M+L': 'GIVE', 'A+M+;': 'TAKE',
-    'A+M+J+K': 'THINK', 'A+M+J+L': 'HELP', 'A+M+J+;': 'CHECK',
-    'A+M+K+L': 'LIST', 'A+M+K+;': 'COMBINE', 'A+M+L+;': 'SPLIT',
-    'A+M+J+K+L': 'GENERATE', 'A+M+J+K+;': 'TRANSLATE',
-    'A+M+J+L+;': 'REWRITE', 'A+M+K+L+;': 'FORMAT',
+    # =========================================================================
+    # A — VERBS-CORE (abstract manipulation)
+    # =========================================================================
+    'A+J': 'MAKE', 'A+K': 'CHANGE', 'A+L': 'ADD', 'A+;': 'REMOVE',
+    'A+J+K': 'FIND', 'A+J+L': 'SHOW', 'A+J+;': 'FIX',
+    'A+K+L': 'USE', 'A+K+;': 'GET', 'A+L+;': 'GIVE',
+    'A+J+K+L': 'KEEP', 'A+J+K+;': 'TAKE', 'A+J+L+;': 'TRY',
+    'A+K+L+;': 'PUT', 'A+J+K+L+;': 'MOVE',
+    'A+M+J': 'HELP', 'A+M+K': 'CHECK', 'A+M+L': 'OPEN', 'A+M+;': 'CLOSE',
+    'A+M+J+K': 'THINK', 'A+M+J+L': 'LIST', 'A+M+J+;': 'COMBINE',
+    'A+M+K+L': 'SPLIT', 'A+M+K+;': 'COMPARE', 'A+M+L+;': 'IMPROVE',
+    'A+M+J+K+L': 'EXPLAIN', 'A+M+J+K+;': 'ANALYZE', 'A+M+J+L+;': 'SUMMARIZE',
+    'A+M+K+L+;': 'SIMPLIFY', 'A+M+J+K+L+;': 'EXPAND',
 
-    # SUBJECTS (S)
-    'S+J': 'THIS', 'S+K': 'THAT', 'S+L': 'IT', 'S+;': 'IDEA',
-    'S+J+K': 'TEXT', 'S+J+L': 'CODE', 'S+J+;': 'QUESTION',
-    'S+K+L': 'ANSWER', 'S+K+;': 'PROBLEM', 'S+L+;': 'SOLUTION',
-    'S+J+K+L': 'EXAMPLE', 'S+J+K+;': 'RESULT', 'S+J+L+;': 'REASON',
-    'S+K+L+;': 'WAY', 'S+J+K+L+;': 'POINT',
-    'S+M+J': 'FILE', 'S+M+K': 'FUNCTION', 'S+M+L': 'DATA', 'S+M+;': 'NAME',
-    'S+M+J+K': 'LIST', 'S+M+J+L': 'STEP', 'S+M+J+;': 'PART',
-    'S+M+K+L': 'OPTION', 'S+M+K+;': 'ERROR', 'S+M+L+;': 'OUTPUT',
-    'S+M+J+K+L': 'INPUT', 'S+M+J+K+;': 'CONTENT',
-    'S+M+J+L+;': 'CONTEXT', 'S+M+K+L+;': 'DETAIL',
+    # =========================================================================
+    # S — NOUNS (concepts, abstract things)
+    # =========================================================================
+    'S+J': 'IT', 'S+K': 'THIS', 'S+L': 'THAT', 'S+;': 'THING',
+    'S+J+K': 'IDEA', 'S+J+L': 'WAY', 'S+J+;': 'PART',
+    'S+K+L': 'POINT', 'S+K+;': 'REASON', 'S+L+;': 'PROBLEM',
+    'S+J+K+L': 'SOLUTION', 'S+J+K+;': 'QUESTION', 'S+J+L+;': 'ANSWER',
+    'S+K+L+;': 'EXAMPLE', 'S+J+K+L+;': 'RESULT',
+    'S+M+J': 'FILE', 'S+M+K': 'CODE', 'S+M+L': 'DATA', 'S+M+;': 'TEXT',
+    'S+M+J+K': 'FUNCTION', 'S+M+J+L': 'LIST', 'S+M+J+;': 'NAME',
+    'S+M+K+L': 'STEP', 'S+M+K+;': 'OPTION', 'S+M+L+;': 'ERROR',
+    'S+M+J+K+L': 'INPUT', 'S+M+J+K+;': 'OUTPUT', 'S+M+J+L+;': 'CONTENT',
+    'S+M+K+L+;': 'CONTEXT', 'S+M+J+K+L+;': 'DETAIL',
 
-    # QUALITY (D)
+    # =========================================================================
+    # D — MODIFIERS (adjectives, adverbs, intensifiers)
+    # =========================================================================
     'D+J': 'GOOD', 'D+K': 'BAD', 'D+L': 'MORE', 'D+;': 'LESS',
-    'D+J+K': 'SIMPLE', 'D+J+L': 'COMPLEX', 'D+J+;': 'NEW',
-    'D+K+L': 'OLD', 'D+K+;': 'SAME', 'D+L+;': 'DIFFERENT',
-    'D+J+K+L': 'GENERAL', 'D+J+K+;': 'SPECIFIC', 'D+J+L+;': 'MAIN',
-    'D+K+L+;': 'OTHER', 'D+J+K+L+;': 'ALL',
+    'D+J+K': 'NEW', 'D+J+L': 'OLD', 'D+J+;': 'SAME',
+    'D+K+L': 'DIFFERENT', 'D+K+;': 'OTHER', 'D+L+;': 'ALL',
+    'D+J+K+L': 'SIMPLE', 'D+J+K+;': 'COMPLEX', 'D+J+L+;': 'MAIN',
+    'D+K+L+;': 'GENERAL', 'D+J+K+L+;': 'SPECIFIC',
     'D+M+J': 'FAST', 'D+M+K': 'SLOW', 'D+M+L': 'BIG', 'D+M+;': 'SMALL',
-    'D+M+J+K': 'SHORT', 'D+M+J+L': 'LONG', 'D+M+J+;': 'CLEAR',
-    'D+M+K+L': 'BETTER', 'D+M+K+;': 'WORSE', 'D+M+L+;': 'CORRECT',
-    'D+M+J+K+L': 'WRONG', 'D+M+J+K+;': 'SIMILAR',
-    'D+M+J+L+;': 'EXACT', 'D+M+K+L+;': 'ENOUGH',
+    'D+M+J+K': 'LONG', 'D+M+J+L': 'SHORT', 'D+M+J+;': 'CLEAR',
+    'D+M+K+L': 'CORRECT', 'D+M+K+;': 'WRONG', 'D+M+L+;': 'SIMILAR',
+    'D+M+J+K+L': 'EXACT', 'D+M+J+K+;': 'ENOUGH', 'D+M+J+L+;': 'VERY',
+    'D+M+K+L+;': 'TOO', 'D+M+J+K+L+;': 'QUITE',
 
-    # CONNECT (F)
+    # =========================================================================
+    # F — CONNECTORS (logic, conjunctions)
+    # =========================================================================
     'F+J': 'AND', 'F+K': 'OR', 'F+L': 'BUT', 'F+;': 'SO',
     'F+J+K': 'IF', 'F+J+L': 'THEN', 'F+J+;': 'BECAUSE',
     'F+K+L': 'WITH', 'F+K+;': 'WITHOUT', 'F+L+;': 'FOR',
-    'F+J+K+L': 'TO', 'F+J+K+;': 'FROM', 'F+J+L+;': 'LIKE',
-    'F+K+L+;': 'AS', 'F+J+K+L+;': 'ABOUT',
+    'F+J+K+L': 'TO', 'F+J+K+;': 'FROM', 'F+J+L+;': 'AS',
+    'F+K+L+;': 'LIKE', 'F+J+K+L+;': 'ABOUT',
     'F+M+J': 'ALSO', 'F+M+K': 'HOWEVER', 'F+M+L': 'INSTEAD', 'F+M+;': 'RATHER',
-    'F+M+J+K': 'BEFORE', 'F+M+J+L': 'AFTER', 'F+M+J+;': 'WHILE',
-    'F+M+K+L': 'WHEN', 'F+M+K+;': 'WHERE', 'F+M+L+;': 'ALTHOUGH',
-    'F+M+J+K+L': 'UNLESS', 'F+M+J+K+;': 'UNTIL',
-    'F+M+J+L+;': 'SINCE', 'F+M+K+L+;': 'WHETHER',
+    'F+M+J+K': 'WHEN', 'F+M+J+L': 'WHERE', 'F+M+J+;': 'WHILE',
+    'F+M+K+L': 'BEFORE', 'F+M+K+;': 'AFTER', 'F+M+L+;': 'ALTHOUGH',
+    'F+M+J+K+L': 'UNLESS', 'F+M+J+K+;': 'UNTIL', 'F+M+J+L+;': 'SINCE',
+    'F+M+K+L+;': 'WHETHER', 'F+M+J+K+L+;': 'THAN',
 
-    # RESPOND (C)
-    'C+J': 'YES', 'C+K': 'NO', 'C+L': 'MAYBE', 'C+;': 'OK',
-    'C+J+K': 'THANKS', 'C+J+L': 'PLEASE', 'C+J+;': 'SORRY',
-    'C+K+L': 'WAIT', 'C+K+;': 'DONE', 'C+L+;': 'AGAIN',
-    'C+J+K+L': 'WHAT', 'C+J+K+;': 'WHY', 'C+J+L+;': 'HOW',
-    'C+K+L+;': 'WHICH', 'C+J+K+L+;': 'WHO',
-    'C+M+J': 'CONTINUE', 'C+M+K': 'STOP', 'C+M+L': 'UNDO', 'C+M+;': 'SKIP',
-    'C+M+J+K': 'FOCUS', 'C+M+J+L': 'IGNORE', 'C+M+J+;': 'REMEMBER',
-    'C+M+K+L': 'FORGET', 'C+M+K+;': 'CONFIRM', 'C+M+L+;': 'NEVERMIND',
-    'C+M+J+K+L': 'PERFECT', 'C+M+J+K+;': 'ALMOST',
-    'C+M+J+L+;': 'NOT_QUITE', 'C+M+K+L+;': 'EXACTLY',
+    # =========================================================================
+    # C — RESPONSES (dialog flow)
+    # =========================================================================
+    'C+J': 'YES', 'C+K': 'NO', 'C+L': 'OK', 'C+;': 'THANKS',
+    'C+J+K': 'PLEASE', 'C+J+L': 'SORRY', 'C+J+;': 'WHAT',
+    'C+K+L': 'WHY', 'C+K+;': 'HOW', 'C+L+;': 'WHICH',
+    'C+J+K+L': 'WHO', 'C+J+K+;': 'WHEN', 'C+J+L+;': 'WHERE',
+    'C+K+L+;': 'MAYBE', 'C+J+K+L+;': 'AGAIN',
+    'C+M+J': 'WAIT', 'C+M+K': 'DONE', 'C+M+L': 'CONTINUE', 'C+M+;': 'STOP',
+    'C+M+J+K': 'UNDO', 'C+M+J+L': 'SKIP', 'C+M+J+;': 'FOCUS',
+    'C+M+K+L': 'IGNORE', 'C+M+K+;': 'REMEMBER', 'C+M+L+;': 'FORGET',
+    'C+M+J+K+L': 'CONFIRM', 'C+M+J+K+;': 'PERFECT', 'C+M+J+L+;': 'ALMOST',
+    'C+M+K+L+;': 'EXACTLY',
 
-    # SYMBOLS (A+F)
+    # =========================================================================
+    # A+S — VERBS-SOCIAL (communication, interpersonal)
+    # =========================================================================
+    'A+S+J': 'ASK', 'A+S+K': 'TELL', 'A+S+L': 'SAY', 'A+S+;': 'KNOW',
+    'A+S+J+K': 'WANT', 'A+S+J+L': 'NEED', 'A+S+J+;': 'LIKE',
+    'A+S+K+L': 'SEND', 'A+S+K+;': 'CALL', 'A+S+L+;': 'MEET',
+    'A+S+J+K+L': 'START', 'A+S+J+K+;': 'FINISH', 'A+S+J+L+;': 'GREET',
+    'A+S+K+L+;': 'INVITE', 'A+S+J+K+L+;': 'SCHEDULE',
+    'A+S+M+J': 'GO', 'A+S+M+K': 'COME', 'A+S+M+L': 'LEAVE', 'A+S+M+;': 'STAY',
+    'A+S+M+J+K': 'RETURN', 'A+S+M+J+L': 'ARRIVE', 'A+S+M+J+;': 'BRING',
+    'A+S+M+K+L': 'SEE', 'A+S+M+K+;': 'HEAR', 'A+S+M+L+;': 'FEEL',
+    'A+S+M+J+K+L': 'AGREE', 'A+S+M+J+K+;': 'ACCEPT', 'A+S+M+J+L+;': 'REJECT',
+    'A+S+M+K+L+;': 'CANCEL',
+
+    # =========================================================================
+    # A+D — TIME (temporal, sequence)
+    # =========================================================================
+    'A+D+J': 'NOW', 'A+D+K': 'TODAY', 'A+D+L': 'TOMORROW', 'A+D+;': 'YESTERDAY',
+    'A+D+J+K': 'SOON', 'A+D+J+L': 'LATER', 'A+D+J+;': 'FIRST',
+    'A+D+K+L': 'LAST', 'A+D+K+;': 'NEXT', 'A+D+L+;': 'PREVIOUS',
+    'A+D+J+K+L': 'BEFORE', 'A+D+J+K+;': 'AFTER', 'A+D+J+L+;': 'DURING',
+    'A+D+K+L+;': 'RECENTLY', 'A+D+J+K+L+;': 'FINALLY',
+    'A+D+M+J': 'TIME', 'A+D+M+K': 'DATE', 'A+D+M+L': 'WEEK', 'A+D+M+;': 'MONTH',
+    'A+D+M+J+K': 'YEAR', 'A+D+M+J+L': 'HOUR', 'A+D+M+J+;': 'MINUTE',
+    'A+D+M+K+L': 'MORNING', 'A+D+M+K+;': 'AFTERNOON', 'A+D+M+L+;': 'EVENING',
+    'A+D+M+J+K+L': 'NIGHT', 'A+D+M+J+K+;': 'WEEKEND', 'A+D+M+J+L+;': 'DAILY',
+    'A+D+M+K+L+;': 'WEEKLY', 'A+D+M+J+K+L+;': 'MONTHLY',
+
+    # =========================================================================
+    # A+F — SYMBOLS (numbers, punctuation)
+    # =========================================================================
     'A+F+J': '1', 'A+F+K': '2', 'A+F+L': '3', 'A+F+;': '4',
     'A+F+J+K': '5', 'A+F+J+L': '6', 'A+F+J+;': '7',
     'A+F+K+L': '8', 'A+F+K+;': '9', 'A+F+L+;': '0',
@@ -108,136 +148,117 @@ SEMANTICS = {
     'A+F+M+J+K': '#', 'A+F+M+J+L': '$', 'A+F+M+J+;': '%',
     'A+F+M+K+L': '&', 'A+F+M+K+;': '*', 'A+F+M+L+;': '+',
     'A+F+M+J+K+L': '=', 'A+F+M+J+K+;': '(', 'A+F+M+J+L+;': ')',
-    'A+F+M+K+L+;': '"',
+    'A+F+M+K+L+;': '"', 'A+F+M+J+K+L+;': ';',
 
-    # DAILY (A+S) - common verbs
-    'A+S+J': 'GREET', 'A+S+K': 'ASK', 'A+S+L': 'TELL', 'A+S+;': 'WANT',
-    'A+S+J+K': 'NEED', 'A+S+J+L': 'KNOW', 'A+S+J+;': 'MEET',
-    'A+S+K+L': 'CALL', 'A+S+K+;': 'SEND', 'A+S+L+;': 'GET',
-    'A+S+J+K+L': 'START', 'A+S+J+K+;': 'FINISH',
-    'A+S+J+L+;': 'SCHEDULE', 'A+S+K+L+;': 'CANCEL', 'A+S+J+K+L+;': 'COMPLETE',
-    'A+S+M+J': 'GO', 'A+S+M+K': 'COME', 'A+S+M+L': 'LEAVE', 'A+S+M+;': 'STAY',
-    'A+S+M+J+K': 'RETURN', 'A+S+M+J+L': 'BRING', 'A+S+M+J+;': 'ARRIVE',
-    'A+S+M+K+L': 'PUT', 'A+S+M+K+;': 'MOVE', 'A+S+M+L+;': 'OPEN',
-    'A+S+M+J+K+L': 'SEE', 'A+S+M+J+K+;': 'HEAR', 'A+S+M+J+L+;': 'FEEL',
-    'A+S+M+K+L+;': 'CLOSE', 'A+S+M+J+K+L+;': 'TOUCH',
-
-    # VERBS2 (S+C) - more action verbs
-    'S+C+J': 'PLAY', 'S+C+K': 'WORK', 'S+C+L': 'REST', 'S+C+;': 'SLEEP',
-    'S+C+J+K': 'WAKE', 'S+C+J+L': 'EAT', 'S+C+J+;': 'DRINK',
-    'S+C+K+L': 'READ', 'S+C+K+;': 'WRITE', 'S+C+L+;': 'SPEAK',
-    'S+C+J+K+L': 'LISTEN', 'S+C+J+K+;': 'WATCH', 'S+C+J+L+;': 'LEARN',
-    'S+C+K+L+;': 'TEACH', 'S+C+J+K+L+;': 'PRACTICE',
-    'S+C+M+J': 'RUN', 'S+C+M+K': 'WALK', 'S+C+M+L': 'SIT', 'S+C+M+;': 'STAND',
-    'S+C+M+J+K': 'JUMP', 'S+C+M+J+L': 'CLIMB', 'S+C+M+J+;': 'FALL',
-    'S+C+M+K+L': 'PUSH', 'S+C+M+K+;': 'PULL', 'S+C+M+L+;': 'HOLD',
-    'S+C+M+J+K+L': 'DROP', 'S+C+M+J+K+;': 'THROW', 'S+C+M+J+L+;': 'CATCH',
-    'S+C+M+K+L+;': 'CARRY', 'S+C+M+J+K+L+;': 'DRAG',
-
-    # PEOPLE/PLACES/THINGS (D+S) - nouns
-    'D+S+J': 'NAME', 'D+S+K': 'PERSON', 'D+S+L': 'PLACE', 'D+S+;': 'THING',
-    'D+S+J+K': 'TEAM', 'D+S+J+L': 'COMPANY', 'D+S+J+;': 'GROUP',
-    'D+S+K+L': 'PROJECT', 'D+S+K+;': 'MEETING', 'D+S+L+;': 'EVENT',
-    'D+S+J+K+L': 'WORLD', 'D+S+J+K+;': 'HOME', 'D+S+J+L+;': 'OFFICE',
-    'D+S+K+L+;': 'ROOM', 'D+S+J+K+L+;': 'BUILDING',
-    'D+S+M+J': 'EMAIL', 'D+S+M+K': 'MESSAGE', 'D+S+M+L': 'PHONE', 'D+S+M+;': 'MONEY',
-    'D+S+M+J+K': 'DOCUMENT', 'D+S+M+J+L': 'REPORT', 'D+S+M+J+;': 'TASK',
-    'D+S+M+K+L': 'ISSUE', 'D+S+M+K+;': 'REQUEST', 'D+S+M+L+;': 'UPDATE',
-    'D+S+M+J+K+L': 'SCREEN', 'D+S+M+J+K+;': 'BUTTON', 'D+S+M+J+L+;': 'WINDOW',
-    'D+S+M+K+L+;': 'LINK', 'D+S+M+J+K+L+;': 'IMAGE',
-
-    # TIME (A+D)
-    'A+D+J': 'TODAY', 'A+D+K': 'TOMORROW', 'A+D+L': 'NOW', 'A+D+;': 'LATER',
-    'A+D+J+K': 'SOON', 'A+D+J+L': 'YESTERDAY', 'A+D+J+;': 'ALWAYS',
-    'A+D+K+L': 'TIME', 'A+D+K+;': 'DATE', 'A+D+L+;': 'MOMENT',
-    'A+D+J+K+L': 'WEEK', 'A+D+J+K+;': 'MONTH', 'A+D+J+L+;': 'YEAR',
-    'A+D+K+L+;': 'HOUR', 'A+D+J+K+L+;': 'MINUTE',
-    'A+D+M+J': 'MORNING', 'A+D+M+K': 'AFTERNOON', 'A+D+M+L': 'EVENING', 'A+D+M+;': 'NIGHT',
-    'A+D+M+J+K': 'NOON', 'A+D+M+J+L': 'MIDNIGHT', 'A+D+M+J+;': 'WEEKEND',
-    'A+D+M+K+L': 'DAILY', 'A+D+M+K+;': 'WEEKLY', 'A+D+M+L+;': 'MONTHLY',
-    'A+D+M+J+K+L': 'YEARLY', 'A+D+M+J+K+;': 'ONCE', 'A+D+M+J+L+;': 'TWICE',
-    'A+D+M+K+L+;': 'OFTEN', 'A+D+M+J+K+L+;': 'RARELY',
-
-    # STATES (F+D)
-    'F+D+J': 'HAPPY', 'F+D+K': 'BUSY', 'F+D+L': 'READY', 'F+D+;': 'SURE',
-    'F+D+J+K': 'AVAILABLE', 'F+D+J+L': 'INTERESTED', 'F+D+J+;': 'EXCITED',
-    'F+D+K+L': 'URGENT', 'F+D+K+;': 'IMPORTANT', 'F+D+L+;': 'NECESSARY',
-    'F+D+J+K+L': 'POSSIBLE', 'F+D+J+K+;': 'IMPOSSIBLE', 'F+D+J+L+;': 'REQUIRED',
-    'F+D+K+L+;': 'OPTIONAL', 'F+D+J+K+L+;': 'RECOMMENDED',
-    'F+D+M+J': 'SAD', 'F+D+M+K': 'ANGRY', 'F+D+M+L': 'TIRED', 'F+D+M+;': 'CONFUSED',
-    'F+D+M+J+K': 'WORRIED', 'F+D+M+J+L': 'NERVOUS', 'F+D+M+J+;': 'CALM',
-    'F+D+M+K+L': 'BORED', 'F+D+M+K+;': 'STUCK', 'F+D+M+L+;': 'LOST',
-    'F+D+M+J+K+L': 'FOUND', 'F+D+M+J+K+;': 'BROKEN', 'F+D+M+J+L+;': 'FIXED',
-    'F+D+M+K+L+;': 'PENDING', 'F+D+M+J+K+L+;': 'COMPLETE',
-
-    # PRONOUNS (S+F)
-    'S+F+J': 'I', 'S+F+K': 'YOU', 'S+F+L': 'WE', 'S+F+;': 'THEY',
-    'S+F+J+K': 'HE', 'S+F+J+L': 'SHE', 'S+F+J+;': 'SOMEONE',
-    'S+F+K+L': 'EVERYONE', 'S+F+K+;': 'ANYONE', 'S+F+L+;': 'NOONE',
-    'S+F+M+J': 'MY', 'S+F+M+K': 'YOUR', 'S+F+M+L': 'OUR', 'S+F+M+;': 'THEIR',
-    'S+F+M+J+K': 'HIS', 'S+F+M+J+L': 'HER', 'S+F+M+J+;': 'MYSELF',
-    'S+F+M+K+L': 'ME', 'S+F+M+K+;': 'US', 'S+F+M+L+;': 'THEM',
-
-    # NEGATION & MODALS (A+C)
+    # =========================================================================
+    # A+C — MODALS (can, will, should, frequency adverbs)
+    # =========================================================================
     'A+C+J': 'NOT', 'A+C+K': 'CAN', 'A+C+L': 'WILL', 'A+C+;': 'SHOULD',
-    'A+C+J+K': 'NEVER', 'A+C+J+L': 'CANNOT', 'A+C+J+;': 'WONT',
-    'A+C+K+L': 'MUST', 'A+C+K+;': 'MIGHT', 'A+C+L+;': 'WOULD',
-    'A+C+M+J': 'DONT', 'A+C+M+K': 'DIDNT', 'A+C+M+L': 'DOESNT', 'A+C+M+;': 'ISNT',
-    'A+C+M+J+K': 'HAVENT', 'A+C+M+J+L': 'WASNT', 'A+C+M+J+;': 'WERENT',
-    'A+C+M+K+L': 'COULDNT', 'A+C+M+K+;': 'SHOULDNT', 'A+C+M+L+;': 'WOULDNT',
+    'A+C+J+K': 'WOULD', 'A+C+J+L': 'COULD', 'A+C+J+;': 'MIGHT',
+    'A+C+K+L': 'MUST', 'A+C+K+;': 'MAY', 'A+C+L+;': 'SHALL',
+    'A+C+J+K+L': 'ALWAYS', 'A+C+J+K+;': 'NEVER', 'A+C+J+L+;': 'SOMETIMES',
+    'A+C+K+L+;': 'USUALLY', 'A+C+J+K+L+;': 'OFTEN',
+    'A+C+M+J': 'RARELY', 'A+C+M+K': 'HARDLY', 'A+C+M+L': 'BARELY', 'A+C+M+;': 'ALREADY',
+    'A+C+M+J+K': 'STILL', 'A+C+M+J+L': 'YET', 'A+C+M+J+;': 'JUST',
+    'A+C+M+K+L': 'ONLY', 'A+C+M+K+;': 'EVEN',
 
-    # PREPOSITIONS (F+C)
-    'F+C+J': 'IN', 'F+C+K': 'ON', 'F+C+L': 'AT', 'F+C+;': 'BY',
-    'F+C+J+K': 'OUT', 'F+C+J+L': 'UP', 'F+C+J+;': 'DOWN',
-    'F+C+K+L': 'OVER', 'F+C+K+;': 'UNDER', 'F+C+L+;': 'THROUGH',
-    'F+C+M+J': 'INTO', 'F+C+M+K': 'ONTO', 'F+C+M+L': 'NEAR', 'F+C+M+;': 'AROUND',
-    'F+C+M+J+K': 'BETWEEN', 'F+C+M+J+L': 'BEHIND', 'F+C+M+J+;': 'ABOVE',
-    'F+C+M+K+L': 'BELOW', 'F+C+M+K+;': 'BESIDE', 'F+C+M+L+;': 'ACROSS',
+    # =========================================================================
+    # S+D — NOUNS-THINGS (objects, places)
+    # =========================================================================
+    'S+D+J': 'PLACE', 'S+D+K': 'PERSON', 'S+D+L': 'HOME', 'S+D+;': 'OFFICE',
+    'S+D+J+K': 'ROOM', 'S+D+J+L': 'BUILDING', 'S+D+J+;': 'WORLD',
+    'S+D+K+L': 'PHONE', 'S+D+K+;': 'EMAIL', 'S+D+L+;': 'MESSAGE',
+    'S+D+J+K+L': 'DOCUMENT', 'S+D+J+K+;': 'REPORT', 'S+D+J+L+;': 'PROJECT',
+    'S+D+K+L+;': 'MEETING', 'S+D+J+K+L+;': 'TEAM',
+    'S+D+M+J': 'COMPANY', 'S+D+M+K': 'GROUP', 'S+D+M+L': 'EVENT', 'S+D+M+;': 'TASK',
+    'S+D+M+J+K': 'ISSUE', 'S+D+M+J+L': 'REQUEST', 'S+D+M+J+;': 'UPDATE',
+    'S+D+M+K+L': 'MONEY', 'S+D+M+K+;': 'SCREEN', 'S+D+M+L+;': 'BUTTON',
+    'S+D+M+J+K+L': 'WINDOW', 'S+D+M+J+K+;': 'LINK', 'S+D+M+J+L+;': 'IMAGE',
+    'S+D+M+K+L+;': 'PAGE', 'S+D+M+J+K+L+;': 'SITE',
 
-    # STYLE (D+C)
+    # =========================================================================
+    # S+F — PRONOUNS (personal, quantifiers)
+    # =========================================================================
+    'S+F+J': 'I', 'S+F+K': 'YOU', 'S+F+L': 'WE', 'S+F+;': 'THEY',
+    'S+F+J+K': 'HE', 'S+F+J+L': 'SHE', 'S+F+J+;': 'IT',
+    'S+F+K+L': 'THIS', 'S+F+K+;': 'THAT', 'S+F+L+;': 'WHO',
+    'S+F+J+K+L': 'SOMEONE', 'S+F+J+K+;': 'EVERYONE', 'S+F+J+L+;': 'ANYONE',
+    'S+F+K+L+;': 'NOONE', 'S+F+J+K+L+;': 'SOMETHING',
+    'S+F+M+J': 'MY', 'S+F+M+K': 'YOUR', 'S+F+M+L': 'OUR', 'S+F+M+;': 'THEIR',
+    'S+F+M+J+K': 'HIS', 'S+F+M+J+L': 'HER', 'S+F+M+J+;': 'ME',
+    'S+F+M+K+L': 'US', 'S+F+M+K+;': 'THEM', 'S+F+M+L+;': 'SOME',
+    'S+F+M+J+K+L': 'MANY', 'S+F+M+J+K+;': 'FEW', 'S+F+M+J+L+;': 'NONE',
+    'S+F+M+K+L+;': 'EACH', 'S+F+M+J+K+L+;': 'BOTH',
+
+    # =========================================================================
+    # S+C — VERBS-PHYSICAL (body actions)
+    # =========================================================================
+    'S+C+J': 'DO', 'S+C+K': 'HAVE', 'S+C+L': 'BE', 'S+C+;': 'GET',
+    'S+C+J+K': 'WORK', 'S+C+J+L': 'PLAY', 'S+C+J+;': 'REST',
+    'S+C+K+L': 'SLEEP', 'S+C+K+;': 'WAKE', 'S+C+L+;': 'EAT',
+    'S+C+J+K+L': 'DRINK', 'S+C+J+K+;': 'RUN', 'S+C+J+L+;': 'WALK',
+    'S+C+K+L+;': 'SIT', 'S+C+J+K+L+;': 'STAND',
+    'S+C+M+J': 'READ', 'S+C+M+K': 'WRITE', 'S+C+M+L': 'SPEAK', 'S+C+M+;': 'LISTEN',
+    'S+C+M+J+K': 'WATCH', 'S+C+M+J+L': 'LEARN', 'S+C+M+J+;': 'TEACH',
+    'S+C+M+K+L': 'HOLD', 'S+C+M+K+;': 'DROP', 'S+C+M+L+;': 'CARRY',
+    'S+C+M+J+K+L': 'PUSH', 'S+C+M+J+K+;': 'PULL', 'S+C+M+J+L+;': 'THROW',
+    'S+C+M+K+L+;': 'CATCH', 'S+C+M+J+K+L+;': 'TOUCH',
+
+    # =========================================================================
+    # D+F — STATES (emotions, conditions)
+    # =========================================================================
+    'D+F+J': 'READY', 'D+F+K': 'BUSY', 'D+F+L': 'SURE', 'D+F+;': 'HAPPY',
+    'D+F+J+K': 'SAD', 'D+F+J+L': 'TIRED', 'D+F+J+;': 'ANGRY',
+    'D+F+K+L': 'WORRIED', 'D+F+K+;': 'CONFUSED', 'D+F+L+;': 'NERVOUS',
+    'D+F+J+K+L': 'CALM', 'D+F+J+K+;': 'EXCITED', 'D+F+J+L+;': 'BORED',
+    'D+F+K+L+;': 'STUCK', 'D+F+J+K+L+;': 'LOST',
+    'D+F+M+J': 'AVAILABLE', 'D+F+M+K': 'INTERESTED', 'D+F+M+L': 'IMPORTANT', 'D+F+M+;': 'URGENT',
+    'D+F+M+J+K': 'NECESSARY', 'D+F+M+J+L': 'REQUIRED', 'D+F+M+J+;': 'OPTIONAL',
+    'D+F+M+K+L': 'POSSIBLE', 'D+F+M+K+;': 'RECOMMENDED', 'D+F+M+L+;': 'PENDING',
+    'D+F+M+J+K+L': 'COMPLETE', 'D+F+M+J+K+;': 'BROKEN', 'D+F+M+J+L+;': 'FIXED',
+    'D+F+M+K+L+;': 'FOUND',
+
+    # =========================================================================
+    # D+C — STYLE (tone modifiers)
+    # =========================================================================
     'D+C+J': 'FORMAL', 'D+C+K': 'CASUAL', 'D+C+L': 'POLITE', 'D+C+;': 'DIRECT',
-    'D+C+J+K': 'TECHNICAL', 'D+C+J+L': 'FRIENDLY', 'D+C+J+;': 'PROFESSIONAL',
-    'D+C+K+L': 'BRIEF', 'D+C+K+;': 'DETAILED', 'D+C+L+;': 'AS_QUESTION',
-    'D+C+J+K+L': 'AS_COMMAND', 'D+C+J+K+;': 'AS_REQUEST', 'D+C+J+L+;': 'AS_STATEMENT',
+    'D+C+J+K': 'BRIEF', 'D+C+J+L': 'DETAILED', 'D+C+J+;': 'FRIENDLY',
+    'D+C+K+L': 'PROFESSIONAL', 'D+C+K+;': 'TECHNICAL', 'D+C+L+;': 'SIMPLE',
+    'D+C+J+K+L': 'AS_QUESTION', 'D+C+J+K+;': 'AS_COMMAND', 'D+C+J+L+;': 'AS_REQUEST',
     'D+C+K+L+;': 'AS_LIST', 'D+C+J+K+L+;': 'AS_SUMMARY',
-    'D+C+M+J': 'REPROMPT', 'D+C+M+K': 'URGENT_TONE', 'D+C+M+L': 'GENTLE', 'D+C+M+;': 'FIRM',
-    'D+C+M+J+K': 'HUMOROUS', 'D+C+M+J+L': 'SERIOUS', 'D+C+M+J+;': 'EMPATHETIC',
-    'D+C+M+K+L': 'CONFIDENT', 'D+C+M+K+;': 'HUMBLE', 'D+C+M+L+;': 'ENTHUSIASTIC',
-    'D+C+M+J+K+L': 'SKEPTICAL', 'D+C+M+J+K+;': 'SUPPORTIVE', 'D+C+M+J+L+;': 'CRITICAL',
-    'D+C+M+K+L+;': 'NEUTRAL', 'D+C+M+J+K+L+;': 'PERSUASIVE',
+    'D+C+M+J': 'GENTLE', 'D+C+M+K': 'FIRM', 'D+C+M+L': 'SERIOUS', 'D+C+M+;': 'HUMOROUS',
+    'D+C+M+J+K': 'CONFIDENT', 'D+C+M+J+L': 'HUMBLE', 'D+C+M+J+;': 'ENTHUSIASTIC',
+    'D+C+M+K+L': 'EMPATHETIC', 'D+C+M+K+;': 'SUPPORTIVE', 'D+C+M+L+;': 'CRITICAL',
+    'D+C+M+J+K+L': 'SKEPTICAL', 'D+C+M+J+K+;': 'PERSUASIVE', 'D+C+M+J+L+;': 'NEUTRAL',
+    'D+C+M+K+L+;': 'URGENT_TONE', 'D+C+M+J+K+L+;': 'REPROMPT',
 
-    # PRONOUNS extended (S+F)
-    'S+F+J+K+L': 'SOMETHING', 'S+F+J+K+;': 'EVERYTHING', 'S+F+J+L+;': 'ANYTHING',
-    'S+F+K+L+;': 'NOTHING', 'S+F+J+K+L+;': 'ITSELF',
-    'S+F+M+J+K+L': 'HIMSELF', 'S+F+M+J+K+;': 'HERSELF', 'S+F+M+J+L+;': 'THEMSELVES',
-    'S+F+M+K+L+;': 'OURSELVES', 'S+F+M+J+K+L+;': 'YOURSELF',
+    # =========================================================================
+    # F+C — PREPOSITIONS (spatial, relational)
+    # =========================================================================
+    'F+C+J': 'IN', 'F+C+K': 'ON', 'F+C+L': 'AT', 'F+C+;': 'TO',
+    'F+C+J+K': 'FROM', 'F+C+J+L': 'WITH', 'F+C+J+;': 'BY',
+    'F+C+K+L': 'FOR', 'F+C+K+;': 'OF', 'F+C+L+;': 'ABOUT',
+    'F+C+J+K+L': 'UP', 'F+C+J+K+;': 'DOWN', 'F+C+J+L+;': 'OUT',
+    'F+C+K+L+;': 'INTO', 'F+C+J+K+L+;': 'THROUGH',
+    'F+C+M+J': 'OVER', 'F+C+M+K': 'UNDER', 'F+C+M+L': 'BETWEEN', 'F+C+M+;': 'AROUND',
+    'F+C+M+J+K': 'BEHIND', 'F+C+M+J+L': 'ABOVE', 'F+C+M+J+;': 'BELOW',
+    'F+C+M+K+L': 'BESIDE', 'F+C+M+K+;': 'NEAR', 'F+C+M+L+;': 'ACROSS',
+    'F+C+M+J+K+L': 'ALONG', 'F+C+M+J+K+;': 'TOWARD', 'F+C+M+J+L+;': 'AGAINST',
+    'F+C+M+K+L+;': 'HERE', 'F+C+M+J+K+L+;': 'THERE',
 
-    # NEGATION extended (A+C)
-    'A+C+J+K+L': 'ALWAYS', 'A+C+J+K+;': 'SOMETIMES', 'A+C+J+L+;': 'USUALLY',
-    'A+C+K+L+;': 'BARELY', 'A+C+J+K+L+;': 'HARDLY',
-    'A+C+M+J+K+L': 'ARENT', 'A+C+M+J+K+;': 'WONT_BE', 'A+C+M+J+L+;': 'CANT_BE',
-    'A+C+M+K+L+;': 'MUSTNT', 'A+C+M+J+K+L+;': 'NEEDNT',
-
-    # PREPOSITIONS extended (F+C)
-    'F+C+J+K+L': 'WITHIN', 'F+C+J+K+;': 'THROUGHOUT', 'F+C+J+L+;': 'ALONG',
-    'F+C+K+L+;': 'AGAINST', 'F+C+J+K+L+;': 'AMONG',
-    'F+C+M+J+K+L': 'TOWARD', 'F+C+M+J+K+;': 'AWAY', 'F+C+M+J+L+;': 'APART',
-    'F+C+M+K+L+;': 'TOGETHER', 'F+C+M+J+K+L+;': 'INSIDE',
-
-    # SYMBOLS extended (A+F)
-    'A+F+M+J+K+L+;': ';',
-
-    # TECH (A+D+S) - programming/tech terms - using 3-key left combo
-    'A+D+S+J': 'DEBUG', 'A+D+S+K': 'TEST', 'A+D+S+L': 'BUILD', 'A+D+S+;': 'DEPLOY',
-    'A+D+S+J+K': 'COMMIT', 'A+D+S+J+L': 'PUSH', 'A+D+S+J+;': 'PULL',
-    'A+D+S+K+L': 'MERGE', 'A+D+S+K+;': 'BRANCH', 'A+D+S+L+;': 'CLONE',
-    'A+D+S+J+K+L': 'INSTALL', 'A+D+S+J+K+;': 'UNINSTALL', 'A+D+S+J+L+;': 'UPGRADE',
+    # =========================================================================
+    # A+D+S — TECH (programming)
+    # =========================================================================
+    'A+D+S+J': 'DEBUG', 'A+D+S+K': 'TEST', 'A+D+S+L': 'BUILD', 'A+D+S+;': 'RUN',
+    'A+D+S+J+K': 'DEPLOY', 'A+D+S+J+L': 'COMMIT', 'A+D+S+J+;': 'PUSH',
+    'A+D+S+K+L': 'PULL', 'A+D+S+K+;': 'MERGE', 'A+D+S+L+;': 'BRANCH',
+    'A+D+S+J+K+L': 'INSTALL', 'A+D+S+J+K+;': 'UPDATE', 'A+D+S+J+L+;': 'UPGRADE',
     'A+D+S+K+L+;': 'CONFIGURE', 'A+D+S+J+K+L+;': 'INITIALIZE',
     'A+D+S+M+J': 'SERVER', 'A+D+S+M+K': 'CLIENT', 'A+D+S+M+L': 'DATABASE', 'A+D+S+M+;': 'API',
-    'A+D+S+M+J+K': 'ENDPOINT', 'A+D+S+M+J+L': 'REQUEST_NOUN', 'A+D+S+M+J+;': 'RESPONSE',
+    'A+D+S+M+J+K': 'ENDPOINT', 'A+D+S+M+J+L': 'REQUEST', 'A+D+S+M+J+;': 'RESPONSE',
     'A+D+S+M+K+L': 'QUERY', 'A+D+S+M+K+;': 'CACHE', 'A+D+S+M+L+;': 'LOG',
-    'A+D+S+M+J+K+L': 'VARIABLE', 'A+D+S+M+J+K+;': 'CONSTANT', 'A+D+S+M+J+L+;': 'PARAMETER',
-    'A+D+S+M+K+L+;': 'ARGUMENT', 'A+D+S+M+J+K+L+;': 'EXCEPTION',
+    'A+D+S+M+J+K+L': 'VARIABLE', 'A+D+S+M+J+K+;': 'FUNCTION', 'A+D+S+M+J+L+;': 'CLASS',
+    'A+D+S+M+K+L+;': 'ERROR', 'A+D+S+M+J+K+L+;': 'EXCEPTION',
 }
 
 # Build normalized lookup (sort keys for consistent matching)
@@ -262,7 +283,7 @@ TOKEN_TO_CHORD = {v: k for k, v in SEMANTICS.items()}
 
 
 class ChordEngine:
-    """State machine for chord detection in semantic/phonemic modes."""
+    """State machine for chord detection in semantic/text modes."""
 
     def __init__(self):
         self.held_keys = set()
@@ -314,13 +335,21 @@ class ChordEngine:
     def _fire_chord(self):
         left_code, right_code = self._get_codes()
 
-        # Control: C+M = backspace
-        if left_code == 16 and right_code == 16:
+        # Control: All 10 keys = send to AI
+        if left_code == 31 and right_code == 31:  # All keys: 1+2+4+8+16=31
+            return ('send_ai',)
+
+        # Control: C+; = backspace (left thumb + right pinky)
+        if left_code == 16 and right_code == 1:  # C=16, ;=1
             return ('backspace',)
 
-        # Control: C+; = enter (left thumb + right pinky)
-        if left_code == 16 and right_code == 1:  # C=16, ;=1
+        # Control: C+M = enter (both thumbs)
+        if left_code == 16 and right_code == 16:  # C=16, M=16
             return ('enter',)
+
+        # Control: C+J = search popup (left thumb + right index)
+        if left_code == 16 and right_code == 8:  # C=16, J=8
+            return ('search',)
 
         # Control: S+C+M = toggle mode
         if left_code == 18 and right_code == 16:  # S+C = 2+16=18, M=16

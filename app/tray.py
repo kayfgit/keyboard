@@ -88,10 +88,13 @@ class TrayApp:
         icon.stop()
 
     def update(self):
-        if self._icon:
-            self._icon.icon = _create_icon_image(self.enabled, self.mode)
-            self._icon.menu = self._build_menu()
-            self._icon.title = self._get_tooltip()
+        try:
+            if self._icon:
+                self._icon.icon = _create_icon_image(self.enabled, self.mode)
+                self._icon.menu = self._build_menu()
+                self._icon.title = self._get_tooltip()
+        except Exception as e:
+            print(f"Tray update error: {e}", flush=True)
 
     def set_enabled(self, enabled):
         self.enabled = enabled
@@ -102,8 +105,11 @@ class TrayApp:
         self.update()
 
     def set_tooltip_buffer(self, buffer_text):
-        if self._icon:
-            self._icon.title = self._get_tooltip(buffer_text)
+        try:
+            if self._icon:
+                self._icon.title = self._get_tooltip(buffer_text)
+        except Exception as e:
+            pass  # Ignore tooltip errors
 
     def _get_tooltip(self, buffer_text=''):
         status = "ON" if self.enabled else "OFF"

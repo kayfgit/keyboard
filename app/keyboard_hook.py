@@ -18,6 +18,9 @@ from config import (
     LLKHF_INJECTED, MODIFIER_VKS, PASSTHROUGH_VKS,
 )
 from overlay import notify_held_keys
+from search_popup import is_search_open, request_search_close
+
+VK_ESCAPE = 0x1B
 
 user32 = ctypes.windll.user32
 user32.GetAsyncKeyState.argtypes = [ctypes.c_int]
@@ -29,17 +32,18 @@ controller = Controller()
 class KeyboardHook:
     """Global keyboard interceptor (Plover-style)."""
 
-    def __init__(self, chord_engine, on_toggle, on_space, on_token,
+    def __init__(self, chord_engine, on_toggle, on_send_ai, on_token,
                  on_backspace, on_mode_toggle, on_cheatsheet, on_enter,
-                 on_mode_change=None):
+                 on_search, on_mode_change=None):
         self.engine = chord_engine
         self.on_toggle = on_toggle
-        self.on_space = on_space
+        self.on_send_ai = on_send_ai
         self.on_token = on_token
         self.on_backspace = on_backspace
         self.on_mode_toggle = on_mode_toggle
         self.on_cheatsheet = on_cheatsheet
         self.on_enter = on_enter
+        self.on_search = on_search
         self.on_mode_change = on_mode_change  # Just updates display, no toggle
         self.enabled = False
         self.converting = False
@@ -102,10 +106,12 @@ class KeyboardHook:
 
     def _win32_filter(self, msg, data):
         try:
-            return self._process_event(msg, data)
+            result = self._process_event(msg, data)
+            return result
         except SystemHook.SuppressException:
             raise
-        except Exception:
+        except Exception as e:
+            print(f"Event processing error: {e}", flush=True)
             traceback.print_exc()
             sys.stdout.flush()
 
@@ -118,6 +124,9 @@ class KeyboardHook:
         vk = data.vkCode
         flags = data.flags
 
+        # Debug: uncomment to see all key events
+        # print(f"Key event: vk={vk}, down={is_down}, enabled={self.enabled}", flush=True)
+
         # Never suppress our own injected keystrokes
         if flags & LLKHF_INJECTED:
             return
@@ -126,8 +135,15 @@ class KeyboardHook:
         if vk == VK_Q_TOGGLE and is_down:
             alt = user32.GetAsyncKeyState(0x12) & 0x8000
             if alt:
-                self.toggle()
-                self.on_toggle()
+                print(f"Alt+Q pressed, enabled={self.enabled}", flush=True)
+                try:
+                    self.toggle()
+                    self.on_toggle()
+                    print(f"Alt+Q handled, enabled={self.enabled}", flush=True)
+                except Exception as e:
+                    print(f"Toggle error: {e}", flush=True)
+                    traceback.print_exc()
+                    sys.stdout.flush()
                 self._listener.suppress_event()
                 return
 
@@ -141,7 +157,34 @@ class KeyboardHook:
 
         # Always pass through system/function keys
         if vk in PASSTHROUGH_VKS:
+            # Special case: Escape closes search popup if open
+            if vk == VK_ESCAPE and is_down and is_search_open():
+                request_search_close()
             return
+
+        # When search popup is open, pass through most keys for typing
+        # BUT detect C+J chord to toggle search closed
+        if is_search_open():
+            key_name = VK_TO_KEY.get(vk)
+            if key_name is not None:
+                # Track chord keys to detect C+J toggle
+                if is_down:
+                    self.engine.key_down(key_name)
+                    # If multiple chord keys held, suppress (chord in progress)
+                    if len(self.engine.held_keys) >= 2:
+                        self._listener.suppress_event()
+                        return
+                elif is_up:
+                    # Check before key_up clears buffer
+                    was_multi_key = len(self.engine.chord_buffer) >= 2
+                    result = self.engine.key_up(key_name)
+                    if was_multi_key:
+                        # This was part of a chord - suppress and handle
+                        if result is not None and result[0] == 'search':
+                            self._handle_chord_result(result)
+                        self._listener.suppress_event()
+                        return
+            return  # Let other keys through for typing
 
         # Pass through any key pressed with Ctrl/Alt/Win (system shortcuts)
         ctrl = user32.GetAsyncKeyState(0x11) & 0x8000
@@ -159,15 +202,9 @@ class KeyboardHook:
                     self.engine.pop_text_char()
                 return  # Let backspace through
 
-            # Space in text mode: expand or pass through
+            # Space in text mode: just pass through (send via chord now)
             if vk == VK_SPACE:
-                if is_down and not self.converting:
-                    # If we have tokens or text, expand
-                    if self.engine.token_buffer or self.engine.text_buffer:
-                        self.on_space()
-                        self._listener.suppress_event()
-                        return
-                return  # No buffer, let space through
+                return  # Let space through
 
             # All keys in text mode: pass through and track immediately
             if is_down and not self.converting:
@@ -192,10 +229,8 @@ class KeyboardHook:
             self._listener.suppress_event()
             return
 
-        # --- Space ---
+        # --- Space in semantic mode: suppressed (use all-10-keys chord to send) ---
         if vk == VK_SPACE:
-            if not self.converting and is_down and self.engine.token_buffer:
-                self.on_space()
             self._listener.suppress_event()
             return
 
@@ -203,32 +238,41 @@ class KeyboardHook:
         self._listener.suppress_event()
 
     def _handle_chord_result(self, result):
-        action = result[0]
-        if action == 'token':
-            token = result[1]
-            # Type token with space separator if not first
-            if len(self.engine.token_buffer) > 1:
-                controller.type(' ' + token)
-            else:
-                controller.type(token)
-            self.on_token(token)
-        elif action == 'type_chars':
-            # Text mode: type chord keys as regular characters
-            chars = result[1]
-            for char in chars:
-                controller.type(char)
-                self.engine.add_text_char(char)
-            self.on_token(''.join(chars))
-        elif action == 'backspace':
-            self.on_backspace()
-        elif action == 'enter':
-            self.on_enter()
-        elif action == 'toggle_mode':
-            self.on_mode_toggle()
-        elif action == 'cheatsheet':
-            self.on_cheatsheet()
-        elif action == 'invalid':
-            pass  # Silent
+        try:
+            action = result[0]
+            if action == 'token':
+                token = result[1]
+                # Type token with space separator if not first
+                if len(self.engine.token_buffer) > 1:
+                    controller.type(' ' + token)
+                else:
+                    controller.type(token)
+                self.on_token(token)
+            elif action == 'type_chars':
+                # Text mode: type chord keys as regular characters
+                chars = result[1]
+                for char in chars:
+                    controller.type(char)
+                    self.engine.add_text_char(char)
+                self.on_token(''.join(chars))
+            elif action == 'send_ai':
+                self.on_send_ai()
+            elif action == 'backspace':
+                self.on_backspace()
+            elif action == 'enter':
+                self.on_enter()
+            elif action == 'search':
+                self.on_search()
+            elif action == 'toggle_mode':
+                self.on_mode_toggle()
+            elif action == 'cheatsheet':
+                self.on_cheatsheet()
+            elif action == 'invalid':
+                pass  # Silent
+        except Exception as e:
+            print(f"Chord handler error: {e}", flush=True)
+            traceback.print_exc()
+            sys.stdout.flush()
 
     @staticmethod
     def type_text(text):

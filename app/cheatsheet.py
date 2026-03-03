@@ -313,29 +313,38 @@ class CheatsheetWindow:
         self.root.mainloop()
 
 
+# Global state for cheatsheet
+_cheatsheet_open = False
+
+
 def show_cheatsheet(mode='semantic'):
     """Show cheatsheet popup (non-blocking)."""
+    global _cheatsheet_open
     import threading
 
+    print(f"show_cheatsheet called, _cheatsheet_open={_cheatsheet_open}", flush=True)
+
+    # If already open, ignore
+    if _cheatsheet_open:
+        print("Cheatsheet already open, ignoring", flush=True)
+        return None
+
+    _cheatsheet_open = True
+    print("Opening cheatsheet", flush=True)
+
     def _run():
-        window = CheatsheetWindow(mode)
-        window.run()
+        global _cheatsheet_open
+        try:
+            print("Cheatsheet thread starting", flush=True)
+            window = CheatsheetWindow(mode)
+            window.run()
+            print("Cheatsheet mainloop ended", flush=True)
+        except Exception as e:
+            print(f"Cheatsheet error: {e}", flush=True)
+        finally:
+            _cheatsheet_open = False
+            print("Cheatsheet thread ended, _cheatsheet_open=False", flush=True)
 
     thread = threading.Thread(target=_run, daemon=True)
     thread.start()
-
-    # Return a proxy object for the window
-    class WindowProxy:
-        def __init__(self):
-            self._exists = True
-
-        def winfo_exists(self):
-            return self._exists
-
-        def lift(self):
-            pass
-
-        def focus_force(self):
-            pass
-
-    return WindowProxy()
+    return None

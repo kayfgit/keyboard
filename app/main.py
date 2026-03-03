@@ -2,14 +2,16 @@
 
 Flow:
   1. User chords keys → token typed into focused app immediately
-  2. Space → tokens sent to AI → AI result replaces typed tokens
-  3. C+M → backspace (deletes last token/char)
-  4. S+C+M → toggle semantic/text mode
-  5. C+M+K → show cheatsheet popup
+  2. All 10 keys → tokens sent to AI → AI result replaces typed tokens
+  3. C+; → backspace (deletes last token/char)
+  4. C+M → enter (new line)
+  5. C+J → search popup (find tokens by name)
+  6. S+C+M → toggle semantic/text mode
+  7. C+M+K → show cheatsheet popup
 
 Modes:
   - Semantic: chord keys produce UPPERCASE tokens
-  - Text: normal QWERTY typing (lowercase), Space triggers AI expansion
+  - Text: normal QWERTY typing (lowercase)
 """
 
 import sys
@@ -25,12 +27,12 @@ from tray import TrayApp
 from feedback import beep_toggle_on, beep_toggle_off, beep_mode_semantic, beep_mode_text
 from config import get_groq_api_key
 from overlay import start_overlay
+from search_popup import toggle_search
 
 
 def main():
     engine = ChordEngine()
     pending_chars = [0]
-    cheatsheet_window = [None]  # Mutable container for window reference
 
     def on_ai_result(text):
         count = pending_chars[0]
@@ -58,7 +60,8 @@ def main():
         else:
             beep_toggle_off()
 
-    def on_space():
+    def on_send_ai():
+        """All 10 keys chord — send tokens to AI for expansion."""
         tokens, char_count = engine.flush_buffer()
         if tokens:
             pending_chars[0] = char_count
@@ -73,8 +76,14 @@ def main():
         print(f"  Token: {token}  Buffer: [{buf}]", flush=True)
         tray.set_tooltip_buffer(buf)
 
+    def on_search():
+        """C+J chord — toggle search popup."""
+        print("  on_search called", flush=True)
+        toggle_search()
+        print("  on_search completed", flush=True)
+
     def on_backspace():
-        """C+M chord — delete last token/char from app and buffer."""
+        """C+; chord — delete last token/char from app and buffer."""
         # In text mode, first try to delete from text_buffer
         if engine.mode == 'text' and engine.text_buffer:
             engine.pop_text_char()
@@ -122,24 +131,22 @@ def main():
     def on_cheatsheet():
         """C+M+K chord — show cheatsheet popup."""
         from cheatsheet import show_cheatsheet
-        if cheatsheet_window[0] is None or not cheatsheet_window[0].winfo_exists():
-            cheatsheet_window[0] = show_cheatsheet(engine.mode)
-        else:
-            cheatsheet_window[0].lift()
-            cheatsheet_window[0].focus_force()
+        show_cheatsheet(engine.mode)
 
     def on_enter():
+        """C+M chord — enter/new line."""
         KeyboardHook.send_enter()
 
     hook = KeyboardHook(
         chord_engine=engine,
         on_toggle=on_toggle,
-        on_space=on_space,
+        on_send_ai=on_send_ai,
         on_token=on_token,
         on_backspace=on_backspace,
         on_mode_toggle=on_mode_toggle,
         on_cheatsheet=on_cheatsheet,
         on_enter=on_enter,
+        on_search=on_search,
         on_mode_change=on_mode_change,
     )
 
@@ -172,11 +179,12 @@ def main():
         print("  Groq AI: disabled (no GROQ_API_KEY)", flush=True)
     print(flush=True)
     print("  Alt+Q     = toggle ON/OFF", flush=True)
-    print("  C+M       = backspace (delete token)", flush=True)
-    print("  C+;       = enter (new line)", flush=True)
+    print("  ALL 10    = send to AI (expand)", flush=True)
+    print("  C+;       = backspace (delete token)", flush=True)
+    print("  C+M       = enter (new line)", flush=True)
+    print("  C+J       = search tokens", flush=True)
     print("  S+C+M     = toggle semantic/text", flush=True)
     print("  C+M+K     = show cheatsheet", flush=True)
-    print("  Space     = expand to text", flush=True)
     print(flush=True)
     print("  Chord preview overlay enabled", flush=True)
     print("=" * 50, flush=True)

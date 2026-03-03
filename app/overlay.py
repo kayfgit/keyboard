@@ -12,21 +12,21 @@ _overlay_instance = None
 # Category names based on left-hand key combinations
 # M extends the category (shown as +)
 CATEGORIES = {
-    frozenset({'A'}): 'ACTIONS',
-    frozenset({'S'}): 'SUBJECTS',
-    frozenset({'D'}): 'QUALITY',
-    frozenset({'F'}): 'CONNECT',
-    frozenset({'C'}): 'RESPOND',
-    frozenset({'A', 'F'}): 'SYMBOLS',
-    frozenset({'A', 'S'}): 'DAILY',
-    frozenset({'D', 'S'}): 'NOUNS',
+    frozenset({'A'}): 'VERBS',
+    frozenset({'S'}): 'NOUNS',
+    frozenset({'D'}): 'MODIFIERS',
+    frozenset({'F'}): 'CONNECTORS',
+    frozenset({'C'}): 'RESPONSES',
+    frozenset({'A', 'S'}): 'SOCIAL',
     frozenset({'A', 'D'}): 'TIME',
-    frozenset({'F', 'D'}): 'STATES',
+    frozenset({'A', 'F'}): 'SYMBOLS',
+    frozenset({'A', 'C'}): 'MODALS',
+    frozenset({'S', 'D'}): 'THINGS',
     frozenset({'S', 'F'}): 'PRONOUNS',
-    frozenset({'A', 'C'}): 'NEGATION',
-    frozenset({'F', 'C'}): 'PREPOSITIONS',
+    frozenset({'S', 'C'}): 'PHYSICAL',
+    frozenset({'D', 'F'}): 'STATES',
     frozenset({'D', 'C'}): 'STYLE',
-    frozenset({'S', 'C'}): 'VERBS',
+    frozenset({'F', 'C'}): 'PREPOSITIONS',
     frozenset({'A', 'D', 'S'}): 'TECH',
 }
 
@@ -232,14 +232,20 @@ class ChordOverlay:
 
 def notify_held_keys(held_keys):
     """Thread-safe function to update overlay with held keys."""
-    _update_queue.put(set(held_keys))
+    try:
+        _update_queue.put_nowait(set(held_keys))
+    except:
+        pass  # Queue full or other error, ignore
 
 
 def start_overlay():
     """Start overlay in a background thread."""
     def _run():
-        overlay = ChordOverlay()
-        overlay.run()
+        try:
+            overlay = ChordOverlay()
+            overlay.run()
+        except Exception as e:
+            print(f"Overlay error: {e}", flush=True)
 
     thread = threading.Thread(target=_run, daemon=True)
     thread.start()
