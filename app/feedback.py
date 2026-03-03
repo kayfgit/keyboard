@@ -53,3 +53,11 @@ def beep_mode_semantic():
 def beep_mode_text():
     """Low ping — switched to text mode."""
     _beep(700, 60)
+
+
+def beep_undo():
+    """Descending two-tone — undo expansion."""
+    def _play():
+        winsound.Beep(1000, 40)
+        winsound.Beep(700, 40)
+    threading.Thread(target=_play, daemon=True).start()
