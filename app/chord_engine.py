@@ -363,6 +363,22 @@ class ChordEngine:
         if left_code == 16 and right_code == 17:  # C=16, M+;=16+1=17
             return ('clear_context',)
 
+        # Control: C+L = language selector (left thumb + right ring)
+        if left_code == 16 and right_code == 2:  # C=16, L=2
+            return ('language',)
+
+        # Arrow keys: J/K/L/; = left/down/up/right (vim shifted right)
+        # Single right-hand keys only (no left-hand keys needed)
+        if left_code == 0:
+            if right_code == 8:  # J = left
+                return ('arrow', 'left')
+            if right_code == 4:  # K = down
+                return ('arrow', 'down')
+            if right_code == 2:  # L = up
+                return ('arrow', 'up')
+            if right_code == 1:  # ; = right
+                return ('arrow', 'right')
+
         if self.mode == 'semantic':
             return self._fire_semantic()
         else:

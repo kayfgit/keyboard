@@ -19,6 +19,7 @@ from config import (
 )
 from overlay import notify_held_keys
 from search_popup import is_search_open, request_search_close
+from language_popup import is_popup_open as is_language_popup_open
 
 VK_ESCAPE = 0x1B
 
@@ -34,7 +35,8 @@ class KeyboardHook:
 
     def __init__(self, chord_engine, on_toggle, on_send_ai, on_token,
                  on_backspace, on_mode_toggle, on_cheatsheet, on_enter,
-                 on_search, on_mode_change=None, on_clear_context=None):
+                 on_search, on_mode_change=None, on_clear_context=None,
+                 on_language=None):
         self.engine = chord_engine
         self.on_toggle = on_toggle
         self.on_send_ai = on_send_ai
@@ -46,6 +48,7 @@ class KeyboardHook:
         self.on_search = on_search
         self.on_mode_change = on_mode_change  # Just updates display, no toggle
         self.on_clear_context = on_clear_context  # Clear AI context
+        self.on_language = on_language  # Language selector popup
         self.enabled = False
         self.converting = False
         self._listener = None
@@ -163,29 +166,38 @@ class KeyboardHook:
                 request_search_close()
             return
 
-        # When search popup is open, pass through most keys for typing
-        # BUT detect C+J chord to toggle search closed
-        if is_search_open():
+        # When search or language popup is open, pass through ALL keys for typing
+        # Only intercept complete multi-key chords (C+M, C+J, C+L)
+        if is_search_open() or is_language_popup_open():
             key_name = VK_TO_KEY.get(vk)
-            if key_name is not None:
-                # Track chord keys to detect C+J toggle
-                if is_down:
-                    self.engine.key_down(key_name)
-                    # If multiple chord keys held, suppress (chord in progress)
-                    if len(self.engine.held_keys) >= 2:
-                        self._listener.suppress_event()
+            if key_name is None:
+                return  # Not a chord key, pass through
+
+            # Track held keys for popup chord detection (separate from engine)
+            if not hasattr(self, '_popup_held'):
+                self._popup_held = set()
+
+            if is_down:
+                self._popup_held.add(key_name)
+            elif is_up:
+                # Check for control chords before removing key
+                held = self._popup_held.copy()
+                self._popup_held.discard(key_name)
+
+                # Detect specific chords: C+M (enter), C+J (search), C+L (language)
+                if len(held) == 2 and 'c' in held:
+                    other_key = (held - {'c'}).pop()
+                    if other_key == 'm':
+                        self._handle_chord_result(('enter',))
                         return
-                elif is_up:
-                    # Check before key_up clears buffer
-                    was_multi_key = len(self.engine.chord_buffer) >= 2
-                    result = self.engine.key_up(key_name)
-                    if was_multi_key:
-                        # This was part of a chord - suppress and handle
-                        if result is not None and result[0] == 'search':
-                            self._handle_chord_result(result)
-                        self._listener.suppress_event()
+                    elif other_key == 'j':
+                        self._handle_chord_result(('search',))
                         return
-            return  # Let other keys through for typing
+                    elif other_key == 'l':
+                        self._handle_chord_result(('language',))
+                        return
+
+            return  # Let all keys pass through for typing
 
         # Pass through any key pressed with Ctrl/Alt/Win (system shortcuts)
         ctrl = user32.GetAsyncKeyState(0x11) & 0x8000
@@ -271,6 +283,12 @@ class KeyboardHook:
             elif action == 'clear_context':
                 if self.on_clear_context:
                     self.on_clear_context()
+            elif action == 'language':
+                if self.on_language:
+                    self.on_language()
+            elif action == 'arrow':
+                direction = result[1]
+                self._send_arrow(direction)
             elif action == 'invalid':
                 pass  # Silent
         except Exception as e:
@@ -298,3 +316,16 @@ class KeyboardHook:
         """Send Ctrl+Backspace to delete the previous word."""
         with controller.pressed(Key.ctrl):
             controller.tap(Key.backspace)
+
+    @staticmethod
+    def _send_arrow(direction):
+        """Send arrow key press."""
+        arrow_keys = {
+            'left': Key.left,
+            'right': Key.right,
+            'up': Key.up,
+            'down': Key.down,
+        }
+        key = arrow_keys.get(direction)
+        if key:
+            controller.tap(key)

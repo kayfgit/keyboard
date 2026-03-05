@@ -6,9 +6,11 @@ Flow:
   3. C+; → backspace (deletes last token/char, or undo last expansion)
   4. C+M → enter (new line)
   5. C+J → search popup (find tokens by name)
-  6. S+C+M → toggle semantic/text mode
-  7. C+M+K → show cheatsheet popup
-  8. C+M+; → clear context (start new conversation)
+  6. C+L → language popup (select AI output language)
+  7. J/K/L/; → arrow keys (left/down/up/right, vim-style shifted)
+  8. S+C+M → toggle semantic/text mode
+  9. C+M+K → show cheatsheet popup
+  10. C+M+; → clear context (start new conversation)
 
 Modes:
   - Semantic: chord keys produce UPPERCASE tokens
@@ -37,6 +39,7 @@ from feedback import beep_toggle_on, beep_toggle_off, beep_mode_semantic, beep_m
 from config import get_groq_api_key
 from overlay import start_overlay
 from search_popup import toggle_search
+from language_popup import open_language_popup
 
 
 def main():
@@ -58,6 +61,10 @@ def main():
     def on_context_change(size):
         """Called when AI context size changes."""
         context_size[0] = size
+
+    def on_language_change(code, name):
+        """Called when AI output language changes."""
+        print(f"  Language: {name} ({code})", flush=True)
 
     def on_ai_result(text):
         count = pending_chars[0]
@@ -85,6 +92,7 @@ def main():
         on_result=on_ai_result,
         on_error=on_ai_error,
         on_context_change=on_context_change,
+        on_language_change=on_language_change,
     )
 
     def on_toggle():
@@ -124,6 +132,25 @@ def main():
         print("  on_search called", flush=True)
         toggle_search()
         print("  on_search completed", flush=True)
+
+    def on_language():
+        """C+L chord — open language selector popup."""
+        # Disable hook while popup is open so typing works
+        was_enabled = hook.enabled
+        hook.enabled = False
+
+        def handle_selection(code, name):
+            ai.set_language(code, name)
+
+        def on_popup_close():
+            # Re-enable hook when popup closes
+            hook.enabled = was_enabled
+
+        open_language_popup(
+            current_language=ai.get_language(),
+            on_select=handle_selection,
+            on_close=on_popup_close
+        )
 
     def on_clear_context():
         """C+M+; chord — clear AI context (new conversation)."""
@@ -225,6 +252,7 @@ def main():
         on_search=on_search,
         on_mode_change=on_mode_change,
         on_clear_context=on_clear_context,
+        on_language=on_language,
     )
 
     def tray_toggle():
@@ -260,6 +288,8 @@ def main():
     print("  C+;       = backspace / undo expansion", flush=True)
     print("  C+M       = enter (new line)", flush=True)
     print("  C+J       = search tokens", flush=True)
+    print("  C+L       = select language", flush=True)
+    print("  J/K/L/;   = arrows (left/down/up/right)", flush=True)
     print("  S+C+M     = toggle semantic/text", flush=True)
     print("  C+M+K     = show cheatsheet", flush=True)
     print("  C+M+;     = clear context (new conversation)", flush=True)

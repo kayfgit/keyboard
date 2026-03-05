@@ -641,10 +641,36 @@
 </head>
 <body>
 
+<div id="demo-banner" style="background: linear-gradient(90deg, #1a2a3a 0%, #2a1a3a 100%); padding: 10px 20px; font-size: 11px; color: #8af; border-bottom: 1px solid #2a3a4a;">
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+    <div>
+      <strong>Web Demo</strong> — Limited preview. The desktop app has 280+ tokens, 40+ languages, system tray, overlays & more.
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <a href="semantic-cheatsheet.html" style="color:#4ade80;">Cheatsheet</a>
+      <span style="color:#333;">|</span>
+      <button onclick="toggleApiPanel()" style="background:#1a3a35;color:#4ade80;border:1px solid #2a5a4a;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:10px;">
+        <span id="api-btn-text">Enable AI</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="api-panel" style="display:none; background:#0d1117; padding:12px 20px; border-bottom:1px solid #2a3a4a;">
+  <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+    <label style="font-size:11px; color:#6a7a8a;">Groq API Key:</label>
+    <input type="password" id="groq-key-input" placeholder="gsk_..." style="flex:1; min-width:200px; max-width:350px; background:#1a1a25; border:1px solid #2a3a4a; border-radius:4px; padding:6px 10px; color:#e0e0e0; font-size:12px; font-family:monospace;">
+    <button onclick="saveApiKey()" style="background:#1a3a35;color:#4ade80;border:1px solid #2a5a4a;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:11px;">Save</button>
+    <button onclick="clearApiKey()" style="background:#2a1a1a;color:#f87171;border:1px solid #4a2a2a;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:11px;">Clear</button>
+    <a href="https://console.groq.com/keys" target="_blank" style="font-size:10px;color:#6a7a8a;">Get free key</a>
+  </div>
+  <div style="font-size:10px; color:#4a5a6a; margin-top:8px;">Your key is stored locally in your browser and sent directly to Groq. We never see it.</div>
+</div>
+
 <div id="status-bar">
   <div class="status-indicator">
     <span class="status-dot" id="status-dot"></span>
-    <span id="server-status">Checking server...</span>
+    <span id="server-status">Demo Mode</span>
   </div>
   <span id="mode-label" class="semantic">SEMANTIC MODE</span>
   <span style="color: var(--text-dim);">Universal Intent Interface</span>
@@ -732,8 +758,8 @@
 
 <div id="help-bar">
   <span><kbd>Space</kbd> Expand</span>
-  <span><kbd>C</kbd>+<kbd>M</kbd> Backspace</span>
-  <span><kbd>C</kbd>+<kbd>;</kbd> Enter</span>
+  <span><kbd>C</kbd>+<kbd>;</kbd> Backspace</span>
+  <span><kbd>C</kbd>+<kbd>M</kbd> Enter</span>
   <span><kbd>S</kbd>+<kbd>C</kbd>+<kbd>M</kbd> Toggle phonemic</span>
   <span><kbd>D</kbd>+<kbd>S</kbd>+<kbd>J</kbd> NAME</span>
   <a href="semantic-cheatsheet.html">Reference</a>
@@ -1191,6 +1217,87 @@ function getOptionsForLeftKeys(leftKeys) {
 
 const API_BASE = 'http://localhost:8000';
 let serverOnline = false;
+let demoMode = true; // Enable demo mode for web preview
+let groqApiKey = localStorage.getItem('groq_api_key') || '';
+
+// API Key Panel Functions
+function toggleApiPanel() {
+  const panel = document.getElementById('api-panel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+function saveApiKey() {
+  const key = document.getElementById('groq-key-input').value.trim();
+  if (key) {
+    groqApiKey = key;
+    localStorage.setItem('groq_api_key', key);
+    updateApiStatus();
+    toggleApiPanel();
+  }
+}
+
+function clearApiKey() {
+  groqApiKey = '';
+  localStorage.removeItem('groq_api_key');
+  document.getElementById('groq-key-input').value = '';
+  updateApiStatus();
+}
+
+function updateApiStatus() {
+  const btnText = document.getElementById('api-btn-text');
+  const statusText = document.getElementById('server-status');
+  if (groqApiKey) {
+    btnText.textContent = 'AI Enabled';
+    btnText.parentElement.style.background = '#1a3a2a';
+    statusText.textContent = 'AI Ready';
+    document.getElementById('status-dot').classList.add('online');
+  } else {
+    btnText.textContent = 'Enable AI';
+    btnText.parentElement.style.background = '#1a3a35';
+    statusText.textContent = 'Demo Mode';
+    document.getElementById('status-dot').classList.remove('online');
+  }
+}
+
+// Groq API call
+async function callGroqAPI(tokens) {
+  if (!groqApiKey) return null;
+
+  const prompt = `You are an AI that expands semantic tokens into natural language.
+The user inputs intent tokens (UPPERCASE = semantic meaning, lowercase = literal text).
+Expand these tokens into a single natural sentence. Be concise and natural.
+
+Tokens: ${tokens.join(' ')}
+
+Respond with ONLY the expanded sentence, nothing else.`;
+
+  try {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${groqApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'llama-3.1-8b-instant',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 150,
+        temperature: 0.7,
+      }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      return data.choices[0]?.message?.content?.trim() || null;
+    } else if (res.status === 401) {
+      alert('Invalid Groq API key. Please check and try again.');
+      clearApiKey();
+    }
+  } catch (e) {
+    console.error('Groq API error:', e);
+  }
+  return null;
+}
 
 const LEFT_KEYS = { 'c': 4, 'f': 3, 'd': 2, 's': 1, 'a': 0 };
 const RIGHT_KEYS = { 'm': 4, 'j': 3, 'k': 2, 'l': 1, ';': 0 };
@@ -1482,10 +1589,10 @@ function updateRightKeysSemantic(leftHeld, rightHeld, category) {
 
     keyEl.classList.remove('pressed', 'has-option', 'action', 'subject', 'quality', 'connect', 'respond', 'symbol', 'style', 'mode', 'phonemic', 'control');
 
-    // Check for backspace control chord
+    // Check for Enter control chord (C+M)
     if (leftHeld.includes('C') && leftHeld.length === 1 && key === 'm') {
       keyEl.classList.add('has-option', 'control');
-      labelEl.textContent = 'BACKSPACE';
+      labelEl.textContent = 'ENTER';
       if (isPressed) keyEl.classList.add('pressed', 'control');
       return;
     }
@@ -1498,10 +1605,10 @@ function updateRightKeysSemantic(leftHeld, rightHeld, category) {
       return;
     }
 
-    // Check for Enter chord (C+;)
+    // Check for Backspace chord (C+;)
     if (leftHeld.includes('C') && leftHeld.length === 1 && key === ';') {
       keyEl.classList.add('has-option', 'control');
-      labelEl.textContent = 'ENTER';
+      labelEl.textContent = 'BACKSPACE';
       if (isPressed) keyEl.classList.add('pressed', 'control');
       return;
     }
@@ -1570,15 +1677,15 @@ function updatePreview() {
     return;
   }
 
-  // Backspace (C+M)
-  if (leftCode === 16 && rightCode === 16) {
+  // Backspace (C+;)
+  if (leftCode === 16 && rightCode === 1) {
     previewResult.textContent = '⌫ BACKSPACE';
     previewResult.classList.add('control');
     return;
   }
 
-  // Enter (C+;)
-  if (leftCode === 16 && rightCode === 1) {
+  // Enter (C+M)
+  if (leftCode === 16 && rightCode === 16) {
     previewResult.textContent = '↵ ENTER';
     previewResult.classList.add('control');
     return;
@@ -1629,18 +1736,43 @@ async function checkServer() {
     const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(2000) });
     if (res.ok) {
       serverOnline = true;
+      demoMode = false;
       document.getElementById('status-dot').classList.add('online');
       document.getElementById('server-status').textContent = 'Connected';
     }
   } catch {
     serverOnline = false;
     document.getElementById('status-dot').classList.remove('online');
-    document.getElementById('server-status').textContent = 'Offline';
+    document.getElementById('server-status').textContent = demoMode ? 'Demo Mode' : 'Offline';
   }
 }
 
 async function expandSemantic(tokens, options = {}) {
-  if (!serverOnline) return tokens.map(t => t.symbol).join(' ');
+  // Format tokens for API
+  const formattedTokens = tokens.map(t => {
+    if (t.isRawIPA) return t.symbol.toLowerCase();
+    return t.symbol.toUpperCase();
+  });
+
+  // Try Groq API first (browser-based)
+  if (groqApiKey) {
+    const result = await callGroqAPI(formattedTokens);
+    if (result) return result;
+  }
+
+  // Try local server
+  if (!serverOnline) {
+    // Demo mode: simulate AI expansion with a simple transformation
+    if (demoMode) {
+      const words = tokens.map(t => {
+        if (t.isRawIPA) return t.symbol;
+        // Convert UPPERCASE tokens to Title Case for demo
+        return t.symbol.charAt(0) + t.symbol.slice(1).toLowerCase();
+      });
+      return words.join(' ') + '.';
+    }
+    return tokens.map(t => t.symbol).join(' ');
+  }
   try {
     // Format tokens: UPPERCASE = semantic, lowercase = phonemic
     const formattedTokens = tokens.map(t => {
@@ -1766,15 +1898,15 @@ function fireChord() {
     return;
   }
 
-  // Backspace: C+M (both thumbs)
-  if (leftCode === 16 && rightCode === 16) {
+  // Backspace: C+; (left thumb + right pinky)
+  if (leftCode === 16 && rightCode === 1) {
     flashFired();
     handleBackspace();
     return;
   }
 
-  // Enter: C+; (left thumb + right pinky)
-  if (leftCode === 16 && rightCode === 1) {
+  // Enter: C+M (both thumbs)
+  if (leftCode === 16 && rightCode === 16) {
     flashFired();
     handleEnter();
     return;
@@ -1943,6 +2075,12 @@ setInterval(checkServer, 10000);
 updateDisplay();
 updateKeyVisuals();
 updatePreview();
+updateApiStatus();
+
+// Load saved API key into input
+if (groqApiKey) {
+  document.getElementById('groq-key-input').value = groqApiKey;
+}
 </script>
 </body>
 </html>

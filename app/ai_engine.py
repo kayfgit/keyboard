@@ -99,10 +99,11 @@ class AIEngine:
 
     MAX_CONTEXT_TURNS = 5  # Rolling context window size
 
-    def __init__(self, on_result, on_error, on_context_change=None):
+    def __init__(self, on_result, on_error, on_context_change=None, on_language_change=None):
         self.on_result = on_result
         self.on_error = on_error
         self.on_context_change = on_context_change  # Called when context size changes
+        self.on_language_change = on_language_change  # Called when language changes
         self._queue = queue.Queue()
         self._thread = threading.Thread(target=self._worker, daemon=True)
         self._client = None
@@ -110,6 +111,9 @@ class AIEngine:
         # Conversation context: list of (tokens, result) tuples
         self._context = []
         self._pending_tokens = None  # Track tokens for context storage
+        # Language setting
+        self._language = 'English'
+        self._language_code = 'EN'
 
     def start(self):
         self._thread.start()
@@ -133,15 +137,41 @@ class AIEngine:
         """Return number of turns in context."""
         return len(self._context)
 
-    def set_language(self, lang):
-        pass  # Semantic mode is language-agnostic for now
+    def set_language(self, code, name):
+        """Set output language for AI expansion."""
+        self._language_code = code
+        self._language = name
+        if self.on_language_change:
+            self.on_language_change(code, name)
+
+    def get_language(self):
+        """Get current language name."""
+        return self._language
+
+    def get_language_code(self):
+        """Get current language code."""
+        return self._language_code
 
     def set_raw_mode(self, enabled):
         pass  # Not used in semantic mode
 
     def _build_messages(self, tokens):
         """Build message list with context history."""
-        messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+        # Add language instruction if not English
+        if self._language != 'English':
+            language_instruction = f"""
+
+## OUTPUT LANGUAGE
+You MUST output the expanded text in {self._language}.
+- Translate the semantic meaning to {self._language}
+- Keep proper nouns (names after NAME token) as-is
+- Maintain natural grammar and idioms for {self._language}
+- Do NOT output in English unless the target language is English"""
+            system_content = SYSTEM_PROMPT + language_instruction
+        else:
+            system_content = SYSTEM_PROMPT
+
+        messages = [{"role": "system", "content": system_content}]
 
         # Add context history as conversation turns
         for prev_tokens, prev_result in self._context:
